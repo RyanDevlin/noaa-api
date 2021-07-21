@@ -11,8 +11,9 @@ data_files = [
 ]
 
 setup(
-    name="intake",
+    name="pipeline",
     version="1.0",
     packages=find_packages(),
-    data_files=data_files
+    data_files=data_files,
+    include_package_data=True,
 )

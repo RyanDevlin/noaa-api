@@ -45,11 +45,12 @@ def structure_as_row(partitionData, header_keys):
         yield Row(**record)
 
 
-def run_etl(source, spark=None):
+def run_etl(source, output_path, spark=None):
     """
     Run Spark ETL of source file.
 
     :params source (string) - name of source type (should be module in intake/sources/)
+    :param output_path (string) - where to write parquet output
     :params spark - spark context
     """
     if not spark:
@@ -69,4 +70,4 @@ def run_etl(source, spark=None):
     # broadcasting the header_keys to workers...
     df = rdd.mapPartitions(lambda partition: filter_helper(partition, header=','.join(header_keys), ignore_symbol=ignore_symbol)) \
         .mapPartitions(lambda partition: structure_as_row(partition, header_keys)).toDF()
-    df.write.parquet('sample_out')
+    df.write.parquet(output_path)
