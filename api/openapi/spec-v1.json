@@ -1,0 +1,229 @@
+{
+    "openapi":"3.0.2",
+    "info": {
+        "title":"Planet Pulse",
+        "description": "Planet Pulse is an API designed to serve climate data pulled from NOAA's Global Monitoring Laboratory FTP server. This API is based on the OpenAPI v3 specification.",
+        "version":"0.1.0",
+        "contact": {
+            "name": "API Support",
+            "email": "planetpulse.api@gmail.com"
+          }
+    },
+    "servers": [
+        {
+            "url":"http://localhost:8080/v1",
+            "description": "This server path will remain localhost until we have an actual server and domain."
+        }
+    ],
+    "paths": {
+        "/health": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Server is up.",
+                        "content": {
+                            "text/plain": {
+                               "schema": {
+                                   "type": "string",
+                                   "example": "OK"
+                               } 
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/co2/weekly": {
+            "summary": "Represents weekly CO2 measurements taken at Mauna Loa Observatory.",
+            "description": "This resource represents all weekly average measurements of atmospheric CO2 taken at Mauna Loa Observatory since 1974.",
+            "get": {
+                "tags": [
+                    "co2-weekly"
+                ],
+                "summary": "Requests CO2 measurements.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "simple",
+                        "description": "If true, a smaller, simplified version of each CO2 measurement will be returned in the array.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {   
+                        "$ref": "#/components/parameters/LimitParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/OffsetParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Request successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WeeklyDataPoint"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
+                    }
+                }
+            }
+        },
+        "/co2/weekly/{id}": {
+            "summary": "Represents weekly CO2 measurements taken at Mauna Loa Observatory.",
+            "description": "This resource represents a specific weekly average measurement of atmospheric CO2 taken at Mauna Loa Observatory.",
+            "get": {
+                "tags": [
+                    "co2-weekly"
+                ],
+                "summary": "Requests CO2 measurements.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The weekly CO2 measurement ID. IDs are generated in sequential and chronological order with id==1 being the first weekly measurement at Mauna Loa Observatory.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "simple",
+                        "description": "If true, a smaller, simplified version of each CO2 measurement will be returned in the array.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {   
+                        "$ref": "#/components/parameters/LimitParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/OffsetParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Request successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WeeklyDataPoint"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "WeeklyDataPoint": {
+                "$ref": "./models/WeeklyDataPoint.json"
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "integer"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "code",
+                    "message"
+                ]
+            }
+        },
+        "parameters": {
+            "OffsetParam": {
+                "name": "offset",
+                "description": "Number of items to skip before returning the results.",
+                "in": "query",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0,
+                    "default": 0
+                }
+            },
+            "LimitParam": {
+                "name": "limit",
+                "description": "Maximum number of items to return.",
+                "in": "query",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "default": 10
+                }
+            }
+        },
+        "responses": {
+            "400": {
+                "description": "Bad request.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "404": {
+                "description": "Not found.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "GenericError": {
+                "description": "An error occured.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
