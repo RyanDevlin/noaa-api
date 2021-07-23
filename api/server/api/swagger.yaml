@@ -24,18 +24,238 @@ paths:
                 example: OK
                 x-content-type: text/plain
   /co2/weekly:
-    summary: Represents weekly CO2 measurements taken at Mauna Loa Observatory.
-    description: This resource represents all weekly average measurements of atmospheric
-      CO2 taken at Mauna Loa Observatory since 1974.
+    summary: Represents weekly CO2 measurements.
+    description: This resource represents a range of weekly average atmospheric CO2
+      measurements taken at Mauna Loa Observatory since 1974.
     get:
       tags:
       - co2-weekly
-      summary: Requests CO2 measurements.
+      summary: Requests weekly CO2 measurements.
       parameters:
+      - name: year
+        in: query
+        description: Return all CO2 measurements for a given year.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: month
+        in: query
+        description: Return all CO2 measurements for a given month.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 12
+          minimum: 1
+          type: integer
+      - name: greaterThan
+        in: query
+        description: Return all CO2 measurements with a ppm reading greater than the
+          supplied value.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 1000
+          minimum: 0
+          type: number
+          format: float
+      - name: lessThan
+        in: query
+        description: Return all CO2 measurements with a ppm reading less than the
+          supplied value.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 1000
+          minimum: 0
+          type: number
+          format: float
       - name: simple
         in: query
         description: "If true, a smaller, simplified version of each CO2 measurement\
-          \ will be returned in the array."
+          \ will be returned."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      - name: limit
+        in: query
+        description: Maximum number of items to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: offset
+        in: query
+        description: Number of items to skip before returning the results.
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+          default: 0
+      responses:
+        "200":
+          description: Request successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeeklyDataPoint'
+                x-content-type: application/json
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: An error occured.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /co2/weekly/increase:
+    summary: Represents weekly CO2 measurements by increase in ppm since 1800.
+    description: This resource represents a range of weekly average atmospheric CO2
+      measurements taken at Mauna Loa Observatory querried by the increase in CO2
+      concentration since measurements taken in 1800.
+    get:
+      tags:
+      - co2-weekly
+      summary: Requests weekly CO2 measurements by increase in ppm since 1800..
+      parameters:
+      - name: greaterThan
+        in: query
+        description: Return all CO2 measurements with a ppm increase since 1800 greater
+          than the supplied value.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 1000
+          minimum: 0
+          type: number
+          format: float
+      - name: lessThan
+        in: query
+        description: Return all CO2 measurements with a ppm increase since 1800 less
+          than the supplied value.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 1000
+          minimum: 0
+          type: number
+          format: float
+      - name: simple
+        in: query
+        description: "If true, a smaller, simplified version of each CO2 measurement\
+          \ will be returned."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      - name: limit
+        in: query
+        description: Maximum number of items to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: offset
+        in: query
+        description: Number of items to skip before returning the results.
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+          default: 0
+      responses:
+        "200":
+          description: Request successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeeklyDataPoint'
+                x-content-type: application/json
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: An error occured.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /co2/weekly/{ppm}:
+    summary: Represents weekly CO2 measurements by ppm.
+    description: "This resource represents specific weekly average atmospheric CO2\
+      \ measurements taken at Mauna Loa Observatory querried by ppm. The supplied\
+      \ ppm value must be an integer, and the server will return all measurements\
+      \ that match the supplied integer. Since measurements are represented as floats,\
+      \ any float where the integer portion matches the supplied value will be returned."
+    get:
+      tags:
+      - co2-weekly
+      summary: Requests weekly CO2 measurements by ppm.
+      parameters:
+      - name: ppm
+        in: path
+        description: The concentration of atmospheric CO2 measured in parts-per-million.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maximum: 1000
+          minimum: 0
+          type: integer
+      - name: simple
+        in: query
+        description: "If true, a smaller, simplified version of each CO2 measurement\
+          \ will be returned."
         required: false
         style: form
         explode: true
@@ -94,13 +314,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /co2/weekly/{id}:
-    summary: Represents weekly CO2 measurements taken at Mauna Loa Observatory.
-    description: This resource represents a specific weekly average measurement of
-      atmospheric CO2 taken at Mauna Loa Observatory.
+    summary: Represents weekly CO2 measurements.
+    description: This resource represents a specific weekly average atmospheric CO2
+      measurements taken at Mauna Loa Observatory.
     get:
       tags:
       - co2-weekly
-      summary: Requests CO2 measurements.
+      summary: Requests weekly CO2 measurements.
       parameters:
       - name: id
         in: path
