@@ -4,4 +4,5 @@ apiserver_fqdn: "planetpulse.io"
 apiserver_port: "8080"
 ec2packages:
   - nginx
+  - podman
 goversion: "1.16.6"
