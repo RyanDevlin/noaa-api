@@ -1,0 +1,58 @@
+---
+- hosts: localhost
+  vars:
+    ec2packages:
+      - nginx
+    goversion: "1.16.6"
+  tasks:
+    - name: Install required packages
+      yum:
+        name: "{{ item }}"
+        state: latest
+      loop: "{{ ec2packages }}"
+      become: yes
+
+    - name: Install golang
+      unarchive:
+        src: "https://golang.org/dl/go{{ goversion }}.linux-amd64.tar.gz"
+        dest: /usr/local
+        remote_src: yes
+      become: yes
+
+    - name: Add Golang bin to PATH in .bash_profile
+      lineinfile: 
+        dest: "~/.bash_profile" 
+        line: 'export PATH=$PATH:/usr/local/go/bin'
+        insertafter: 'EOF'
+        state: present
+    
+    - name: Stop Nginx if already running
+      systemd:
+        name: nginx
+        state: stopped
+      become: yes
+
+    - name: Configure SELinux to allow Nginx free port access
+      seboolean:
+        name: httpd_can_network_connect
+        state: yes
+        persistent: yes
+
+    - name: Backup boilerplate Nginx config file
+      copy:
+        src: /etc/nginx/nginx.conf
+        dest: /etc/nginc/nginx.conf-original
+        remote_src: yes
+      become: yes
+
+    - name: Enable and start Nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: True
+      become: yes
+
+    - debug:
+        msg:
+          - "==== MACHINE CONFIGURED ===="
+          - "Run 'source ~/.bash_profile' to complete golang installation."
