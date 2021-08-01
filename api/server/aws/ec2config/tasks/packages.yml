@@ -1,0 +1,30 @@
+- name: Install required packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  loop: "{{ ec2packages }}"
+  become: yes
+
+- name: Install golang
+  unarchive:
+    src: "https://golang.org/dl/go{{ goversion }}.linux-amd64.tar.gz"
+    dest: /usr/local
+    remote_src: yes
+  become: yes
+
+- name: Add Golang bin to PATH in .bash_profile
+  lineinfile: 
+    dest: "~/.bash_profile" 
+    line: 'export PATH=$PATH:/usr/local/go/bin'
+    insertafter: 'EOF'
+    state: present
+
+- name: Create golang src directory
+  file:
+    path: ~/go/src/github.com/RyanDevlin/
+    state: directory
+
+- name: Clone server source to correct directory (for dev only, later source will be delivered via container)
+  git:
+    repo: https://github.com/RyanDevlin/planetpulse.git
+    dest: ~/go/src/github.com/RyanDevlin/planetpulse/

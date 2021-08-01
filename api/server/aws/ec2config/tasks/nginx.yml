@@ -1,0 +1,30 @@
+- block:
+  - name: Stop Nginx if already running
+    systemd:
+      name: nginx
+      state: stopped
+
+  - name: Configure SELinux to allow Nginx free port access
+    seboolean:
+      name: httpd_can_network_connect
+      state: yes
+      persistent: yes
+
+  - name: Backup boilerplate Nginx config file
+    copy:
+      src: /etc/nginx/nginx.conf
+      dest: /etc/nginx/nginx.conf-original
+      remote_src: yes
+      force: no
+
+  - name: Apply Nginx config for reverse proxy setup
+    template:
+      src: nginx.conf.j2
+      dest: /etc/nginx/nginx.conf
+
+  - name: Enable and start Nginx
+    systemd:
+      name: nginx
+      state: started
+      enabled: True
+  become: yes
