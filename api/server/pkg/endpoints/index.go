@@ -30,5 +30,5 @@ import (
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
+	fmt.Fprintf(w, "Welcome to the PlanetPulse API server!")
 }

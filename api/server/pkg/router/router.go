@@ -22,7 +22,7 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package routers
+package router
 
 import (
 	"net/http"
@@ -60,6 +60,13 @@ func NewRouter() *mux.Router {
 }
 
 var routes = Routes{
+	Route{
+		"Index",
+		"GET",
+		"/",
+		ep.Index,
+	},
+
 	Route{
 		"Index",
 		"GET",
