@@ -1,14 +1,14 @@
 FROM golang:1.16.6 AS build
-WORKDIR /go/src
-COPY cmd ./cmd
-COPY pkg ./pkg
+WORKDIR /usr/local/go/src/server
+COPY ./cmd/* ./cmd/
+COPY ./pkg/* ./pkg/
 COPY go.mod .
 COPY go.sum .
 
 ENV CGO_ENABLED=0
 RUN go get -d -v ./...
 
-RUN go build -a -installsuffix cgo -o planetpulse .
+RUN go build -a -installsuffix cgo -o planetpulse ./cmd/planetpulse/
 
 FROM scratch AS runtime
 COPY --from=build /go/src/planetpulse ./
