@@ -28,8 +28,8 @@ import (
 	"net/http"
 	"strings"
 
-	ep "github.com/RyanDevlin/planet-pulse/api/server/pkg/endpoints"
-	utils "github.com/RyanDevlin/planet-pulse/api/server/pkg/utils"
+	ep "github.com/RyanDevlin/planetpulse/api/server/pkg/endpoints"
+	utils "github.com/RyanDevlin/planetpulse/api/server/pkg/utils"
 	"github.com/gorilla/mux"
 )
 

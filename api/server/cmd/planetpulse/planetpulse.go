@@ -28,7 +28,7 @@ import (
 	"log"
 	"net/http"
 
-	router "github.com/RyanDevlin/planet-pulse/api/server/pkg/router"
+	router "github.com/RyanDevlin/planetpulse/api/server/pkg/router"
 )
 
 func main() {
