@@ -1,7 +1,7 @@
 FROM golang:1.16.6 AS build
-WORKDIR /usr/local/go/src/server
-COPY ./cmd/* ./cmd/
-COPY ./pkg/* ./pkg/
+WORKDIR /usr/local/go/src/apiserver
+COPY cmd/ ./cmd/
+COPY pkg/ ./pkg/
 COPY go.mod .
 COPY go.sum .
 
@@ -11,6 +11,6 @@ RUN go get -d -v ./...
 RUN go build -a -installsuffix cgo -o planetpulse ./cmd/planetpulse/
 
 FROM scratch AS runtime
-COPY --from=build /go/src/planetpulse ./
+COPY --from=build /usr/local/go/src/apiserver ./
 EXPOSE 8080/tcp
 ENTRYPOINT ["./planetpulse"]
