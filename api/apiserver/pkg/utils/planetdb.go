@@ -52,6 +52,7 @@ func PlanetDBConnect() {
 	}
 	// TODO: Change to logger
 	fmt.Println("entering main loop")
+	db.Close()
 	/*for {
 		// process all available work before waiting for notifications
 		getWork(db)
