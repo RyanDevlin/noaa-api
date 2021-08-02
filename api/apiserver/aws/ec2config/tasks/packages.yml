@@ -18,13 +18,3 @@
     line: 'export PATH=$PATH:/usr/local/go/bin'
     insertafter: 'EOF'
     state: present
-
-#- name: Create golang src directory
-#  file:
-#    path: ~/go/src/github.com/RyanDevlin/
-#    state: directory
-
-#- name: Clone server source to correct directory (for dev only, later source will be delivered via container)
-#  git:
-#    repo: https://github.com/RyanDevlin/planetpulse.git
-#    dest: ~/go/src/github.com/RyanDevlin/planetpulse/
