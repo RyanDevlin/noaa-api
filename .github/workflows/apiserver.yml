@@ -38,4 +38,4 @@ jobs:
         context: ./api/apiserver/
         file: ./api/apiserver/Containerfile
         push: true
-        tags: ${{ env.REGISTRY }}/ryandevlin/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        tags: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
