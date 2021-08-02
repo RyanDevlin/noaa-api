@@ -43,5 +43,4 @@ jobs:
         context: ./api/apiserver/
         file: ./api/apiserver/Containerfile
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: ghcr.io/ryandevlin/planetpulse/apiserver:latest
