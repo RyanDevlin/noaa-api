@@ -33,7 +33,5 @@ jobs:
       with:
         context: ./api/apiserver/
         file: ./api/apiserver/Containerfile
-        tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-
-    - name: Push Docker image
-      run: docker push apiserver ghcr.io/ryandevlin/apiserver:latest
+        push: true
+        tags: ghcr.io/ryandevlin/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
