@@ -33,7 +33,7 @@ import (
 )
 
 func PlanetDBConnect() {
-	conninfo := "user=planet_pulse dbname=planetpulse password=boilerup host=planetpulse.ch0g0ophcqsz.us-east-1.rds.amazonaws.com sslmode=disable"
+	conninfo := ""
 	db, err := sql.Open("postgres", conninfo)
 	if err != nil {
 		panic(err)
