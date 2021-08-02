@@ -1,0 +1,45 @@
+name: Go
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  IMAGE_NAME: apiserver
+  IMAGE_TAG: latest
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ amd64 ]
+    steps:
+    - uses: actions/checkout@v2.3.4
+
+    - name: Build API Server Container Image
+      id: build_image
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: ${{ env.IMAGE_NAME }}
+        tags: ${{ env.IMAGE_TAG }}
+        arch: ${{ matrix.arch }}
+        build-args: ARCH=${{ matrix.arch }}
+        dockerfiles: |
+          ./api/apiserver/Containerfile
+          
+    - name: Echo Outputs
+      run: |
+        echo "Image: ${{ steps.build_image.outputs.image }}"
+        echo "Tags: ${{ steps.build_image.outputs.tags }}"
+    - name: Check images created
+      run: buildah images | grep '${{ env.IMAGE_NAME }}'
+
+    - name: Check image metadata
+      run: |
+        set -x
+        buildah inspect ${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }} | jq ".OCIv1.architecture"
+        buildah inspect ${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }} | jq ".Docker.architecture"
