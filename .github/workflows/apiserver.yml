@@ -37,4 +37,4 @@ jobs:
         context: ./api/apiserver/
         file: ./api/apiserver/Containerfile
         push: true
-        tags: ${{ env.IMAGE_TAG }}
+        tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
