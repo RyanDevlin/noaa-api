@@ -7,9 +7,8 @@ on:
     branches: [ main ]
 
 env:
-  IMAGE_NAME: apiserver
-  IMAGE_TAG: latest
   REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 defaults:
   run:
@@ -22,19 +21,27 @@ jobs:
       contents: read
       packages: write
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
     - name: Log in to the Container registry
-      uses: docker/login-action@v1.10.0
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
     - name: Build and push Docker image
-      uses: docker/build-push-action@v2.6.1
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
         context: ./api/apiserver/
         file: ./api/apiserver/Containerfile
         push: true
-        tags: ghcr.io/ryandevlin/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
