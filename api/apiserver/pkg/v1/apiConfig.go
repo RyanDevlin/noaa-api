@@ -22,28 +22,30 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package utils
+package v1
 
-import (
-	v1 "apiserver/pkg/v1"
-	"database/sql"
-	"fmt"
-	"net/url"
+type ApiConfig struct {
+	*ServiceConfig
+	*DBConfig
+}
 
-	_ "github.com/lib/pq"
-)
+/* General API server config parameters */
+type ServiceConfig struct {
+	// (OPTIONAL) The port the server will listen on
+	ServicePort string
+}
 
-func PlanetDBConnect(config *v1.ApiConfig) (*sql.DB, error) {
-	conninfo := fmt.Sprintf("postgres://%s:%s@%s/postgres", url.PathEscape(config.DBConfig.DBUser), url.PathEscape(config.DBConfig.DBPass), config.DBConfig.DBHost)
-	db, err := sql.Open("postgres", conninfo)
-	if err != nil {
-		panic(err)
-	}
+/* Database config parameters */
+type DBConfig struct {
+	// The database endpoint
+	DBHost string `env:"PLANET_DB_HOST" validate:"required"`
 
-	// Validate conninfo args with ping
-	if err = db.Ping(); err != nil {
-		db.Close()
-		return nil, err
-	}
-	return db, err
+	// The database username
+	DBUser string `env:"PLANET_DB_USER" validate:"required"`
+
+	// The database password
+	DBPass string `env:"PLANET_DB_PASS" validate:"required"`
+
+	// (OPTIONAL) The port the database listens on
+	DBPort string `env:"PLANET_DB_PORT" validate:"gte=0,lte=65535"`
 }

@@ -25,16 +25,29 @@ Contact: planetpulse.api@gmail.com
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	router "apiserver/pkg/router"
+	utils "apiserver/pkg/utils"
 )
 
 func main() {
-	log.Printf("Server started")
+	log.Printf("Server started.")
 
-	router := router.NewRouter()
+	config, err := utils.Configure()
+	if err != nil {
+		fmt.Printf("Error: %s.\n", err.Error())
+		return
+	}
+	db, err := utils.PlanetDBConnect(config)
+	if err != nil {
+		fmt.Printf("Error: %s.\n", err.Error())
+		return
+	}
+	db.Close()
+	router := router.NewRouter(config)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":"+config.ServicePort, router))
 }
