@@ -18,6 +18,10 @@
     "paths": {
         "/health": {
             "get": {
+                "tags": [
+                    "heatlh"
+                ],
+                "summary": "An endpoint to perform a server health check.",
                 "responses": {
                     "200": {
                         "description": "Server is up.",
@@ -34,18 +38,193 @@
             }
         },
         "/co2/weekly": {
-            "summary": "Represents weekly CO2 measurements taken at Mauna Loa Observatory.",
-            "description": "This resource represents all weekly average measurements of atmospheric CO2 taken at Mauna Loa Observatory since 1974.",
+            "summary": "Represents weekly CO2 measurements.",
+            "description": "This resource represents a range of weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory since 1974.",
             "get": {
                 "tags": [
                     "co2-weekly"
                 ],
-                "summary": "Requests CO2 measurements.",
+                "summary": "Requests weekly CO2 measurements.",
                 "parameters": [
                     {
                         "in": "query",
+                        "name": "year",
+                        "description": "Return all CO2 measurements for a given year.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "month",
+                        "description": "Return all CO2 measurements for a given month.",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 12
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "greaterThan",
+                        "description": "Return all CO2 measurements with a ppm reading greater than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lessThan",
+                        "description": "Return all CO2 measurements with a ppm reading less than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
                         "name": "simple",
-                        "description": "If true, a smaller, simplified version of each CO2 measurement will be returned in the array.",
+                        "description": "If true, a smaller, simplified version of each CO2 measurement will be returned.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {   
+                        "$ref": "#/components/parameters/LimitParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/OffsetParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Request successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WeeklyDataPoint"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
+                    }
+                }
+            }
+        },
+        "/co2/weekly/increase": {
+            "summary": "Represents weekly CO2 measurements by increase in ppm since 1800.",
+            "description": "This resource represents a range of weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory querried by the increase in CO2 concentration since measurements taken in 1800.",
+            "get": {
+                "tags": [
+                    "co2-weekly"
+                ],
+                "summary": "Requests weekly CO2 measurements by increase in ppm since 1800..",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "greaterThan",
+                        "description": "Return all CO2 measurements with a ppm increase since 1800 greater than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lessThan",
+                        "description": "Return all CO2 measurements with a ppm increase since 1800 less than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "simple",
+                        "description": "If true, a smaller, simplified version of each CO2 measurement will be returned.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {   
+                        "$ref": "#/components/parameters/LimitParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/OffsetParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Request successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WeeklyDataPoint"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
+                    }
+                }
+            }
+        },
+        "/co2/weekly/{ppm}": {
+            "summary": "Represents weekly CO2 measurements by ppm.",
+            "description": "This resource represents specific weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory querried by ppm. The supplied ppm value must be an integer, and the server will return all measurements that match the supplied integer. Since measurements are represented as floats, any float where the integer portion matches the supplied value will be returned.",
+            "get": {
+                "tags": [
+                    "co2-weekly"
+                ],
+                "summary": "Requests weekly CO2 measurements by ppm.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "ppm",
+                        "description": "The concentration of atmospheric CO2 measured in parts-per-million.",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1000
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "simple",
+                        "description": "If true, a smaller, simplified version of each CO2 measurement will be returned.",
                         "schema": {
                             "type": "boolean",
                             "default": false
@@ -85,13 +264,13 @@
             }
         },
         "/co2/weekly/{id}": {
-            "summary": "Represents weekly CO2 measurements taken at Mauna Loa Observatory.",
-            "description": "This resource represents a specific weekly average measurement of atmospheric CO2 taken at Mauna Loa Observatory.",
+            "summary": "Represents weekly CO2 measurements.",
+            "description": "This resource represents a specific weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory.",
             "get": {
                 "tags": [
                     "co2-weekly"
                 ],
-                "summary": "Requests CO2 measurements.",
+                "summary": "Requests weekly CO2 measurements.",
                 "parameters": [
                     {
                         "in": "path",
