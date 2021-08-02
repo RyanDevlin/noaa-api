@@ -18,9 +18,7 @@ defaults:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    permissions: read-all|write-all
     steps:
     - uses: actions/checkout@v2
 
