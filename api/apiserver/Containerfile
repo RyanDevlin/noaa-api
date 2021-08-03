@@ -11,6 +11,7 @@ RUN go get -d -v ./...
 RUN go build -a -o planetpulse ./cmd/planetpulse/
 
 FROM alpine:3.14 AS runtime
-COPY --from=build /usr/local/go/src/apiserver/planetpulse /
+WORKDIR /opt/apiserver
+COPY --from=build /usr/local/go/src/apiserver/planetpulse ./
 EXPOSE 8080/tcp
 ENTRYPOINT ["./planetpulse"]
