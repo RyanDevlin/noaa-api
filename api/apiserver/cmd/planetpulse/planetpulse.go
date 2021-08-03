@@ -47,7 +47,7 @@ func main() {
 		return
 	}
 	db.Close()
-	router := router.NewRouter(config)
+	router := router.NewRouter()
 
 	log.Fatal(http.ListenAndServe(":"+config.ServicePort, router))
 }
