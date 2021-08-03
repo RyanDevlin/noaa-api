@@ -22,18 +22,13 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package main
+package server
 
 import (
-	"apiserver/pkg/server"
 	"fmt"
+	"net/http"
 )
 
-func main() {
-	apiserver := &server.ApiServer{}
-	if err := apiserver.ServerInit(); err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
-		return
-	}
-	apiserver.Start()
+func (apiserver *ApiServer) Index(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Welcome to the PlanetPulse API server!")
 }

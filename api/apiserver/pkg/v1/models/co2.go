@@ -22,13 +22,22 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package endpoints
+package models
 
-import (
-	"fmt"
-	"net/http"
-)
+import "time"
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the PlanetPulse API server!")
+type Co2Entry struct {
+	Year                  int
+	Month                 int
+	Day                   int
+	DateDecimal           float32
+	Average               float32
+	NumDays               int
+	OneYearAgo            float32
+	TenYearsAgo           float32
+	IncSincePreIndustrial float32
+	Timestamp             time.Time
 }
+
+// The index of the Co2Table map must be '<year>-<month>-<day>'
+type Co2Table map[string]Co2Entry

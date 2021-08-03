@@ -22,13 +22,13 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package endpoints
+package server
 
 import (
 	"io"
 	"net/http"
 )
 
-func HealthGet(w http.ResponseWriter, r *http.Request) {
+func (apiserver *ApiServer) HealthGet(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "OK ")
 }

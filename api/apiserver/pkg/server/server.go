@@ -22,5 +22,49 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-// Package endpoints contains the logic to generate responses to requests at each endpoint.
-package endpoints
+package server
+
+import (
+	"database/sql"
+	"log"
+	"net/http"
+
+	v1 "apiserver/pkg/v1"
+
+	"github.com/gorilla/mux"
+)
+
+type ApiServer struct {
+	Config *v1.ApiConfig
+	Db     *sql.DB
+	Router *mux.Router
+
+	// True if the server has been configured
+	configured bool
+}
+
+func (apiserver *ApiServer) ServerInit() error {
+	log.Printf("Server started.")
+
+	// Configure server parameters
+	err := apiserver.configure()
+	if err != nil {
+		return err
+	}
+
+	// Establish database connection
+	err = apiserver.planetDBConnect()
+	if err != nil {
+		return err
+	}
+
+	// Generate routes
+	router := NewRouter(apiserver.CreateRoutes())
+	apiserver.Router = router
+	return nil
+}
+
+func (apiserver *ApiServer) Start() {
+	defer apiserver.Db.Close()
+	log.Fatal(http.ListenAndServe(":"+apiserver.Config.ServicePort, apiserver.Router))
+}

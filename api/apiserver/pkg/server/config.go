@@ -21,7 +21,7 @@ https://www.gnu.org/licenses/
 API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
-package utils
+package server
 
 import (
 	"fmt"
@@ -35,26 +35,27 @@ import (
 
 // Configure loads in configuration parameters from ENV vars and the api yaml config file.
 // This function returns an ApiConfig object representing the server configuration.
-func Configure() (*v1.ApiConfig, error) {
+func (apiserver *ApiServer) configure() error {
 	serviceconfig, err := serviceConfig()
 	if err != nil {
-		return &v1.ApiConfig{}, err
+		return err
 	}
 
 	dbconfig, err := dbConfig()
 	if err != nil {
-		return &v1.ApiConfig{}, err
+		return err
 	}
 
-	return &v1.ApiConfig{
+	apiserver.Config = &v1.ApiConfig{
 		ServiceConfig: serviceconfig,
 		DBConfig:      dbconfig,
-	}, nil
+	}
+	apiserver.configured = true
+	return nil
 }
 
 func serviceConfig() (*v1.ServiceConfig, error) {
-	// All environment vars for the API server should be prefixed with 'PLANET_'
-	// eg. 'export PLANET_DB_PASSWORD="hunter2"'
+	// Values for the service config are read from a config.yaml file in the same directory as the executable
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 

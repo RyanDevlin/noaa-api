@@ -22,28 +22,37 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package utils
+package server
 
 import (
-	v1 "apiserver/pkg/v1"
-	"database/sql"
-	"fmt"
-	"net/url"
+	"net/http"
 
-	_ "github.com/lib/pq"
+	utils "apiserver/pkg/utils"
+
+	"github.com/gorilla/mux"
 )
 
-func PlanetDBConnect(config *v1.ApiConfig) (*sql.DB, error) {
-	conninfo := fmt.Sprintf("postgres://%s:%s@%s/postgres", url.PathEscape(config.DBConfig.DBUser), url.PathEscape(config.DBConfig.DBPass), config.DBConfig.DBHost)
-	db, err := sql.Open("postgres", conninfo)
-	if err != nil {
-		panic(err)
-	}
+type Route struct {
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
+}
 
-	// Validate conninfo args with ping
-	if err = db.Ping(); err != nil {
-		db.Close()
-		return nil, err
+type Routes []Route
+
+func NewRouter(routes Routes) *mux.Router {
+	router := mux.NewRouter().StrictSlash(true)
+	for _, route := range routes {
+		var handler http.Handler
+		handler = route.HandlerFunc
+		handler = utils.Logger(handler, route.Name)
+
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(handler)
 	}
-	return db, err
+	return router
 }
