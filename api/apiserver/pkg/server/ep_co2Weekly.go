@@ -37,8 +37,10 @@ func (apiserver *ApiServer) Co2WeeklyGet(w http.ResponseWriter, r *http.Request)
 		// TODO: Fix this
 		panic(err)
 	}
-	err = json.NewEncoder(w).Encode(co2table)
-	if err != nil {
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "    ")
+	if err := enc.Encode(co2table); err != nil {
 		// TODO: Fix this
 		panic(err)
 	}
