@@ -56,7 +56,7 @@ func serviceConfig() (*v1.ServiceConfig, error) {
 	// All environment vars for the API server should be prefixed with 'PLANET_'
 	// eg. 'export PLANET_DB_PASSWORD="hunter2"'
 	viper.SetConfigName("config")
-	viper.AddConfigPath("./config/")
+	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
 	if err != nil {
