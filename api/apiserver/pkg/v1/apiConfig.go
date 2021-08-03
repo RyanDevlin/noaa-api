@@ -22,32 +22,30 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package main
+package v1
 
-import (
-	"fmt"
-	"log"
-	"net/http"
+type ApiConfig struct {
+	*ServiceConfig
+	*DBConfig
+}
 
-	router "apiserver/pkg/router"
-	utils "apiserver/pkg/utils"
-)
+/* General API server config parameters */
+type ServiceConfig struct {
+	// (OPTIONAL) The port the server will listen on
+	ServicePort string
+}
 
-func main() {
-	log.Printf("Server started.")
+/* Database config parameters */
+type DBConfig struct {
+	// The database endpoint
+	DBHost string `env:"PLANET_DB_HOST" validate:"required"`
 
-	config, err := utils.Configure()
-	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
-		return
-	}
-	db, err := utils.PlanetDBConnect(config)
-	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
-		return
-	}
-	db.Close()
-	router := router.NewRouter(config)
+	// The database username
+	DBUser string `env:"PLANET_DB_USER" validate:"required"`
 
-	log.Fatal(http.ListenAndServe(":"+config.ServicePort, router))
+	// The database password
+	DBPass string `env:"PLANET_DB_PASS" validate:"required"`
+
+	// (OPTIONAL) The port the database listens on
+	DBPort string `env:"PLANET_DB_PORT" validate:"gte=0,lte=65535"`
 }

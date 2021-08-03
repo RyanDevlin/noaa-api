@@ -30,6 +30,7 @@ import (
 
 	ep "apiserver/pkg/endpoints"
 	utils "apiserver/pkg/utils"
+	v1 "apiserver/pkg/v1"
 
 	"github.com/gorilla/mux"
 )
@@ -43,7 +44,7 @@ type Route struct {
 
 type Routes []Route
 
-func NewRouter() *mux.Router {
+func NewRouter(config *v1.ApiConfig) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
 		var handler http.Handler

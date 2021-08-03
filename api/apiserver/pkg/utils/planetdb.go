@@ -22,32 +22,28 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package main
+package utils
 
 import (
+	v1 "apiserver/pkg/v1"
+	"database/sql"
 	"fmt"
-	"log"
-	"net/http"
+	"net/url"
 
-	router "apiserver/pkg/router"
-	utils "apiserver/pkg/utils"
+	_ "github.com/lib/pq"
 )
 
-func main() {
-	log.Printf("Server started.")
-
-	config, err := utils.Configure()
+func PlanetDBConnect(config *v1.ApiConfig) (*sql.DB, error) {
+	conninfo := fmt.Sprintf("postgres://%s:%s@%s/postgres", url.PathEscape(config.DBConfig.DBUser), url.PathEscape(config.DBConfig.DBPass), config.DBConfig.DBHost)
+	db, err := sql.Open("postgres", conninfo)
 	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
-		return
+		panic(err)
 	}
-	db, err := utils.PlanetDBConnect(config)
-	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
-		return
-	}
-	db.Close()
-	router := router.NewRouter(config)
 
-	log.Fatal(http.ListenAndServe(":"+config.ServicePort, router))
+	// Validate conninfo args with ping
+	if err = db.Ping(); err != nil {
+		db.Close()
+		return nil, err
+	}
+	return db, err
 }
