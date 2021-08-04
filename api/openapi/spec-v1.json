@@ -42,7 +42,7 @@
             "description": "This resource represents a range of weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory since 1974.",
             "get": {
                 "tags": [
-                    "co2-weekly"
+                    "co2Weekly"
                 ],
                 "summary": "Requests weekly CO2 measurements.",
                 "parameters": [
@@ -79,6 +79,28 @@
                         "in": "query",
                         "name": "lessThan",
                         "description": "Return all CO2 measurements with a ppm reading less than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "gte",
+                        "description": "Return all CO2 measurements with a ppm reading greater than OR equal to the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lte",
+                        "description": "Return all CO2 measurements with a ppm reading less than OR equal to the supplied value.",
                         "schema": {
                             "type": "number",
                             "format": "float",
@@ -133,7 +155,7 @@
             "description": "This resource represents a range of weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory querried by the increase in CO2 concentration since measurements taken in 1800.",
             "get": {
                 "tags": [
-                    "co2-weekly"
+                    "co2WeeklyIncrease"
                 ],
                 "summary": "Requests weekly CO2 measurements by increase in ppm since 1800..",
                 "parameters": [
@@ -206,7 +228,7 @@
             "description": "This resource represents specific weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory querried by ppm. The supplied ppm value must be an integer, and the server will return all measurements that match the supplied integer. Since measurements are represented as floats, any float where the integer portion matches the supplied value will be returned.",
             "get": {
                 "tags": [
-                    "co2-weekly"
+                    "co2WeeklyPpm"
                 ],
                 "summary": "Requests weekly CO2 measurements by ppm.",
                 "parameters": [
@@ -268,7 +290,7 @@
             "description": "This resource represents a specific weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory.",
             "get": {
                 "tags": [
-                    "co2-weekly"
+                    "co2WeeklyId"
                 ],
                 "summary": "Requests weekly CO2 measurements.",
                 "parameters": [
