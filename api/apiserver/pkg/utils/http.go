@@ -22,22 +22,32 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package models
+package utils
 
-import "time"
+import (
+	"net/http"
+	"net/url"
+	"strings"
+)
 
-type Co2Entry struct {
-	Year                  int
-	Month                 int
-	Day                   int
-	DateDecimal           float32
-	Average               float32
-	NumDays               int
-	OneYearAgo            float32
-	TenYearsAgo           float32
-	IncSincePreIndustrial float32
-	Timestamp             time.Time
+// ParseQuery expands the parameters passed to the endpoint
+// to account for array-like paramters.
+// This allows one to search for, say, the following:
+//
+//		example.com/v1/stuff?day=1,2,3&day=4
+//
+// The expansion will allow the day slice to become:
+//
+//		day := ["1", "2", "3". "4"]
+func ParseQuery(r *http.Request) url.Values {
+	params := r.URL.Query()
+	for key, val := range params {
+		var expanded []string
+		for _, elem := range val {
+			array := strings.Split(elem, ",")
+			expanded = append(expanded, array...)
+		}
+		params[key] = expanded
+	}
+	return params
 }
-
-// The index of the Co2Table map must be '<year>-<month>-<day>'
-type Co2Table map[string]Co2Entry

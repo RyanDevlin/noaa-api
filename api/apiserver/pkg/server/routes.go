@@ -47,28 +47,28 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 			"Co2WeeklyGet",
 			strings.ToUpper("Get"),
 			"/v1/co2/weekly",
-			apiserver.Co2WeeklyGet,
+			Co2WeeklyIdGet,
 		},
 
 		Route{
 			"Co2WeeklyIdGet",
 			strings.ToUpper("Get"),
 			"/v1/co2/weekly/{id}",
-			apiserver.Co2WeeklyIdGet,
+			Co2WeeklyIdGet,
 		},
 
 		Route{
 			"Co2WeeklyIncreaseGet",
 			strings.ToUpper("Get"),
 			"/v1/co2/weekly/increase",
-			apiserver.Co2WeeklyIncreaseGet,
+			Co2WeeklyIncreaseGet,
 		},
 
 		Route{
 			"Co2WeeklyPpmGet",
 			strings.ToUpper("Get"),
 			"/v1/co2/weekly/{ppm}",
-			apiserver.Co2WeeklyPpmGet,
+			Co2WeeklyPpmGet,
 		},
 
 		Route{

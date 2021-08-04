@@ -25,11 +25,10 @@ Contact: planetpulse.api@gmail.com
 package server
 
 import (
-	"encoding/json"
 	"net/http"
 )
 
-func (apiserver *ApiServer) Co2WeeklyGet(w http.ResponseWriter, r *http.Request) {
+/*func (apiserver *ApiServer) Co2WeeklyGet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	co2table, err := apiserver.PlanetDBGetCo2Table()
@@ -44,19 +43,24 @@ func (apiserver *ApiServer) Co2WeeklyGet(w http.ResponseWriter, r *http.Request)
 		// TODO: Fix this
 		panic(err)
 	}
-}
+}*/
 
-func (apiserver *ApiServer) Co2WeeklyIdGet(w http.ResponseWriter, r *http.Request) {
+func Co2WeeklyGet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }
 
-func (apiserver *ApiServer) Co2WeeklyIncreaseGet(w http.ResponseWriter, r *http.Request) {
+func Co2WeeklyIdGet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }
 
-func (apiserver *ApiServer) Co2WeeklyPpmGet(w http.ResponseWriter, r *http.Request) {
+func Co2WeeklyIncreaseGet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+}
+
+func Co2WeeklyPpmGet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }

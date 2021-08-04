@@ -41,11 +41,11 @@ type Route struct {
 
 type Routes []Route
 
-func NewRouter(routes Routes) *mux.Router {
+func NewRouter(routes Routes, apiserver *ApiServer) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
-		var handler http.Handler
-		handler = route.HandlerFunc
+		handler := co2HandlerFactory(apiserver)
+		//handler = route.HandlerFunc
 		handler = utils.Logger(handler, route.Name)
 
 		router.

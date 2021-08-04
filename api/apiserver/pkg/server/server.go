@@ -59,7 +59,7 @@ func (apiserver *ApiServer) ServerInit() error {
 	}
 
 	// Generate routes
-	router := NewRouter(apiserver.CreateRoutes())
+	router := NewRouter(apiserver.CreateRoutes(), apiserver)
 	apiserver.Router = router
 	return nil
 }
