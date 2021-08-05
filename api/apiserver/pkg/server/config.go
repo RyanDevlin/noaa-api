@@ -28,6 +28,7 @@ import (
 	"reflect"
 
 	"github.com/go-playground/validator/v10"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -110,15 +111,13 @@ func validateConfig(config interface{}) error {
 func validateErrorHandler(obj reflect.Type, err error) error {
 	for _, err := range err.(validator.ValidationErrors) {
 
-		fmt.Println("Error: Validation failed for " + err.StructNamespace())
 		if err.Tag() == "required" {
 			if field, ok := obj.FieldByName(err.Field()); ok {
 				if env, ok := field.Tag.Lookup("env"); ok {
-					fmt.Println("'" + env + "' is a required environment variable.")
+					log.Error("'" + env + "' is a required environment variable.")
 				}
 			}
 		}
-		fmt.Println()
 	}
-	return fmt.Errorf("database environment variable validation Failed")
+	return fmt.Errorf("failed to load database parameters from environment variables")
 }
