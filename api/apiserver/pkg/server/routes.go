@@ -30,10 +30,10 @@ import "strings"
 func (apiserver *ApiServer) CreateRoutes() Routes {
 	return Routes{
 		Route{
-			"Index",
+			"favicon",
 			strings.ToUpper("Get"),
-			"/",
-			co2WeeklyHandlerFactory,
+			"/favicon.ico",
+			faviconHandler,
 		},
 
 		Route{
