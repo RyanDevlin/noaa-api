@@ -29,8 +29,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
-
-	v1 "apiserver/pkg/v1"
 )
 
 // Configure loads in configuration parameters from ENV vars and the api yaml config file.
@@ -46,7 +44,7 @@ func (apiserver *ApiServer) configure() error {
 		return err
 	}
 
-	apiserver.Config = &v1.ApiConfig{
+	apiserver.Config = &ApiConfig{
 		ServiceConfig: serviceconfig,
 		DBConfig:      dbconfig,
 	}
@@ -54,30 +52,33 @@ func (apiserver *ApiServer) configure() error {
 	return nil
 }
 
-func serviceConfig() (*v1.ServiceConfig, error) {
+func serviceConfig() (*ServiceConfig, error) {
 	// Values for the service config are read from a config.yaml file in the same directory as the executable
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		return &v1.ServiceConfig{}, err
+		return &ServiceConfig{}, err
 	}
 
 	// Defaults
-	viper.SetDefault("ServicePort", "8080")
+	viper.SetDefault("HttpPort", "8080")
+	viper.SetDefault("HttpsPort", "8443")
+	viper.SetDefault("LogLevel", "4")
+	viper.SetDefault("DBConnTimeout", "5")
 
-	var serviceconfig v1.ServiceConfig
+	var serviceconfig ServiceConfig
 	err = viper.Unmarshal(&serviceconfig)
 	if err != nil {
-		return &v1.ServiceConfig{}, err
+		return &ServiceConfig{}, err
 	}
 
 	err = validateConfig(serviceconfig)
 	return &serviceconfig, err
 }
 
-func dbConfig() (*v1.DBConfig, error) {
+func dbConfig() (*DBConfig, error) {
 	// All environment vars for the API server should be prefixed with 'PLANET_'
 	// eg. 'export PLANET_DB_PASSWORD="hunter2"'
 	viper.SetEnvPrefix("planet")
@@ -87,7 +88,7 @@ func dbConfig() (*v1.DBConfig, error) {
 
 	viper.AutomaticEnv()
 
-	dbconfig := v1.DBConfig{
+	dbconfig := DBConfig{
 		DBHost: viper.GetString("db_host"),
 		DBUser: viper.GetString("db_user"),
 		DBPass: viper.GetString("db_pass"),

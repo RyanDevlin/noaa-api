@@ -26,14 +26,9 @@ package main
 
 import (
 	"apiserver/pkg/server"
-	"fmt"
 )
 
 func main() {
 	apiserver := &server.ApiServer{}
-	if err := apiserver.ServerInit(); err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
-		return
-	}
 	apiserver.Start()
 }

@@ -33,6 +33,9 @@ const (
 	co2PpmMin = 0
 )
 
+// The index of the Co2Table map must be '<year>-<month>-<day>'
+type Co2Table map[string]interface{}
+
 type Co2Entry struct {
 	Year                  int
 	Month                 int
@@ -50,9 +53,6 @@ type Co2EntrySimple struct {
 	Average               float32
 	IncSincePreIndustrial float32
 }
-
-// The index of the Co2Table map must be '<year>-<month>-<day>'
-type Co2Table map[string]interface{}
 
 type Co2Year struct {
 	Params []string

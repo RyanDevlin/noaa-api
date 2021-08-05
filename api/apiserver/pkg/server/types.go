@@ -22,7 +22,23 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package v1
+package server
+
+import (
+	utils "apiserver/pkg/utils"
+	"database/sql"
+
+	"github.com/gorilla/mux"
+)
+
+type ApiServer struct {
+	Config *ApiConfig
+	Db     *sql.DB
+	Router *mux.Router
+
+	// True if the server has been configured
+	configured bool
+}
 
 type ApiConfig struct {
 	*ServiceConfig
@@ -31,8 +47,17 @@ type ApiConfig struct {
 
 /* General API server config parameters */
 type ServiceConfig struct {
-	// (OPTIONAL) The port the server will listen on
-	ServicePort string
+	// (OPTIONAL) The port the server will listen for HTTP traffic on
+	HttpPort string
+
+	// (OPTIONAL) The port the server will listen for HTTPS traffic on
+	HttpsPort string
+
+	// (OPTIONAL) The global server log level
+	LogLevel int
+
+	// (OPTIONAL) The connection timeout in seconds used when connecting to the database
+	DBConnTimeout int
 }
 
 /* Database config parameters */
@@ -49,3 +74,14 @@ type DBConfig struct {
 	// (OPTIONAL) The port the database listens on
 	DBPort string `env:"PLANET_DB_PORT" validate:"gte=0,lte=65535"`
 }
+
+type Route struct {
+	Name           string
+	Method         string
+	Pattern        string
+	HandlerFactory HandlerFactory
+}
+
+type Routes []Route
+
+type HandlerFactory func(*ApiServer) utils.ApiHandler

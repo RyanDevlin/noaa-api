@@ -25,18 +25,19 @@ Contact: planetpulse.api@gmail.com
 package utils
 
 import (
-	"log"
 	"net/http"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
-func Logger(inner http.Handler, name string) http.Handler {
+func HttpLogger(inner ApiHandler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
 		inner.ServeHTTP(w, r)
 
-		log.Printf(
+		log.Infof(
 			"%s %s %s %s",
 			r.Method,
 			r.RequestURI,

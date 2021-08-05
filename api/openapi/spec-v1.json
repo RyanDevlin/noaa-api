@@ -66,7 +66,7 @@
                     },
                     {
                         "in": "query",
-                        "name": "greaterThan",
+                        "name": "gt",
                         "description": "Return all CO2 measurements with a ppm reading greater than the supplied value.",
                         "schema": {
                             "type": "number",
@@ -77,7 +77,7 @@
                     },
                     {
                         "in": "query",
-                        "name": "lessThan",
+                        "name": "lt",
                         "description": "Return all CO2 measurements with a ppm reading less than the supplied value.",
                         "schema": {
                             "type": "number",
@@ -407,6 +407,16 @@
             },
             "404": {
                 "description": "Not found.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "500": {
+                "description": "Internal server error",
                 "content": {
                     "application/json": {
                         "schema": {

@@ -24,25 +24,12 @@ Contact: planetpulse.api@gmail.com
 
 package v1
 
-// A QueryParam is any parameter that can be passed as a query.
-// The parameter is represented as a string key mapped to an interface.
-// This is used to model all params such as 'test=true' or 'nums=[2,4]'.
-type QueryParam struct {
-	Key   string
-	Value []string
+type ErrorResp struct {
+	Description string
+	Content     ErrorType
 }
 
-// Implementing a QueryFilter allows for reducing a map of data from the DB
-// down to a smaller output. Filter functions ingest a QueryParam and data
-// from the DB represented as map[string]interface{}. The logic in the Filter
-// method is then used to discard entries from the given data and return data
-// that is less than or equal to the original input.
-type QueryFilter interface {
-	Filter(map[string]interface{}) (map[string]interface{}, error)
+type ErrorType struct {
+	Code    int
+	Message string
 }
-
-/*
-// QueryParams acts as a mapping from
-type QueryParams struct {
-	Params map[string]QueryFilter
-}*/

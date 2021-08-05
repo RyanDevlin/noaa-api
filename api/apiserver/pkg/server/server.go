@@ -25,46 +25,46 @@ Contact: planetpulse.api@gmail.com
 package server
 
 import (
-	"database/sql"
-	"log"
+	utils "apiserver/pkg/utils"
 	"net/http"
 
-	v1 "apiserver/pkg/v1"
-
-	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
-type ApiServer struct {
-	Config *v1.ApiConfig
-	Db     *sql.DB
-	Router *mux.Router
+func (apiserver *ApiServer) Start() {
+	if err := apiserver.ServerInit(); err != nil {
+		utils.HttpErrorLog(err)
+	}
 
-	// True if the server has been configured
-	configured bool
+	defer apiserver.Db.Close()
+	log.Info("Server started.")
+
+	//log.Fatal(http.ListenAndServeTLS(":"+apiserver.Config.HttpsPort, "apiserver.crt", "apiserver.key", apiserver.Router))
+	log.Fatal(http.ListenAndServe(":"+apiserver.Config.HttpPort, apiserver.Router))
 }
 
-func (apiserver *ApiServer) ServerInit() error {
-	log.Printf("Server started.")
-
-	// Configure server parameters
+func (apiserver *ApiServer) ServerInit() *utils.ServerError {
+	// Configure server parameters. If this fails, a fatal log.Fatal will be called
+	// and the server process will be terminated
 	err := apiserver.configure()
 	if err != nil {
-		return err
+		return utils.NewError(err, "apiserver configuration failed", 500, true)
 	}
 
-	// Establish database connection
-	err = apiserver.planetDBConnect()
-	if err != nil {
-		return err
-	}
+	// Setup Logging Level
+	log.SetLevel(log.Level(apiserver.Config.LogLevel))
 
 	// Generate routes
 	router := NewRouter(apiserver.CreateRoutes(), apiserver)
 	apiserver.Router = router
-	return nil
-}
 
-func (apiserver *ApiServer) Start() {
-	defer apiserver.Db.Close()
-	log.Fatal(http.ListenAndServe(":"+apiserver.Config.ServicePort, apiserver.Router))
+	// Establish database connection. If this fails the server will recover and
+	// begin serving, but will only return error messages to the client until a
+	// db connection is established.
+	err = apiserver.DBConnect()
+	if err != nil {
+		return utils.NewError(err, "error establishing database connection", 500, false)
+	}
+
+	return nil
 }

@@ -31,31 +31,30 @@ import (
 	"net/http"
 )
 
-func co2HandlerFactory(apiserver *ApiServer) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func co2WeeklyHandlerFactory(apiserver *ApiServer) utils.ApiHandler {
+	return utils.ApiHandler(func(w http.ResponseWriter, r *http.Request) *utils.ServerError {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		co2table, err := apiserver.PlanetDBGetCo2Table()
+		co2table, err := apiserver.DBGetCo2Table()
 		if err != nil {
-			// TODO: Fix this
-			panic(err)
+			return utils.NewError(err, "failed to connect to database", 500, false)
 		}
 
-		// Do filtering work
+		// Filter data based on query params
 		filters := co2FilterFactory(r)
 		for _, filter := range filters {
 			co2table, err = filter(co2table)
 			if err != nil {
-				// TODO: Fix this
-				panic(err)
+				message := err.Error() + ": " + utils.ParseQuery(r).Encode()
+				return utils.NewError(err, message, 400, false)
 			}
 		}
 
 		enc := json.NewEncoder(w)
 		enc.SetIndent("", "    ")
 		if err := enc.Encode(co2table); err != nil {
-			// TODO: Fix this
-			panic(err)
+			return utils.NewError(err, "error encoding data as json", 500, false)
 		}
+		return nil
 	})
 }
 
@@ -76,12 +75,12 @@ func co2FilterFactory(r *http.Request) []co2Weekly.FilterFunc {
 				Params: val,
 			}
 			filters = append(filters, co2Month.Filter)
-		case "greaterThan":
+		case "gt":
 			co2GreaterThan := &co2Weekly.Co2GreaterThan{
 				Params: val,
 			}
 			filters = append(filters, co2GreaterThan.Filter)
-		case "lessThan":
+		case "lt":
 			co2LessThan := &co2Weekly.Co2LessThan{
 				Params: val,
 			}

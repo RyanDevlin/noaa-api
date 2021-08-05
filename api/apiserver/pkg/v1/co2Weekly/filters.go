@@ -38,25 +38,11 @@ type QueryFilter interface {
 type FilterFunc func(Co2Table) (Co2Table, error)
 
 func (co2Year *Co2Year) Filter(table Co2Table) (Co2Table, error) {
-	result := make(map[string]interface{})
-	for key, val := range table {
-		year := strings.Split(key, "-")[0] // Year is the first portion of the key: 'year-month-day'
-		if paramMatch(co2Year.Params, year) {
-			result[key] = val
-		}
-	}
-	return result, nil
+	return dateParse(table, co2Year.Params, 0)
 }
 
 func (co2Month *Co2Month) Filter(table Co2Table) (Co2Table, error) {
-	result := make(map[string]interface{})
-	for key, val := range table {
-		month := strings.Split(key, "-")[1] // Month is the second portion of the key: 'year-month-day'
-		if paramMatch(co2Month.Params, month) {
-			result[key] = val
-		}
-	}
-	return result, nil
+	return dateParse(table, co2Month.Params, 1)
 }
 
 func (co2GreaterThan *Co2GreaterThan) Filter(table Co2Table) (Co2Table, error) {
@@ -94,13 +80,35 @@ func (co2Simple *Co2Simple) Filter(table Co2Table) (Co2Table, error) {
 
 /* ====	HELPER FUNCTIONS ==== */
 
-func paramMatch(params []string, input string) bool {
-	for _, v := range params {
-		if v == input {
-			return true
+func dateParse(table Co2Table, params []string, index int) (Co2Table, error) {
+	result := make(map[string]interface{})
+	for key, val := range table {
+		date := strings.Split(key, "-")
+		if index < 0 || index > len(date) {
+			return nil, fmt.Errorf("internal error") //TODO: is this correct?
+		}
+
+		match, err := paramMatch(params, date[index])
+		if err != nil {
+			return nil, err
+		}
+		if match {
+			result[key] = val
 		}
 	}
-	return false
+	return result, nil
+}
+
+func paramMatch(params []string, input string) (bool, error) {
+	for _, v := range params {
+		if _, err := strconv.Atoi(v); err != nil {
+			return false, fmt.Errorf("malformed query parameters, invalid date value")
+		}
+		if v == input {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func filterPpmCompare(table Co2Table, params []string, comparison string) (Co2Table, error) {
@@ -110,7 +118,6 @@ func filterPpmCompare(table Co2Table, params []string, comparison string) (Co2Ta
 	if err != nil {
 		return nil, err
 	}
-	fmt.Print(ppm)
 	for key, val := range table {
 		average := float32(reflect.ValueOf(val).FieldByName("Average").Float())
 
@@ -132,7 +139,7 @@ func filterPpmCompare(table Co2Table, params []string, comparison string) (Co2Ta
 				result[key] = val
 			}
 		default:
-			return nil, fmt.Errorf("filterPpmCompare: malformed comparison string")
+			return nil, fmt.Errorf("(internal) malformed ppm comparison string '%s'", comparison) //TODO: is this correct?
 		}
 	}
 	return result, nil
@@ -140,27 +147,27 @@ func filterPpmCompare(table Co2Table, params []string, comparison string) (Co2Ta
 
 func validateAndDigestPpm(param []string) (float32, error) {
 	if len(param) != 1 {
-		return 0, fmt.Errorf("malformed ppm value in query parameters. No more than one ppm value per argument")
+		return 0, fmt.Errorf("malformed query parameters, too many ppm constraints")
 	}
 
 	ppm, err := strconv.ParseFloat(param[0], 32)
 	if err != nil {
-		return 0, fmt.Errorf("malformed ppm value in query parameters. Cannot convert to float32")
+		return 0, fmt.Errorf("malformed query parameters, ppm value should be a decimal number")
 	}
 	if !(ppm <= co2PpmMax && ppm >= co2PpmMin) {
-		return 0, fmt.Errorf("malformed ppm value in query parameters. Ppm range is %v to %v", co2PpmMax, co2PpmMin)
+		return 0, fmt.Errorf("malformed query parameters, ppm query range is %v to %v", co2PpmMin, co2PpmMax)
 	}
 	return float32(ppm), nil
 }
 
 func validateAndDigestBool(param []string) (bool, error) {
 	if len(param) != 1 {
-		return false, fmt.Errorf("malformed boolean value in query parameters. No more than one boolean value per argument")
+		return false, fmt.Errorf("malformed query parameters, only one boolean value per argument")
 	}
 
 	result, err := strconv.ParseBool(param[0])
 	if err != nil {
-		return false, fmt.Errorf("malformed boolean value in query parameters. Cannot convert to boolean")
+		return false, fmt.Errorf("malformed query parameters, invalid boolean value")
 	}
 	return result, nil
 }

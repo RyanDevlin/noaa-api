@@ -25,34 +25,21 @@ Contact: planetpulse.api@gmail.com
 package server
 
 import (
-	"net/http"
-
 	utils "apiserver/pkg/utils"
 
 	"github.com/gorilla/mux"
 )
 
-type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
-}
-
-type Routes []Route
-
 func NewRouter(routes Routes, apiserver *ApiServer) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
-		handler := co2HandlerFactory(apiserver)
-		//handler = route.HandlerFunc
-		handler = utils.Logger(handler, route.Name)
+		handler := route.HandlerFactory(apiserver)
 
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
-			Handler(handler)
+			Handler(utils.HttpLogger(handler, route.Name))
 	}
 	return router
 }
