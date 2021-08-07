@@ -22,7 +22,7 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package v1
+package models
 
 type ErrorResp struct {
 	Description string

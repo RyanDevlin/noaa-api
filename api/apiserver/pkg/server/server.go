@@ -53,6 +53,9 @@ func (apiserver *ApiServer) ServerInit() *utils.ServerError {
 
 	// Setup Logging Level
 	log.SetLevel(log.Level(apiserver.Config.LogLevel))
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 
 	// Generate routes
 	router := NewRouter(apiserver.CreateRoutes(), apiserver)

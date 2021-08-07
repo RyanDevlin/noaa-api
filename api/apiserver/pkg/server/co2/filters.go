@@ -22,81 +22,81 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package co2Weekly
+package co2
 
 import (
+	"apiserver/pkg/server/models"
+	"apiserver/pkg/utils"
 	"fmt"
+	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
 )
 
-type QueryFilter interface {
-	Filter(Co2Table) (Co2Table, error)
+type Query struct {
+	filterType string
+	params     []string
 }
 
-type FilterFunc func(Co2Table) (Co2Table, error)
+type FilterFunc func(*models.Co2Table) error
 
-func (co2Year *Co2Year) Filter(table Co2Table) (Co2Table, error) {
-	return dateParse(table, co2Year.Params, 0)
-}
-
-func (co2Month *Co2Month) Filter(table Co2Table) (Co2Table, error) {
-	return dateParse(table, co2Month.Params, 1)
-}
-
-func (co2GreaterThan *Co2GreaterThan) Filter(table Co2Table) (Co2Table, error) {
-	return filterPpmCompare(table, co2GreaterThan.Params, ">")
-}
-
-func (co2LessThan *Co2LessThan) Filter(table Co2Table) (Co2Table, error) {
-	return filterPpmCompare(table, co2LessThan.Params, "<")
-}
-
-func (gte *Co2Gte) Filter(table Co2Table) (Co2Table, error) {
-	return filterPpmCompare(table, gte.Params, ">=")
-}
-
-func (lte *Co2Lte) Filter(table Co2Table) (Co2Table, error) {
-	return filterPpmCompare(table, lte.Params, "<=")
-}
-
-func (co2Simple *Co2Simple) Filter(table Co2Table) (Co2Table, error) {
-	result := make(map[string]interface{})
-
-	param, err := validateAndDigestBool(co2Simple.Params)
-	if err != nil {
-		return nil, err
+func (co2Table *models.Co2Table) Filter(r *http.Request) *utils.ServerError {
+	params := utils.ParseQuery(r)
+	for key, val := range params {
+		query := Query{key, val}
+		err := query.execute(co2Table)
+		if err != nil {
+			message := err.Error() + ": " + utils.ParseQuery(r).Encode()
+			return utils.NewError(err, message, 400, false)
+		}
 	}
-	if !param {
-		return table, nil
-	}
+	return nil
+}
 
-	for key, val := range table {
-		result[key] = convToSimple(val)
+func (query Query) execute(data *Co2Table) error {
+	var err error
+	switch query.filterType {
+	case "year":
+		err = dateParse(data, query.params, 0)
+	case "month":
+		err = dateParse(data, query.params, 1)
+	case "gt":
+		err = filterPpmCompare(data, query.params, ">")
+	case "lt":
+		err = filterPpmCompare(data, query.params, "<")
+	case "gte":
+		err = filterPpmCompare(data, query.params, ">=")
+	case "lte":
+		err = filterPpmCompare(data, query.params, "<=")
+	case "simple":
+		err = simple(data, query.params)
 	}
-	return result, nil
+	return err
 }
 
 /* ====	HELPER FUNCTIONS ==== */
 
-func dateParse(table Co2Table, params []string, index int) (Co2Table, error) {
-	result := make(map[string]interface{})
-	for key, val := range table {
+func dateParse(table *Co2Table, params []string, index int) error {
+	result := make(Co2Table)
+
+	for key, val := range *table {
 		date := strings.Split(key, "-")
 		if index < 0 || index > len(date) {
-			return nil, fmt.Errorf("internal error") //TODO: is this correct?
+			return fmt.Errorf("internal error") //TODO: is this correct?
 		}
 
 		match, err := paramMatch(params, date[index])
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if match {
 			result[key] = val
 		}
 	}
-	return result, nil
+
+	*table = result
+	return nil
 }
 
 func paramMatch(params []string, input string) (bool, error) {
@@ -111,14 +111,14 @@ func paramMatch(params []string, input string) (bool, error) {
 	return false, nil
 }
 
-func filterPpmCompare(table Co2Table, params []string, comparison string) (Co2Table, error) {
-	result := make(map[string]interface{})
+func filterPpmCompare(table *Co2Table, params []string, comparison string) error {
+	result := make(Co2Table)
 
 	ppm, err := validateAndDigestPpm(params)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	for key, val := range table {
+	for key, val := range *table {
 		average := float32(reflect.ValueOf(val).FieldByName("Average").Float())
 
 		switch comparison {
@@ -139,10 +139,12 @@ func filterPpmCompare(table Co2Table, params []string, comparison string) (Co2Ta
 				result[key] = val
 			}
 		default:
-			return nil, fmt.Errorf("(internal) malformed ppm comparison string '%s'", comparison) //TODO: is this correct?
+			return fmt.Errorf("(internal) malformed ppm comparison string '%s'", comparison) //TODO: is this correct?
 		}
 	}
-	return result, nil
+
+	*table = result
+	return nil
 }
 
 func validateAndDigestPpm(param []string) (float32, error) {
@@ -170,6 +172,26 @@ func validateAndDigestBool(param []string) (bool, error) {
 		return false, fmt.Errorf("malformed query parameters, invalid boolean value")
 	}
 	return result, nil
+}
+
+func simple(table *Co2Table, params []string) error {
+	result := make(Co2Table)
+
+	param, err := validateAndDigestBool(params)
+	if err != nil {
+		return err
+	}
+	if !param {
+		table = &result
+		return nil
+	}
+
+	for key, val := range *table {
+		result[key] = convToSimple(val)
+	}
+
+	*table = result
+	return nil
 }
 
 func convToSimple(data interface{}) interface{} {

@@ -36,17 +36,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-/*
-type ApiError struct {
-	Error   error
-	Message string
-	Code    int
-	Fatal   bool
-
-	File string
-	Line int
-}*/
-
 type ServerError struct {
 	Error    error
 	Message  string

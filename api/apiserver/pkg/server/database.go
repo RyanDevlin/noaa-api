@@ -90,20 +90,17 @@ func (apiserver *ApiServer) DBGetCo2Table() (co2Weekly.Co2Table, error) {
 }
 
 func (apiserver *ApiServer) DBProbeConnection() (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Errorf("Database connection not established - %v", r)
+	// If database failed to initialize, apiserver.Db will be nil
+	if apiserver.Db == nil {
+		log.Error("Database connection has not been established.")
 
-			log.Info("Retrying database connection....")
-			status := apiserver.DBConnect()
-			if status != nil {
-				err = status
-				return
-			}
-			log.Info("Database connection succesfully established.")
-			err = nil
+		log.Info("Retrying database connection....")
+		status := apiserver.DBConnect()
+		if status != nil {
+			return status
 		}
-	}()
+		log.Info("Database connection succesfully established.")
+	}
 
 	if err = apiserver.Db.Ping(); err != nil {
 		return err

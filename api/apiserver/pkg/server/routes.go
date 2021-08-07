@@ -37,7 +37,7 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 		},
 
 		Route{
-			"index",
+			"apiindex",
 			strings.ToUpper("Get"),
 			"/v1/",
 			co2WeeklyHandlerFactory,

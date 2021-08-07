@@ -23,4 +23,4 @@ Contact: planetpulse.api@gmail.com
 */
 
 // Package co2 contains the structures necessary to model the planetpulse api c02 endpoints.
-package co2Weekly
+package co2
