@@ -32,9 +32,7 @@ import (
 )
 
 func GetCo2Weekly(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
-	//csp := []string{"default-src: 'self'", "font-src: 'fonts.googleapis.com'", "frame-src: 'none'"}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Header().Set("Content-Security-Policy", "img-src 'self'")
 
 	co2Table, err := handlerConfig.Database.Query("SELECT * FROM public.co2_weekly_mlo")
 	if err != nil {

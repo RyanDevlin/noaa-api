@@ -52,6 +52,10 @@ func ParseQuery(r *http.Request) url.Values {
 	return params
 }
 
-func SetJsonHeader(w http.ResponseWriter) {
-
+func SetCSPHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//  w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; object-src 'self';style-src 'self' img-src 'https://planetpulse.io'; media-src 'self'; frame-ancestors 'self'; frame-src 'self'; connect-src 'self'")
+		next.ServeHTTP(w, r)
+	})
 }

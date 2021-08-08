@@ -26,6 +26,7 @@ package server
 
 import (
 	"apiserver/pkg/server/handlers"
+	utils "apiserver/pkg/utils"
 	"context"
 	"strings"
 
@@ -34,9 +35,9 @@ import (
 
 func (apiserver *ApiServer) NewRouter(ctx context.Context, routes Routes) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range routes {
-		//handler := route.HandlerFactory(ctx)
+	router.Use(utils.SetCSPHeaders)
 
+	for _, route := range routes {
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
