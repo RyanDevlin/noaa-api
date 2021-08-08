@@ -39,10 +39,6 @@ const (
 	co2PpmMin = 0
 )
 
-type NoaaData interface {
-	Filter(r *http.Request) *utils.ServerError
-}
-
 // The index of the Co2Table map must be '<year>-<month>-<day>'
 type Co2Table map[string]interface{}
 
