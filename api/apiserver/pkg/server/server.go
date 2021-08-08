@@ -26,21 +26,23 @@ package server
 
 import (
 	utils "apiserver/pkg/utils"
+	"context"
 	"net/http"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func (apiserver *ApiServer) Start() {
 	if err := apiserver.ServerInit(); err != nil {
-		utils.HttpErrorLog(err)
+		utils.ErrorLog(err)
 	}
 
-	defer apiserver.Db.Close()
+	defer apiserver.Database.DB.Close()
 	log.Info("Server started.")
 
 	//log.Fatal(http.ListenAndServeTLS(":"+apiserver.Config.HttpsPort, "apiserver.crt", "apiserver.key", apiserver.Router))
-	log.Fatal(http.ListenAndServe(":"+apiserver.Config.HttpPort, apiserver.Router))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(apiserver.Config.HttpPort), apiserver.Router))
 }
 
 func (apiserver *ApiServer) ServerInit() *utils.ServerError {
@@ -57,16 +59,20 @@ func (apiserver *ApiServer) ServerInit() *utils.ServerError {
 		FullTimestamp: true,
 	})
 
+	// Create a toplevel conext to be passed to all handlers
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Generate routes
-	router := NewRouter(apiserver.CreateRoutes(), apiserver)
+	router := apiserver.NewRouter(ctx, apiserver.CreateRoutes())
 	apiserver.Router = router
 
 	// Establish database connection. If this fails the server will recover and
 	// begin serving, but will only return error messages to the client until a
 	// db connection is established.
-	err = apiserver.DBConnect()
+	err = apiserver.Database.Connect()
 	if err != nil {
-		return utils.NewError(err, "error establishing database connection", 500, false)
+		utils.ErrorLog(utils.NewError(err, "error establishing database connection", 500, false))
 	}
 
 	return nil

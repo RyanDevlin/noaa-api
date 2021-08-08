@@ -22,19 +22,5 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package server
-
-import (
-	utils "apiserver/pkg/utils"
-	"net/http"
-)
-
-func FaviconHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-func faviconHandler(apiserver *ApiServer) utils.ApiHandler {
-	return utils.ApiHandler(func(w http.ResponseWriter, r *http.Request) *utils.ServerError {
-		http.ServeFile(w, r, "./favicon.ico")
-		return nil
-	})
-}
+// Package handlers provides HTTP handlers used to handle requests to the server
+package handlers

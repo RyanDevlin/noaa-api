@@ -22,4 +22,11 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package co2
+package models
+
+// This file is used to hold top level objects shared by all or most models
+
+type Query struct {
+	filterType string
+	params     []string
+}

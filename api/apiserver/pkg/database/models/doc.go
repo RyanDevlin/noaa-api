@@ -22,33 +22,5 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package server
-
-import (
-	utils "apiserver/pkg/utils"
-	"apiserver/pkg/v1/co2Weekly"
-	"encoding/json"
-	"net/http"
-)
-
-func co2WeeklyHandlerFactory(apiserver *ApiServer) utils.ApiHandler {
-	return utils.ApiHandler(func(w http.ResponseWriter, r *http.Request) *utils.ServerError {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		co2Table, err := apiserver.DBGetCo2Table()
-		if err != nil {
-			return utils.NewError(err, "failed to connect to database", 500, false)
-		}
-
-		// Filter data based on query params
-		if err := co2Weekly.Filter(&co2Table, r); err != nil {
-			return err
-		}
-
-		enc := json.NewEncoder(w)
-		enc.SetIndent("", "    ")
-		if err := enc.Encode(co2Table); err != nil {
-			return utils.NewError(err, "error encoding data as json", 500, false)
-		}
-		return nil
-	})
-}
+// Package models provides datastructures and methods for modeling and parsing data returned from a database query.
+package models

@@ -22,27 +22,17 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package utils
+package handlers
 
 import (
+	utils "apiserver/pkg/utils"
+	"context"
+	"fmt"
 	"net/http"
-	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
-func HttpLogger(inner ApiHandler, name string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		inner.ServeHTTP(w, r)
-
-		log.Infof(
-			"%s %s %s %s",
-			r.Method,
-			r.RequestURI,
-			name,
-			time.Since(start),
-		)
-	})
+// GetIndexHandler currently returns a welcome message
+func GetIndex(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
+	fmt.Fprint(w, "Welcome to the Planetpulse API server!")
+	return nil
 }

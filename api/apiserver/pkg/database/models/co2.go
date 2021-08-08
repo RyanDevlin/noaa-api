@@ -22,33 +22,56 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package co2
+package models
 
 import (
-	"apiserver/pkg/server/models"
 	"apiserver/pkg/utils"
 	"fmt"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
-type Query struct {
-	filterType string
-	params     []string
+const (
+	co2PpmMax = 1000
+	co2PpmMin = 0
+)
+
+type NoaaData interface {
+	Filter(r *http.Request) *utils.ServerError
 }
 
-type FilterFunc func(*models.Co2Table) error
+// The index of the Co2Table map must be '<year>-<month>-<day>'
+type Co2Table map[string]interface{}
 
-func (co2Table *models.Co2Table) Filter(r *http.Request) *utils.ServerError {
+type Co2Entry struct {
+	Year                  int
+	Month                 int
+	Day                   int
+	DateDecimal           float32
+	Average               float32
+	NumDays               int
+	OneYearAgo            float32
+	TenYearsAgo           float32
+	IncSincePreIndustrial float32
+	Timestamp             time.Time
+}
+
+type Co2EntrySimple struct {
+	Average               float32
+	IncSincePreIndustrial float32
+}
+
+func (co2Table *Co2Table) Filter(r *http.Request) *utils.ServerError {
 	params := utils.ParseQuery(r)
 	for key, val := range params {
 		query := Query{key, val}
 		err := query.execute(co2Table)
 		if err != nil {
 			message := err.Error() + ": " + utils.ParseQuery(r).Encode()
-			return utils.NewError(err, message, 400, false)
+			return utils.NewError(fmt.Errorf("error when parsing query parameters"), message, 400, false)
 		}
 	}
 	return nil

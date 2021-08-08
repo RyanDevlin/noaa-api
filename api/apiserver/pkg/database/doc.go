@@ -22,14 +22,5 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package models
-
-type ErrorResp struct {
-	Description string
-	Content     ErrorType
-}
-
-type ErrorType struct {
-	Code    int
-	Message string
-}
+// Package database provides safe mechanisms for connecting to and querying the database
+package database

@@ -5,6 +5,22 @@
   loop: "{{ ec2packages }}"
   become: yes
 
+- name: Setup snapd
+  shell: ln -s /var/lib/snapd/snap /snap
+  become: yes
+
+- name: Update snapd
+  shell: snap install core; sudo snap refresh core
+  become: yes
+
+- name: Install Certbot
+  shell: snap install --classic certbot
+  become: yes
+
+- name: Perpare Certbot
+  shell: ln -s /snap/bin/certbot /usr/bin/certbot
+  become: yes
+
 - name: Install golang
   unarchive:
     src: "https://golang.org/dl/go{{ goversion }}.linux-amd64.tar.gz"

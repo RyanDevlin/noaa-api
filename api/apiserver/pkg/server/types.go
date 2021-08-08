@@ -25,63 +25,61 @@ Contact: planetpulse.api@gmail.com
 package server
 
 import (
-	utils "apiserver/pkg/utils"
-	"database/sql"
+	"apiserver/pkg/database"
+	"apiserver/pkg/server/handlers"
 
 	"github.com/gorilla/mux"
 )
 
+/* API server internal structures */
 type ApiServer struct {
-	Config *ApiConfig
-	Db     *sql.DB
-	Router *mux.Router
-
-	// True if the server has been configured
-	configured bool
+	Config   *ApiConfig
+	Database *database.Database
+	Router   *mux.Router
 }
-
 type ApiConfig struct {
-	*ServiceConfig
-	*DBConfig
-}
-
-/* General API server config parameters */
-type ServiceConfig struct {
 	// (OPTIONAL) The port the server will listen for HTTP traffic on
-	HttpPort string
+	HttpPort int
 
 	// (OPTIONAL) The port the server will listen for HTTPS traffic on
-	HttpsPort string
+	HttpsPort int
 
 	// (OPTIONAL) The global server log level
 	LogLevel int
-
-	// (OPTIONAL) The connection timeout in seconds used when connecting to the database
-	DBConnTimeout int
 }
-
-/* Database config parameters */
-type DBConfig struct {
-	// The database endpoint
-	DBHost string `env:"PLANET_DB_HOST" validate:"required"`
-
-	// The database username
-	DBUser string `env:"PLANET_DB_USER" validate:"required"`
-
-	// The database password
-	DBPass string `env:"PLANET_DB_PASS" validate:"required"`
-
-	// (OPTIONAL) The port the database listens on
-	DBPort string `env:"PLANET_DB_PORT" validate:"gte=0,lte=65535"`
-}
-
 type Route struct {
-	Name           string
-	Method         string
-	Pattern        string
-	HandlerFactory HandlerFactory
+	Name    string
+	Method  string
+	Pattern string
+	Handler handlers.ApiHandler
 }
 
 type Routes []Route
 
-type HandlerFactory func(*ApiServer) utils.ApiHandler
+/* Server configuration structures */
+type YamlConfig struct {
+	// (OPTIONAL) The port the server will listen for HTTP traffic on
+	HttpPort int `env:"false" name:"HttpPort" validate:"gte=0,lte=65535"`
+
+	// (OPTIONAL) The port the server will listen for HTTPS traffic on
+	HttpsPort int `env:"false" name:"HttpsPort" validate:"gte=0,lte=65535"`
+
+	// (OPTIONAL) The global server log level
+	LogLevel int `env:"false" name:"LogLevel" validate:"gte=0,lte=6"`
+
+	// (OPTIONAL) The connection timeout in seconds used when connecting to the database
+	DBConnTimeout int `env:"false" name:"DBConnTimeout" validate:"gte=0,lte=120"`
+}
+type EnvConfig struct {
+	// The database endpoint
+	DBHost string `env:"true" name:"PLANET_DB_HOST" validate:"required"`
+
+	// The database username
+	DBUser string `env:"true" name:"PLANET_DB_USER" validate:"required"`
+
+	// The database password
+	DBPass string `env:"true" name:"PLANET_DB_PASS" validate:"required"`
+
+	// (OPTIONAL) The port the database listens on
+	DBPort int `env:"true" name:"PLANET_DB_PORT" validate:"gte=0,lte=65535"`
+}

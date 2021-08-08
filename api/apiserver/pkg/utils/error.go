@@ -25,7 +25,6 @@ Contact: planetpulse.api@gmail.com
 package utils
 
 import (
-	v1 "apiserver/pkg/v1"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -45,54 +44,24 @@ type ServerError struct {
 	File string
 	Line int
 }
+type ErrorResp struct {
+	Description string
+	Content     ErrorType
+}
+type ErrorType struct {
+	Code    int
+	Message string
+}
 
-type ApiHandler func(http.ResponseWriter, *http.Request) *ServerError
-type ServerHandler func() *ServerError
-
+// NewError returns a new ServerError object used to encode contextual information about a runtime error
 func NewError(err error, message string, code int, fatal bool) *ServerError {
 	_, file, line, _ := runtime.Caller(1)
 	return &ServerError{Error: err, Message: message, HttpCode: code, Fatal: fatal, File: filepath.Base(file), Line: line}
 }
 
-// ServerHTTP executes an http handler, logs any errors during execution,
-// and rerturns error messages to the client.
-func (fn ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if e := fn(w, r); e != nil {
-		HttpErrorLog(e)
-		//http.Error(w, strings.Title(e.Message), e.HttpCode)
-		JsonError(w, e)
-	}
-}
-
-// ExecuteInternalTask executes a server handler (some sort of internal server
-// process) and logs any errors.
-func (fn ServerHandler) ExecuteInternalTask() {
-	if e := fn(); e != nil {
-		HttpErrorLog(e)
-		//http.Error(w, strings.Title(e.Error.Error()), e.HttpCode)
-	}
-}
-
-func JsonError(w http.ResponseWriter, err *ServerError) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(err.HttpCode)
-
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "    ")
-	enc.SetEscapeHTML(false)
-	enc.Encode(
-		v1.ErrorResp{
-			Description: http.StatusText(err.HttpCode),
-			Content: v1.ErrorType{
-				Code:    err.HttpCode,
-				Message: err.Message,
-			},
-		},
-	)
-}
-
-func HttpErrorLog(serverError *ServerError) {
+// ErrorLog uses the configured logger to report context from a server error.
+// Based on the server error configuration, this function may trigger a program exit and return 1.
+func ErrorLog(serverError *ServerError) {
 	errString := fmt.Sprintf(
 		"%s:%d (%s) - %s (%s).",
 		serverError.File,
@@ -102,6 +71,7 @@ func HttpErrorLog(serverError *ServerError) {
 		serverError.Message,
 	)
 	if serverError.Fatal {
+		// A stacktrace is only logged if loglevel >= 6
 		log.WithField("stack", string(debug.Stack())).Trace("STACK TRACE:")
 		log.Fatal(errString)
 		return
@@ -110,19 +80,23 @@ func HttpErrorLog(serverError *ServerError) {
 	log.WithField("stack", string(debug.Stack())).Trace("STACK TRACE:")
 }
 
-func InternalErrorLog(serverError *ServerError) {
-	errString := fmt.Sprintf(
-		"%s:%d - %s (%s).",
-		serverError.File,
-		serverError.Line,
-		serverError.Error.Error(),
-		serverError.Message,
+// HttpJsonError extracts metadata from a ServerError and returns this
+// information to the client.
+func HttpJsonError(w http.ResponseWriter, err *ServerError) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(err.HttpCode)
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "    ")
+	enc.SetEscapeHTML(false)
+	enc.Encode(
+		ErrorResp{
+			Description: http.StatusText(err.HttpCode),
+			Content: ErrorType{
+				Code:    err.HttpCode,
+				Message: err.Message,
+			},
+		},
 	)
-	if serverError.Fatal {
-		log.WithField("stack", string(debug.Stack())).Trace("STACK TRACE:")
-		log.Fatal(errString)
-		return
-	}
-	log.Errorf(errString)
-	log.WithField("stack", string(debug.Stack())).Trace("STACK TRACE:")
 }

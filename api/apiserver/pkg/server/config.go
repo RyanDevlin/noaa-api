@@ -24,6 +24,7 @@ Contact: planetpulse.api@gmail.com
 package server
 
 import (
+	"apiserver/pkg/database"
 	"fmt"
 	"reflect"
 
@@ -35,33 +36,40 @@ import (
 // Configure loads in configuration parameters from ENV vars and the api yaml config file.
 // This function returns an ApiConfig object representing the server configuration.
 func (apiserver *ApiServer) configure() error {
-	serviceconfig, err := serviceConfig()
+	yamlConfig, err := yamlConfig()
 	if err != nil {
 		return err
 	}
 
-	dbconfig, err := dbConfig()
+	envConfig, err := envConfig()
 	if err != nil {
 		return err
 	}
 
+	// Configure the apiserver
 	apiserver.Config = &ApiConfig{
-		ServiceConfig: serviceconfig,
-		DBConfig:      dbconfig,
+		HttpPort:  yamlConfig.HttpPort,
+		HttpsPort: yamlConfig.HttpsPort,
+		LogLevel:  yamlConfig.LogLevel,
 	}
-	apiserver.configured = true
+
+	// Configure the database
+	apiserver.Database = &database.Database{Config: &database.DBConfig{
+		DBHost:        envConfig.DBHost,
+		DBUser:        envConfig.DBUser,
+		DBPass:        envConfig.DBPass,
+		DBPort:        envConfig.DBPort,
+		DBConnTimeout: yamlConfig.DBConnTimeout,
+	}}
+
 	return nil
 }
 
-func serviceConfig() (*ServiceConfig, error) {
+func yamlConfig() (*YamlConfig, error) {
 	// Values for the service config are read from a config.yaml file in the same directory as the executable
 	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		return &ServiceConfig{}, err
-	}
 
 	// Defaults
 	viper.SetDefault("HttpPort", "8080")
@@ -69,17 +77,22 @@ func serviceConfig() (*ServiceConfig, error) {
 	viper.SetDefault("LogLevel", "4")
 	viper.SetDefault("DBConnTimeout", "5")
 
-	var serviceconfig ServiceConfig
-	err = viper.Unmarshal(&serviceconfig)
+	err := viper.ReadInConfig()
 	if err != nil {
-		return &ServiceConfig{}, err
+		return &YamlConfig{}, err
 	}
 
-	err = validateConfig(serviceconfig)
-	return &serviceconfig, err
+	var yamlConfig YamlConfig
+	err = viper.Unmarshal(&yamlConfig)
+	if err != nil {
+		return &YamlConfig{}, err
+	}
+
+	err = validateConfig(yamlConfig)
+	return &yamlConfig, err
 }
 
-func dbConfig() (*DBConfig, error) {
+func envConfig() (*EnvConfig, error) {
 	// All environment vars for the API server should be prefixed with 'PLANET_'
 	// eg. 'export PLANET_DB_PASSWORD="hunter2"'
 	viper.SetEnvPrefix("planet")
@@ -89,14 +102,14 @@ func dbConfig() (*DBConfig, error) {
 
 	viper.AutomaticEnv()
 
-	dbconfig := DBConfig{
+	envConfig := EnvConfig{
 		DBHost: viper.GetString("db_host"),
 		DBUser: viper.GetString("db_user"),
 		DBPass: viper.GetString("db_pass"),
-		DBPort: viper.GetString("db_port"),
+		DBPort: viper.GetInt("db_port"),
 	}
-	err := validateConfig(dbconfig)
-	return &dbconfig, err
+	err := validateConfig(envConfig)
+	return &envConfig, err
 }
 
 func validateConfig(config interface{}) error {
@@ -111,13 +124,29 @@ func validateConfig(config interface{}) error {
 func validateErrorHandler(obj reflect.Type, err error) error {
 	for _, err := range err.(validator.ValidationErrors) {
 
-		if err.Tag() == "required" {
-			if field, ok := obj.FieldByName(err.Field()); ok {
-				if env, ok := field.Tag.Lookup("env"); ok {
-					log.Error("'" + env + "' is a required environment variable.")
+		if field, ok := obj.FieldByName(err.Field()); ok {
+			if env, ok := field.Tag.Lookup("env"); ok {
+				if env == "true" {
+					if name, ok := field.Tag.Lookup("name"); ok {
+						if err.Tag() == "required" {
+							log.Error("'" + name + "' is a required environment variable.")
+						} else {
+							log.Error("Validation failed for '" + name + "' environment variable.")
+							log.Error(err)
+						}
+					}
+				} else {
+					if name, ok := field.Tag.Lookup("name"); ok {
+						if err.Tag() == "required" {
+							log.Error("'" + name + "' is a required parameter in config.yaml.")
+						} else {
+							log.Error("Validation failed for '" + name + "' parameter in config.yaml.")
+							log.Error(err)
+						}
+					}
 				}
 			}
 		}
 	}
-	return fmt.Errorf("failed to load database parameters from environment variables")
+	return fmt.Errorf("failed to load one or more configuration parameters")
 }

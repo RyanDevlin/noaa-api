@@ -22,13 +22,30 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package server
+package handlers
 
 import (
-	"io"
+	utils "apiserver/pkg/utils"
+	"context"
+	"encoding/json"
 	"net/http"
 )
 
-func (apiserver *ApiServer) HealthGet(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "OK ")
+// GetHealthHandler checks the API server's connection to the database and reports this status.
+// In the future, there may be more health checks to implement here. For now, the main error case
+// inside the API server is the connection to the database.
+func GetHealth(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
+	if err := handlerConfig.Database.ProbeConnection(); err != nil {
+		return utils.NewError(err, "failed to connect to database", 500, false)
+	}
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "    ")
+
+	resp := make(map[string]string)
+	resp["status"] = "OK"
+
+	if err := enc.Encode(resp); err != nil {
+		return utils.NewError(err, "error encoding data as json", 500, false)
+	}
+	return nil
 }

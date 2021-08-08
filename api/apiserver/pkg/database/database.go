@@ -22,57 +22,55 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package server
+package database
 
 import (
+	"apiserver/pkg/database/models"
 	"database/sql"
 	"fmt"
 	"net/url"
 	"strconv"
 
-	"apiserver/pkg/v1/co2Weekly"
-
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 )
 
-func (apiserver *ApiServer) DBConnect() error {
-	conninfo := fmt.Sprintf("postgres://%s:%s@%s/postgres?connect_timeout=%d", url.PathEscape(apiserver.Config.DBUser), url.PathEscape(apiserver.Config.DBPass), apiserver.Config.DBHost, apiserver.Config.DBConnTimeout)
-
-	db, err := sql.Open("postgres", conninfo)
-	if err != nil {
-		return err
-	}
-
-	// Validate conninfo args with ping
-	if err = db.Ping(); err != nil {
-		db.Close()
-		return err
-	}
-
-	apiserver.Db = db
-	return nil
+type Database struct {
+	DB     *sql.DB
+	Config *DBConfig
 }
 
-func (apiserver *ApiServer) DBGetCo2Table() (co2Weekly.Co2Table, error) {
-	if err := apiserver.DBProbeConnection(); err != nil {
+type DBConfig struct {
+	// The database endpoint
+	DBHost string
+
+	// The database username
+	DBUser string
+
+	// The database password
+	DBPass string
+
+	// (OPTIONAL) The port the database listens on
+	DBPort int
+
+	// (OPTIONAL) The connection timeout in seconds used when connecting to the database
+	DBConnTimeout int
+}
+
+func (database *Database) Query(sqlStatement string) (models.Co2Table, error) {
+	if err := database.ProbeConnection(); err != nil {
 		return nil, err
 	}
 
-	sqlStatement := "SELECT * FROM public.co2_weekly_mlo"
-	if apiserver.Db == nil {
-		return nil, fmt.Errorf("cannot connect to database")
-	}
-
-	rows, err := apiserver.Db.Query(sqlStatement)
+	rows, err := database.DB.Query(sqlStatement)
 	if err != nil {
 		return nil, err
 	}
 
-	co2table := co2Weekly.Co2Table{}
+	co2table := models.Co2Table{}
 	defer rows.Close()
 	for rows.Next() {
-		var co2entry co2Weekly.Co2Entry
+		var co2entry models.Co2Entry
 		if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.DateDecimal, &co2entry.Average, &co2entry.NumDays, &co2entry.OneYearAgo, &co2entry.TenYearsAgo, &co2entry.IncSincePreIndustrial, &co2entry.Timestamp); err != nil {
 			return nil, err
 		}
@@ -89,20 +87,42 @@ func (apiserver *ApiServer) DBGetCo2Table() (co2Weekly.Co2Table, error) {
 	return co2table, nil
 }
 
-func (apiserver *ApiServer) DBProbeConnection() (err error) {
+func (database *Database) Connect() error {
+	conninfo := fmt.Sprintf("postgres://%s:%s@%s/postgres?connect_timeout=%d", url.PathEscape(database.Config.DBUser), url.PathEscape(database.Config.DBPass), database.Config.DBHost, database.Config.DBConnTimeout)
+
+	db, err := sql.Open("postgres", conninfo)
+	if err != nil {
+		return err
+	}
+
+	// Validate conninfo args with ping
+	if err = db.Ping(); err != nil {
+		db.Close()
+		return err
+	}
+
+	database.DB = db
+	return nil
+}
+
+// ProbeConnection provides a safe mechanism for checking the database connection.
+// This function should be called before a query is made. It first detects if a database connection
+// has not been initialized. If this is the case a new connection attempt will be made.
+// An error is returned
+func (database *Database) ProbeConnection() error {
 	// If database failed to initialize, apiserver.Db will be nil
-	if apiserver.Db == nil {
+	if database.DB == nil {
 		log.Error("Database connection has not been established.")
 
 		log.Info("Retrying database connection....")
-		status := apiserver.DBConnect()
+		status := database.Connect()
 		if status != nil {
 			return status
 		}
 		log.Info("Database connection succesfully established.")
 	}
 
-	if err = apiserver.Db.Ping(); err != nil {
+	if err := database.DB.Ping(); err != nil {
 		return err
 	}
 	return nil
