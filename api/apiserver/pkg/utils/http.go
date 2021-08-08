@@ -51,3 +51,7 @@ func ParseQuery(r *http.Request) url.Values {
 	}
 	return params
 }
+
+func SetJsonHeader(w http.ResponseWriter) {
+
+}

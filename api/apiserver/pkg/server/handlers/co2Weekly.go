@@ -29,10 +29,14 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 func GetCo2Weekly(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
+	csp := []string{"default-src: 'self'", "font-src: 'fonts.googleapis.com'", "frame-src: 'none'"}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Content-Security-Policy", strings.Join(csp, "; "))
+
 	co2Table, err := handlerConfig.Database.Query("SELECT * FROM public.co2_weekly_mlo")
 	if err != nil {
 		return utils.NewError(err, "failed to connect to database", 500, false)
