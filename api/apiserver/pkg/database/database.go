@@ -57,12 +57,29 @@ type DBConfig struct {
 	DBConnTimeout int
 }
 
-func (database *Database) Query(sqlStatement string) (models.Co2Table, error) {
+type DBQuery struct {
+	// The name of the table to query
+	Table string
+
+	// The columns to select from
+	Cols []string
+
+	// A list of Boolean SQL expressions to be used as 'WHERE' clauses
+	Where []string
+
+	// An expression passed directly to the ORDER BY keyword. Usually should just be one or more cols.
+	OrderBy string
+
+	// Simple provides a way to tell the Query function that the data returned will be simplified.
+	Simple bool
+}
+
+func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
 	if err := database.ProbeConnection(); err != nil {
 		return nil, err
 	}
 
-	rows, err := database.DB.Query(sqlStatement)
+	rows, err := database.DB.Query(query.ToString())
 	if err != nil {
 		return nil, err
 	}
@@ -70,15 +87,29 @@ func (database *Database) Query(sqlStatement string) (models.Co2Table, error) {
 	co2table := models.Co2Table{}
 	defer rows.Close()
 	for rows.Next() {
-		var co2entry models.Co2Entry
-		if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.DateDecimal, &co2entry.Average, &co2entry.NumDays, &co2entry.OneYearAgo, &co2entry.TenYearsAgo, &co2entry.IncSincePreIndustrial, &co2entry.Timestamp); err != nil {
-			return nil, err
+		if query.Simple {
+			var co2entry models.Co2EntrySimple
+			var year, month, day int
+
+			if err := rows.Scan(&year, &month, &day, &co2entry.Average, &co2entry.IncSincePreIndustrial); err != nil {
+				return nil, err
+			}
+
+			// Use the unique date of measurement as the key to the co2table
+			key := strconv.Itoa(year) + "-" + strconv.Itoa(int(month)) + "-" + strconv.Itoa(day)
+			co2table[key] = co2entry
+		} else {
+			var co2entry models.Co2Entry
+			if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.DateDecimal, &co2entry.Average, &co2entry.NumDays, &co2entry.OneYearAgo, &co2entry.TenYearsAgo, &co2entry.IncSincePreIndustrial, &co2entry.Timestamp); err != nil {
+				return nil, err
+			}
+
+			// Use the unique date of measurement as the key to the co2table
+			year, month, day := co2entry.Timestamp.Date()
+			key := strconv.Itoa(year) + "-" + strconv.Itoa(int(month)) + "-" + strconv.Itoa(day)
+			co2table[key] = co2entry
 		}
 
-		// Use the unique date of measurement as the key to the co2table
-		year, month, day := co2entry.Timestamp.Date()
-		key := strconv.Itoa(year) + "-" + strconv.Itoa(int(month)) + "-" + strconv.Itoa(day)
-		co2table[key] = co2entry
 	}
 	err = rows.Err()
 	if err != nil {
@@ -126,4 +157,37 @@ func (database *Database) ProbeConnection() error {
 		return err
 	}
 	return nil
+}
+
+func (query DBQuery) ToString() string {
+	sqlString := "SELECT "
+
+	// Append columns to select from
+	for i, col := range query.Cols {
+		if i == len(query.Cols)-1 {
+			sqlString += col + " "
+			break
+		}
+		sqlString += col + ", "
+	}
+
+	sqlString += "FROM " + query.Table + " "
+
+	if len(query.Where) >= 1 {
+		sqlString += "WHERE "
+	}
+
+	for i, expr := range query.Where {
+		if i == len(query.Where)-1 {
+			sqlString += expr + " "
+			break
+		}
+		sqlString += expr + " AND "
+	}
+
+	if query.OrderBy != "" {
+		sqlString += "ORDER BY " + query.OrderBy
+	}
+
+	return sqlString
 }

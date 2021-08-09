@@ -51,7 +51,9 @@
                         "name": "year",
                         "description": "Return all CO2 measurements for a given year.",
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 3000
                         }
                     },
                     {
