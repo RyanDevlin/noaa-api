@@ -1,0 +1,4 @@
+HttpPort: 8080
+LogLevel: 5
+DBConnTimeout: 2
+TEST: true
