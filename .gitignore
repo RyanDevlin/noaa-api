@@ -3,8 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# PROJECT SPECIFIC
+# Used to hold env vars locally for testing
 *.secret
+
+# The name of the binary artifact produces by the build scripts
+planetpulse
 
 # Python Specific
 dist/
