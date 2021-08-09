@@ -22,9 +22,11 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package v1
+package models
 
-type Error struct {
-	Code    int32  `json:"code"`
-	Message string `json:"message"`
+// This file is used to hold top level objects shared by all or most models
+
+type Query struct {
+	filterType string
+	params     []string
 }

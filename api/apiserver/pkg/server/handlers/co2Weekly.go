@@ -22,13 +22,32 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package server
+package handlers
 
 import (
-	"io"
+	utils "apiserver/pkg/utils"
+	"context"
+	"encoding/json"
 	"net/http"
 )
 
-func (apiserver *ApiServer) HealthGet(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "OK ")
+func GetCo2Weekly(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	co2Table, err := handlerConfig.Database.Query("SELECT * FROM public.co2_weekly_mlo")
+	if err != nil {
+		return utils.NewError(err, "failed to connect to database", 500, false)
+	}
+
+	// Filter data based on query params
+	if err := co2Table.Filter(r); err != nil {
+		return err
+	}
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "    ")
+	if err := enc.Encode(co2Table); err != nil {
+		return utils.NewError(err, "error encoding data as json", 500, false)
+	}
+	return nil
 }

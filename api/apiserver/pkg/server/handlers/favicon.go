@@ -22,5 +22,18 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-// Package co2 contains the structures necessary to model the planetpulse api.
-package co2
+package handlers
+
+import (
+	utils "apiserver/pkg/utils"
+	"context"
+	"net/http"
+)
+
+// GetFaviconHandler simply returns the favicon for the server. This file is assumed to
+// be named 'favicon.ico' and should exist in the same directory as the planetpulse
+// binary.
+func GetFavicon(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
+	http.ServeFile(w, r, "./favicon.ico")
+	return nil
+}

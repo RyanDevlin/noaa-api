@@ -22,5 +22,5 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-// Package server contains the logic to TODO
+// Package server contains the logic to configure and run the apiserver
 package server

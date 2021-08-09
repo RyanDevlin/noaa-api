@@ -25,23 +25,37 @@ Contact: planetpulse.api@gmail.com
 package utils
 
 import (
-	"log"
 	"net/http"
-	"time"
+	"net/url"
+	"strings"
 )
 
-func Logger(inner http.Handler, name string) http.Handler {
+// ParseQuery expands the parameters passed to the endpoint
+// to account for array-like paramters.
+// This allows one to search for, say, the following:
+//
+//		example.com/v1/stuff?day=1,2,3&day=4
+//
+// The expansion will allow the day slice to become:
+//
+//		day := ["1", "2", "3". "4"]
+func ParseQuery(r *http.Request) url.Values {
+	params := r.URL.Query()
+	for key, val := range params {
+		var expanded []string
+		for _, elem := range val {
+			array := strings.Split(elem, ",")
+			expanded = append(expanded, array...)
+		}
+		params[key] = expanded
+	}
+	return params
+}
+
+func SetCSPHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		inner.ServeHTTP(w, r)
-
-		log.Printf(
-			"%s %s %s %s",
-			r.Method,
-			r.RequestURI,
-			name,
-			time.Since(start),
-		)
+		//  w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'")
+		next.ServeHTTP(w, r)
 	})
 }

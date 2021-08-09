@@ -22,22 +22,5 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package models
-
-import "time"
-
-type Co2Entry struct {
-	Year                  int
-	Month                 int
-	Day                   int
-	DateDecimal           float32
-	Average               float32
-	NumDays               int
-	OneYearAgo            float32
-	TenYearsAgo           float32
-	IncSincePreIndustrial float32
-	Timestamp             time.Time
-}
-
-// The index of the Co2Table map must be '<year>-<month>-<day>'
-type Co2Table map[string]Co2Entry
+// Package handlers provides HTTP handlers used to handle requests to the server
+package handlers

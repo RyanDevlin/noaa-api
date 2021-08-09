@@ -24,60 +24,75 @@ Contact: planetpulse.api@gmail.com
 package server
 
 import (
+	"apiserver/pkg/database"
 	"fmt"
 	"reflect"
 
 	"github.com/go-playground/validator/v10"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-
-	v1 "apiserver/pkg/v1"
 )
 
 // Configure loads in configuration parameters from ENV vars and the api yaml config file.
 // This function returns an ApiConfig object representing the server configuration.
 func (apiserver *ApiServer) configure() error {
-	serviceconfig, err := serviceConfig()
+	yamlConfig, err := yamlConfig()
 	if err != nil {
 		return err
 	}
 
-	dbconfig, err := dbConfig()
+	envConfig, err := envConfig()
 	if err != nil {
 		return err
 	}
 
-	apiserver.Config = &v1.ApiConfig{
-		ServiceConfig: serviceconfig,
-		DBConfig:      dbconfig,
+	// Configure the apiserver
+	apiserver.Config = &ApiConfig{
+		HttpPort:  yamlConfig.HttpPort,
+		HttpsPort: yamlConfig.HttpsPort,
+		LogLevel:  yamlConfig.LogLevel,
 	}
-	apiserver.configured = true
+
+	// Configure the database
+	apiserver.Database = &database.Database{Config: &database.DBConfig{
+		DBHost:        envConfig.DBHost,
+		DBUser:        envConfig.DBUser,
+		DBPass:        envConfig.DBPass,
+		DBPort:        envConfig.DBPort,
+		DBConnTimeout: yamlConfig.DBConnTimeout,
+	}}
+
 	return nil
 }
 
-func serviceConfig() (*v1.ServiceConfig, error) {
+func yamlConfig() (*YamlConfig, error) {
 	// Values for the service config are read from a config.yaml file in the same directory as the executable
 	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
+
+	// Defaults
+	viper.SetDefault("HttpPort", "8080")
+	viper.SetDefault("HttpsPort", "8443")
+	viper.SetDefault("LogLevel", "4")
+	viper.SetDefault("DBConnTimeout", "5")
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		return &v1.ServiceConfig{}, err
+		return &YamlConfig{}, err
 	}
 
-	// Defaults
-	viper.SetDefault("ServicePort", "8080")
-
-	var serviceconfig v1.ServiceConfig
-	err = viper.Unmarshal(&serviceconfig)
+	var yamlConfig YamlConfig
+	err = viper.Unmarshal(&yamlConfig)
 	if err != nil {
-		return &v1.ServiceConfig{}, err
+		return &YamlConfig{}, err
 	}
 
-	err = validateConfig(serviceconfig)
-	return &serviceconfig, err
+	err = validateConfig(yamlConfig)
+	return &yamlConfig, err
 }
 
-func dbConfig() (*v1.DBConfig, error) {
+func envConfig() (*EnvConfig, error) {
 	// All environment vars for the API server should be prefixed with 'PLANET_'
 	// eg. 'export PLANET_DB_PASSWORD="hunter2"'
 	viper.SetEnvPrefix("planet")
@@ -87,14 +102,14 @@ func dbConfig() (*v1.DBConfig, error) {
 
 	viper.AutomaticEnv()
 
-	dbconfig := v1.DBConfig{
+	envConfig := EnvConfig{
 		DBHost: viper.GetString("db_host"),
 		DBUser: viper.GetString("db_user"),
 		DBPass: viper.GetString("db_pass"),
-		DBPort: viper.GetString("db_port"),
+		DBPort: viper.GetInt("db_port"),
 	}
-	err := validateConfig(dbconfig)
-	return &dbconfig, err
+	err := validateConfig(envConfig)
+	return &envConfig, err
 }
 
 func validateConfig(config interface{}) error {
@@ -109,15 +124,29 @@ func validateConfig(config interface{}) error {
 func validateErrorHandler(obj reflect.Type, err error) error {
 	for _, err := range err.(validator.ValidationErrors) {
 
-		fmt.Println("Error: Validation failed for " + err.StructNamespace())
-		if err.Tag() == "required" {
-			if field, ok := obj.FieldByName(err.Field()); ok {
-				if env, ok := field.Tag.Lookup("env"); ok {
-					fmt.Println("'" + env + "' is a required environment variable.")
+		if field, ok := obj.FieldByName(err.Field()); ok {
+			if env, ok := field.Tag.Lookup("env"); ok {
+				if env == "true" {
+					if name, ok := field.Tag.Lookup("name"); ok {
+						if err.Tag() == "required" {
+							log.Error("'" + name + "' is a required environment variable.")
+						} else {
+							log.Error("Validation failed for '" + name + "' environment variable.")
+							log.Error(err)
+						}
+					}
+				} else {
+					if name, ok := field.Tag.Lookup("name"); ok {
+						if err.Tag() == "required" {
+							log.Error("'" + name + "' is a required parameter in config.yaml.")
+						} else {
+							log.Error("Validation failed for '" + name + "' parameter in config.yaml.")
+							log.Error(err)
+						}
+					}
 				}
 			}
 		}
-		fmt.Println()
 	}
-	return fmt.Errorf("database environment variable validation Failed")
+	return fmt.Errorf("failed to load one or more configuration parameters")
 }

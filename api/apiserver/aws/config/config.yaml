@@ -1,1 +1,3 @@
-ServicePort: "8080"
+HttpPort: 8080
+LogLevel: 4
+DBConnTimeout: 2

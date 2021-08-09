@@ -10,6 +10,10 @@
       state: yes
       persistent: yes
 
+  - name: Generate certificates with Certbot
+    shell: certbot certonly --nginx
+    become: yes
+
   - name: Backup boilerplate Nginx config file
     copy:
       src: /etc/nginx/nginx.conf

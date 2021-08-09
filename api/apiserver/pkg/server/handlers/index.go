@@ -22,30 +22,17 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package v1
+package handlers
 
-type ApiConfig struct {
-	*ServiceConfig
-	*DBConfig
-}
+import (
+	utils "apiserver/pkg/utils"
+	"context"
+	"fmt"
+	"net/http"
+)
 
-/* General API server config parameters */
-type ServiceConfig struct {
-	// (OPTIONAL) The port the server will listen on
-	ServicePort string
-}
-
-/* Database config parameters */
-type DBConfig struct {
-	// The database endpoint
-	DBHost string `env:"PLANET_DB_HOST" validate:"required"`
-
-	// The database username
-	DBUser string `env:"PLANET_DB_USER" validate:"required"`
-
-	// The database password
-	DBPass string `env:"PLANET_DB_PASS" validate:"required"`
-
-	// (OPTIONAL) The port the database listens on
-	DBPort string `env:"PLANET_DB_PORT" validate:"gte=0,lte=65535"`
+// GetIndexHandler currently returns a welcome message
+func GetIndex(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
+	fmt.Fprint(w, "Welcome to the Planetpulse API server!")
+	return nil
 }

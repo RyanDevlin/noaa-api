@@ -22,7 +22,5 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package co2
-
-type WeeklyDataPoint struct {
-}
+// Package database provides safe mechanisms for connecting to and querying the database
+package database

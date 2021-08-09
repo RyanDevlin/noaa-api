@@ -12,11 +12,27 @@ http {
 
     server {
         listen       80;
+        server_name  _;
+
+	return 301 https://{{ apiserver_fqdn }}$request_uri;
+    }
+    
+    server {
+        server_name  www.{{ apiserver_fqdn }};
+
+	return 301 $scheme://{{ apiserver_fqdn }}$request_uri;
+    }
+    
+    server {
+        listen       443 ssl http2;
         server_name  {{ apiserver_fqdn }};
+
+        ssl_certificate /etc/letsencrypt/live/{{ apiserver_fqdn }}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/{{ apiserver_fqdn }}/privkey.pem;
 
         location / {
 	    proxy_pass http://localhost:{{ apiserver_port }}/;
             index  index.html index.htm;
-            } # end location
-        } # end server
+        }
     }
+}

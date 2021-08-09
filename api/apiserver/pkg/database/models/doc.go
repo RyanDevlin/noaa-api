@@ -22,13 +22,5 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package server
-
-import (
-	"fmt"
-	"net/http"
-)
-
-func (apiserver *ApiServer) Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the PlanetPulse API server!")
-}
+// Package models provides datastructures and methods for modeling and parsing data returned from a database query.
+package models
