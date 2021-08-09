@@ -25,18 +25,12 @@ Contact: planetpulse.api@gmail.com
 package models
 
 import (
-	"apiserver/pkg/utils"
-	"fmt"
-	"net/http"
-	"reflect"
-	"strconv"
-	"strings"
 	"time"
 )
 
 const (
-	co2PpmMax = 1000
-	co2PpmMin = 0
+	Co2PpmMax = 1000
+	Co2PpmMin = 0
 )
 
 // The index of the Co2Table map must be '<year>-<month>-<day>'
@@ -60,6 +54,29 @@ type Co2EntrySimple struct {
 	IncSincePreIndustrial float32
 }
 
+/*
+
+	Here lies a ton of code I wrote to filter data from the database server-side.
+	This has now been simplified by properly querying the database, thus this
+	code is useless. I'm leaving it here on the off chance I need it again during this
+	initial architecture push. Also I put too much work into it :(
+
+
+	Draw things out on paper before you write the code 🤦‍♂️.
+
+        .
+       -|-
+        |
+    .-'~~~`-.
+  .'         `.
+  |  R  I  P  |
+  |           |
+  |           |
+\\|           |//
+^^^^^^^^^^^^^^^^^
+*/
+
+/*
 func (co2Table *Co2Table) Filter(r *http.Request) *utils.ServerError {
 	params := utils.ParseQuery(r)
 	for key, val := range params {
@@ -94,7 +111,7 @@ func (query Query) execute(data *Co2Table) error {
 	return err
 }
 
-/* ====	HELPER FUNCTIONS ==== */
+// ====	HELPER FUNCTIONS ====
 
 func dateParse(table *Co2Table, params []string, index int) error {
 	result := make(Co2Table)
@@ -175,8 +192,8 @@ func validateAndDigestPpm(param []string) (float32, error) {
 	if err != nil {
 		return 0, fmt.Errorf("malformed query parameters, ppm value should be a decimal number")
 	}
-	if !(ppm <= co2PpmMax && ppm >= co2PpmMin) {
-		return 0, fmt.Errorf("malformed query parameters, ppm query range is %v to %v", co2PpmMin, co2PpmMax)
+	if !(ppm <= Co2PpmMax && ppm >= Co2PpmMin) {
+		return 0, fmt.Errorf("malformed query parameters, ppm query range is %v to %v", Co2PpmMin, Co2PpmMax)
 	}
 	return float32(ppm), nil
 }
@@ -226,3 +243,4 @@ func convToSimple(data interface{}) interface{} {
 	}
 	return simple
 }
+*/
