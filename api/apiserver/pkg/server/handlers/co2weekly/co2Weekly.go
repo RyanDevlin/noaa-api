@@ -22,7 +22,7 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package co2Weekly
+package co2weekly
 
 import (
 	"apiserver/pkg/database"
