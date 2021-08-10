@@ -49,7 +49,6 @@ func (apiserver *ApiServer) Start() {
 // ApiServer.ServerInit() initializes the API server. The initialization process loads configuration data
 // from config.yaml and environment variables, configures the logger, creates a top level context, establishes
 // a database connection, and generates a router to forward requests to handler functions.
-
 func (apiserver *ApiServer) ServerInit() *utils.ServerError {
 	// Configure server parameters. If this fails, a fatal log.Fatal will be called
 	// and the server process will be terminated
