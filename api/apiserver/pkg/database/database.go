@@ -150,7 +150,7 @@ func (database *Database) ProbeConnection() error {
 		if status != nil {
 			return status
 		}
-		log.Info("Database connection succesfully established.")
+		log.Info("Database connection successfully established.")
 	}
 
 	if err := database.DB.Ping(); err != nil {
