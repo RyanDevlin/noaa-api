@@ -79,7 +79,7 @@ type DBQuery struct {
 	Simple bool
 }
 
-// Database.Query() querys the database according to the supplied DBQuery.
+// Query querys the database according to the supplied DBQuery.
 // It returns a Co2Table of the requested data.
 func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
 	if err := database.ProbeConnection(); err != nil {
@@ -125,7 +125,7 @@ func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
 	return co2table, nil
 }
 
-// Database.Connect establishes a database connection based on the DBConfig values.
+// Connect establishes a database connection based on the DBConfig values.
 func (database *Database) Connect() error {
 	conninfo := fmt.Sprintf("postgres://%s:%s@%s/postgres?connect_timeout=%d", url.PathEscape(database.Config.DBUser), url.PathEscape(database.Config.DBPass), database.Config.DBHost, database.Config.DBConnTimeout)
 
@@ -167,7 +167,7 @@ func (database *Database) ProbeConnection() error {
 	return nil
 }
 
-// DBQuery.ToString() marshalls a DBQuery object into a string query that can be sent to an SQL database.
+// ToString marshalls a DBQuery object into a string query that can be sent to an SQL database.
 func (query DBQuery) ToString() string {
 	sqlString := "SELECT "
 
