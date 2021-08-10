@@ -31,7 +31,7 @@ import (
 	"net/http"
 )
 
-// GetIndexHandler currently returns a welcome message
+// GetIndex currently returns a welcome message to the user.
 func GetIndex(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
 	fmt.Fprint(w, "Welcome to the Planetpulse API server!")
 	return nil
