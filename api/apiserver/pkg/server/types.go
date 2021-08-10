@@ -31,12 +31,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-/* API server internal structures */
+// ApiServer provides a way to interact with server components and underlying server methods.
 type ApiServer struct {
 	Config   *ApiConfig
 	Database *database.Database
 	Router   *mux.Router
 }
+
+// ApiConfig represents configuration parameters for the API server
 type ApiConfig struct {
 	// (OPTIONAL) The port the server will listen for HTTP traffic on
 	HttpPort int
@@ -47,6 +49,8 @@ type ApiConfig struct {
 	// (OPTIONAL) The global server log level
 	LogLevel int
 }
+
+// Route represents an HTTP route (a mapping from a URL path to a handler function).
 type Route struct {
 	Name    string
 	Method  string
@@ -54,9 +58,10 @@ type Route struct {
 	Handler handlers.ApiHandler
 }
 
+// Routes represents a list of Routes
 type Routes []Route
 
-/* Server configuration structures */
+// YamlConfig represents all parameters to be loaded from the config.yaml file.
 type YamlConfig struct {
 	// (OPTIONAL) The port the server will listen for HTTP traffic on
 	HttpPort int `env:"false" name:"HttpPort" validate:"gte=0,lte=65535"`
@@ -70,6 +75,8 @@ type YamlConfig struct {
 	// (OPTIONAL) The connection timeout in seconds used when connecting to the database
 	DBConnTimeout int `env:"false" name:"DBConnTimeout" validate:"gte=0,lte=120"`
 }
+
+// EnvConfig represents all parameters to be loaded from environment variables.
 type EnvConfig struct {
 	// The database endpoint
 	DBHost string `env:"true" name:"PLANET_DB_HOST" validate:"required"`
