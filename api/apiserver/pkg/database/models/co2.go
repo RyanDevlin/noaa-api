@@ -31,7 +31,7 @@ import (
 const (
 	// Co2PpmMax is the maximum ppm value that may be used in a query for Co2 data
 	Co2PpmMax = 1000
-	
+
 	// Co2PpmMin is the minimum ppm value that may be used in a query for Co2 data
 	Co2PpmMin = 0
 )
