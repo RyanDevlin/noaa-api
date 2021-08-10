@@ -30,7 +30,7 @@ import (
 	"net/http"
 )
 
-// GetFaviconHandler simply returns the favicon for the server. This file is assumed to
+// GetFavicon returns the favicon for the server. This file is assumed to
 // be named 'favicon.ico' and should exist in the same directory as the planetpulse
 // binary.
 func GetFavicon(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
