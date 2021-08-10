@@ -35,6 +35,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ServerError represents an error on the server. It is used not only to provide context to the internal
+// logger, but also to provide context to the response sent to the client.
 type ServerError struct {
 	Error    error
 	Message  string
@@ -44,10 +46,14 @@ type ServerError struct {
 	File string
 	Line int
 }
+
+// ErrorResp represents the format of the JSON response returned to the client when an error occurs.
 type ErrorResp struct {
 	Description string
 	Content     ErrorType
 }
+
+// ErrorType represents the context of an error returned to the client.
 type ErrorType struct {
 	Code    int
 	Message string
