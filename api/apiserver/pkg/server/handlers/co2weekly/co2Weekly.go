@@ -37,6 +37,8 @@ import (
 	"strings"
 )
 
+// Get is an ApiHandlerFunc type. It queries the database for requested co2weekly data and returns a JSON representation of the data
+// to the client.
 func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
