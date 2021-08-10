@@ -29,8 +29,11 @@ import (
 )
 
 const (
-	Co2PpmMax = 1000 // The maximum ppm value that may be used in a query for Co2 data
-	Co2PpmMin = 0    // The minimum ppm value that may be used in a query for Co2 data
+	// The maximum ppm value that may be used in a query for Co2 data
+	Co2PpmMax = 1000
+	
+	// The minimum ppm value that may be used in a query for Co2 data
+	Co2PpmMin = 0
 )
 
 // Co2Table represents a mapping of dates to Co2Entry or Co2EntrySimple structs.
