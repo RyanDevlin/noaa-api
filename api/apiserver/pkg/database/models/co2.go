@@ -29,8 +29,8 @@ import (
 )
 
 const (
-	Co2PpmMax = 1000
-	Co2PpmMin = 0
+	Co2PpmMax = 1000 // The maximum ppm value that may be used in a query for Co2 data
+	Co2PpmMin = 0    // The minimum ppm value that may be used in a query for Co2 data
 )
 
 // The index of the Co2Table map must be '<year>-<month>-<day>'
