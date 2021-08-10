@@ -36,11 +36,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Database represents a Postgres database and configuration parameters required to connect to it.
 type Database struct {
 	DB     *sql.DB
 	Config *DBConfig
 }
 
+// DBConfig represents the configuration parameters required to establish a connection to the database.
+// These parameters are loaded from environment variables and the config.yaml file (see config.go).
 type DBConfig struct {
 	// The database endpoint
 	DBHost string
@@ -58,6 +61,7 @@ type DBConfig struct {
 	DBConnTimeout int
 }
 
+// DBQuery represents an SQL query
 type DBQuery struct {
 	// The name of the table to query
 	Table string
@@ -75,6 +79,8 @@ type DBQuery struct {
 	Simple bool
 }
 
+// Database.Query() querys the database according to the supplied DBQuery.
+// It returns a Co2Table of the requested data.
 func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
 	if err := database.ProbeConnection(); err != nil {
 		return nil, err
@@ -119,6 +125,7 @@ func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
 	return co2table, nil
 }
 
+// Database.Connect establishes a database connection based on the DBConfig values.
 func (database *Database) Connect() error {
 	conninfo := fmt.Sprintf("postgres://%s:%s@%s/postgres?connect_timeout=%d", url.PathEscape(database.Config.DBUser), url.PathEscape(database.Config.DBPass), database.Config.DBHost, database.Config.DBConnTimeout)
 
@@ -140,7 +147,7 @@ func (database *Database) Connect() error {
 // ProbeConnection provides a safe mechanism for checking the database connection.
 // This function should be called before a query is made. It first detects if a database connection
 // has not been initialized. If this is the case a new connection attempt will be made.
-// An error is returned
+// An error is returned when a connection cannot be established.
 func (database *Database) ProbeConnection() error {
 	// If database failed to initialize, apiserver.Db will be nil
 	if database.DB == nil {
@@ -160,6 +167,7 @@ func (database *Database) ProbeConnection() error {
 	return nil
 }
 
+// DBQuery.ToString() marshalls a DBQuery object into a string query that can be sent to an SQL database.
 func (query DBQuery) ToString() string {
 	sqlString := "SELECT "
 
