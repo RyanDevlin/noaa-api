@@ -31,7 +31,7 @@ import (
 	"net/http"
 )
 
-// GetHealthHandler checks the API server's connection to the database and reports this status.
+// GetHealth checks the API server's connection to the database and reports this status.
 // In the future, there may be more health checks to implement here. For now, the main error case
 // inside the API server is the connection to the database.
 func GetHealth(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
