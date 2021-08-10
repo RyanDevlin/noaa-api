@@ -30,7 +30,7 @@ import (
 	"strings"
 )
 
-// ParseQuery expands the parameters passed to the endpoint
+// ParseQuery expands the query parameters passed to an endpoint
 // to account for array-like parameters.
 // This allows one to search for, say, the following:
 //
@@ -52,6 +52,8 @@ func ParseQuery(r *http.Request) url.Values {
 	return params
 }
 
+// SetCSPHeaders is called by each route to set Content Security Policy headers in http responses.
+// Currently this is used mainly to allow the favicon to be requested by the client.
 func SetCSPHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Security-Policy", "default-src 'self'")
