@@ -33,6 +33,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ApiServer.Start() initializes the API server and begins listening on the configured port.
 func (apiserver *ApiServer) Start() {
 	if err := apiserver.ServerInit(); err != nil {
 		utils.ErrorLog(err)
@@ -44,6 +45,10 @@ func (apiserver *ApiServer) Start() {
 	//log.Fatal(http.ListenAndServeTLS(":"+apiserver.Config.HttpsPort, "apiserver.crt", "apiserver.key", apiserver.Router))
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(apiserver.Config.HttpPort), apiserver.Router))
 }
+
+// ApiServer.ServerInit() initializes the API server. The initialization process loads configuration data
+// from config.yaml and environment variables, configures the logger, creates a top level context, establishes
+// a database connection, and generates a router to forward requests to handler functions.
 
 func (apiserver *ApiServer) ServerInit() *utils.ServerError {
 	// Configure server parameters. If this fails, a fatal log.Fatal will be called
