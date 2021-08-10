@@ -34,17 +34,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// ApiHandler exposes HTTP handler methods
+// ApiHandler exposes HTTP handler methods.
 type ApiHandler struct {
 	Handler ApiHandlerFunc
 	Config  *ApiHandlerConfig
 }
 
-// ApiHandlerConfig is a struct to allow for future extensions
+// ApiHandlerConfig represents configuration parameters to be passed to an ApiHandlerFunc.
+// It is a struct to allow for future extensions.
 type ApiHandlerConfig struct {
 	Database *database.Database
 }
 
+// ApiHandlerFunc represents an http handler used to serve data at a specific URL path.
 type ApiHandlerFunc func(context.Context, *ApiHandlerConfig, http.ResponseWriter, *http.Request) *utils.ServerError
 
 // NewHandler wraps the ServeHTTP method. It returns an http.Handler used to call ServeHTTP and time its execution for logging purposes.
