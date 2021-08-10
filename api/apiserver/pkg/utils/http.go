@@ -31,7 +31,7 @@ import (
 )
 
 // ParseQuery expands the parameters passed to the endpoint
-// to account for array-like paramters.
+// to account for array-like parameters.
 // This allows one to search for, say, the following:
 //
 //		example.com/v1/stuff?day=1,2,3&day=4
