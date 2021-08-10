@@ -30,7 +30,8 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
-
+	
+	// The blank import here is used to import the pq PostgreSQL drivers
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 )
