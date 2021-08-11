@@ -37,6 +37,7 @@ import (
 	"net/http/httptest"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -45,7 +46,7 @@ import (
 func TestGetAll(t *testing.T) {
 	sqlString := regexp.QuoteMeta(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day`)
 	query := "/v1/co2/weekly"
-	validKeys := []string{"1974-5-19", "1974-5-26", "1984-1-1", "1984-1-8", "2000-1-2", "2000-1-9", "2018-9-2", "2018-10-7", "2020-2-2", "2020-5-24"}
+	validKeys := []string{"1974-05-19", "1974-05-26", "1984-01-01", "1984-01-08", "2000-01-02", "2000-01-09", "2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
 
 	RunTest(t, t.Name(), nil, sqlString, query, validKeys)
 }
@@ -55,7 +56,7 @@ func TestGetYear(t *testing.T) {
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE year in ('%v') ORDER BY year,month,day`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly?year=%v", testVal)
-	validKeys := []string{"2020-2-2", "2020-5-24"}
+	validKeys := []string{"2020-02-02", "2020-05-24"}
 
 	RunTest(t, t.Name(), testVal, sqlString, query, validKeys)
 }
@@ -65,7 +66,7 @@ func TestGetMonth(t *testing.T) {
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE month in ('%v') ORDER BY year,month,day`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly?month=%v", testVal)
-	validKeys := []string{"1984-1-1", "1984-1-8", "2000-1-2", "2000-1-9"}
+	validKeys := []string{"1984-01-01", "1984-01-08", "2000-01-02", "2000-01-09"}
 
 	RunTest(t, t.Name(), testVal, sqlString, query, validKeys)
 }
@@ -75,7 +76,7 @@ func TestGetGt(t *testing.T) {
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE average > %v ORDER BY year,month,day`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly?gt=%v", testVal)
-	validKeys := []string{"2018-10-7", "2020-2-2", "2020-5-24"}
+	validKeys := []string{"2018-10-07", "2020-02-02", "2020-05-24"}
 
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validKeys)
 }
@@ -85,7 +86,7 @@ func TestGetGte(t *testing.T) {
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE average >= %v ORDER BY year,month,day`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly?gte=%v", testVal)
-	validKeys := []string{"2018-9-2", "2018-10-7", "2020-2-2", "2020-5-24"}
+	validKeys := []string{"2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
 
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validKeys)
 }
@@ -95,7 +96,7 @@ func TestGetLt(t *testing.T) {
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE average < %v ORDER BY year,month,day`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly?lt=%v", testVal)
-	validKeys := []string{"1974-5-19", "1974-5-26", "1984-1-8"}
+	validKeys := []string{"1974-05-19", "1974-05-26", "1984-01-08"}
 
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validKeys)
 }
@@ -105,9 +106,42 @@ func TestGetLte(t *testing.T) {
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE average <= %v ORDER BY year,month,day`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly?lte=%v", testVal)
-	validKeys := []string{"1974-5-19", "1974-5-26", "1984-1-1", "1984-1-8"}
+	validKeys := []string{"1974-05-19", "1974-05-26", "1984-01-01", "1984-01-08"}
 
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validKeys)
+}
+
+func TestGetLimit(t *testing.T) {
+	testVal := 2
+
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT %v`, testVal))
+	query := fmt.Sprintf("/v1/co2/weekly?limit=%v", testVal)
+	validKeys := []string{"1974-05-19", "1974-05-26"}
+
+	RunTest(t, t.Name(), testVal, sqlString, query, validKeys)
+}
+
+func TestGetOffset(t *testing.T) {
+	testVal := 4
+
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day OFFSET %v`, testVal))
+	query := fmt.Sprintf("/v1/co2/weekly?offset=%v", testVal)
+	validKeys := []string{"2000-01-02", "2000-01-09", "2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
+
+	RunTest(t, t.Name(), testVal, sqlString, query, validKeys)
+}
+
+func TestGetPage(t *testing.T) {
+	page := 2
+	limit := 2
+
+	offset := (limit * (page - 1))
+
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT %v OFFSET %v`, limit, offset))
+	query := fmt.Sprintf("/v1/co2/weekly?limit=%v&page=%v", limit, page)
+	validKeys := []string{"1984-01-01", "1984-01-08"}
+
+	RunTest(t, t.Name(), offset, sqlString, query, validKeys)
 }
 
 func TestGetCombo(t *testing.T) {
@@ -121,7 +155,7 @@ func TestGetCombo(t *testing.T) {
 	// This regex will match the SELECT query with any arbitrary ordering of the WHERE clauses. This is needed because the order that the server concatenates WHERE clauses is semi-random
 	sqlString := `SELECT \* FROM public\.co2_weekly_mlo WHERE (average [<>=]+ [\d\.]+( AND )*|year in \(('[\d]+'(,)?[ ]*)*\)( AND )*|month in \(('[\d]+'(,)?[ ]*)*\)( AND )*)* ORDER BY year,month,day`
 	query := fmt.Sprintf("/v1/co2/weekly?year=%v,%v&month=%v&gt=%v&gte=%v&lt=%v&lte=%v", years[0], years[1], month, gt, gte, lt, lte)
-	validKeys := []string{"1984-1-8", "2000-1-2"}
+	validKeys := []string{"1984-01-08", "2000-01-02"}
 
 	RunTest(t, t.Name(), []float32{343.89, 368.89}, sqlString, query, validKeys)
 }
@@ -203,6 +237,13 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 			test.PrintServerResponse(t, resp, body)
 		}
 
+		if strings.Contains(err.Error.Error(), "could not match actual sql") {
+			// This can occur with a badly written test case. Usually if the SQL query
+			// regex in the test case does not match what is actually used by the server.
+			test.ErrorLog(t, err)
+			return
+		}
+
 		validateErrorResponse(t, resp, validValues)
 		return
 	}
@@ -228,7 +269,7 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 }
 
 func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *sqlmock.Rows, data []test.MockCo2Row) error {
-	for _, v := range data {
+	for i, v := range data {
 		switch testName {
 		case "TestGetAll":
 			// Add all entries to mock database response
@@ -285,6 +326,33 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 
 			// Only add January entries to mock database response
 			if v.Average <= testVal.(float32) {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestGetLimit":
+			if _, ok := testVal.(int); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
+			}
+
+			// Only add January entries to mock database response
+			if i < testVal.(int) {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestGetOffset":
+			if _, ok := testVal.(int); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
+			}
+
+			// Only add January entries to mock database response
+			if i+1 > testVal.(int) {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestGetPage":
+			if _, ok := testVal.(int); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
+			}
+
+			// Only add January entries to mock database response
+			if i+1 > testVal.(int) && i+1 < 5 {
 				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 			}
 		case "TestGetCombo":
