@@ -1,0 +1,32 @@
+name: Test Submission
+
+on:
+  pull_request:
+    branches:
+    - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: apiserver
+  IMAGE_TAG: latest
+
+defaults:
+  run:
+    working-directory: ./api/apiserver/
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PLANET_DB_USER: Kanye
+      PLANET_DB_PASS: hunter2
+      PLANET_DB_HOST: db.example.com
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - name: Run Unit Tests
+      run: |
+        ./test/run_unit_test.sh -v

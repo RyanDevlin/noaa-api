@@ -22,11 +22,18 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package main
+package co2weekly
 
-import "apiserver/pkg/server"
+import (
+	"flag"
+	"os"
+	"testing"
+)
 
-func main() {
-	apiserver := &server.ApiServer{}
-	apiserver.Start()
+var verbose bool
+
+func TestMain(m *testing.M) {
+	flag.BoolVar(&verbose, "verbose", false, "turns on verbose logging for test cases")
+	flag.Parse()
+	os.Exit(m.Run())
 }

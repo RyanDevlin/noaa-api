@@ -2,12 +2,12 @@ name: Go
 
 on:
   push:
-    branches: [ main ]
+    branches:
+    - release-*
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: apiserver
-  IMAGE_TAG: latest
 
 defaults:
   run:
@@ -33,6 +33,11 @@ jobs:
     - name: PrepareReg Names
       run: |
         echo IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+        
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: branch_name
 
     - name: Build and push Docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -40,4 +45,4 @@ jobs:
         context: ./api/apiserver/
         file: ./api/apiserver/Containerfile
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch }}
