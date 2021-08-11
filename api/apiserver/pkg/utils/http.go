@@ -25,6 +25,8 @@ Contact: planetpulse.api@gmail.com
 package utils
 
 import (
+	"compress/gzip"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -58,5 +60,34 @@ func SetCSPHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Security-Policy", "default-src 'self'")
 		next.ServeHTTP(w, r)
+	})
+}
+
+// gzipResponseWriter TODO
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+// Write writes to the *gzip.Writer io.Writer which compresses all data
+// and writes to the original http.ResponseWriter
+func (w gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
+}
+
+// Gzip is a middleware function that enables gzip compression on all
+// http responses so long as the header "Accept-Encoding": gzip is
+// present in the request
+func Gzip(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			next.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+		gzw := gzipResponseWriter{Writer: gz, ResponseWriter: w}
+		next.ServeHTTP(gzw, r)
 	})
 }

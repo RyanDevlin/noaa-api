@@ -38,6 +38,7 @@ import (
 func (apiserver *ApiServer) NewRouter(ctx context.Context, routes Routes) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(utils.SetCSPHeaders)
+	router.Use(utils.Gzip)
 
 	for _, route := range routes {
 		router.
