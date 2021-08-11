@@ -91,7 +91,7 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 		Route{
 			"v1",
 			strings.ToUpper("Get"),
-			"/v1/",
+			"/v1",
 			handlers.ApiHandler{
 				Handler: handlers.GetIndex,
 				Config: &handlers.ApiHandlerConfig{

@@ -33,9 +33,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"net/http/httptest"
 	"regexp"
+	"strconv"
 	"testing"
+
+	"github.com/DATA-DOG/go-sqlmock"
 )
 
 func TestGetAll(t *testing.T) {
@@ -122,62 +126,48 @@ func TestGetCombo(t *testing.T) {
 	RunTest(t, t.Name(), []float32{343.89, 368.89}, sqlString, query, validKeys)
 }
 
-// TODO: Add error tests
+func TestErrors(t *testing.T) {
+	testVals := []string{
+		"/v1/co2/weekly?year=2020a",
+		"/v1/co2/weekly?year=20200",
+		"/v1/co2/weekly?month=1a",
+		"/v1/co2/weekly?month=14",
+		"/v1/co2/weekly?gt=400a",
+		"/v1/co2/weekly?lt=400a",
+		"/v1/co2/weekly?gte=400a",
+		"/v1/co2/weekly?lte=400a",
+		"/v1/co2/weekly?gt=300,400",
+		"/v1/co2/weekly?lt=300,400",
+		"/v1/co2/weekly?lte=300,400",
+		"/v1/co2/weekly?gt=300&gt=400",
+		"/v1/co2/weekly?gt=40000",
+		"/v1/co2/weekly?gt=-1",
+	}
 
-func RunTest(t *testing.T, testName string, testVal interface{}, sqlString string, query string, validKeys []string) {
+	sqlString := ``
+	validValues := []string{"400"} // The http response code we're expecting
+
+	for _, v := range testVals {
+		query := fmt.Sprintf("%v", v)
+		RunTest(t, t.Name(), nil, sqlString, query, validValues)
+	}
+}
+
+func RunTest(t *testing.T, testName string, testVal interface{}, sqlString string, query string, validValues []string) {
 	db, mock, rows, data, err := test.NewMockCo2Db()
 	if err != nil {
 		t.Errorf("error generating mock database: %s", err.Error())
+		return
 	}
 	defer db.Close()
 
-	for _, v := range data {
-		switch testName {
-		case "TestGetAll":
-			// Add all entries to mock database response
-			rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-		case "TestGetYear":
-			// Only add 2020 entries to mock database response
-			if v.Year == testVal.(int) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-			}
-		case "TestGetMonth":
-			// Only add January entries to mock database response
-			if v.Month == testVal.(int) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-			}
-		case "TestGetGt":
-			// Only add January entries to mock database response
-			if v.Average > testVal.(float32) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-			}
-		case "TestGetGte":
-			// Only add January entries to mock database response
-			if v.Average >= testVal.(float32) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-			}
-		case "TestGetLt":
-			// Only add January entries to mock database response
-			if v.Average < testVal.(float32) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-			}
-		case "TestGetLte":
-			// Only add January entries to mock database response
-			if v.Average <= testVal.(float32) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-			}
-		case "TestGetCombo":
-			// Only add January entries to mock database response
-			if v.Average == testVal.([]float32)[0] || v.Average == testVal.([]float32)[1] {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-			}
-		default:
-			t.Errorf("A test named '%s' has not been implemented in the 'RunTest' function.", testName)
-			return
-		}
-	}
-
 	mock.ExpectQuery(sqlString).WillReturnRows(rows)
+
+	err = configureDbRows(t, testName, testVal, rows, data)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -198,14 +188,30 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 
 	// Execute method under test
 	if err := Get(ctx, config, w, req); err != nil {
-		test.ErrorLog(t, err)
+		// Because the Get function returned an error, we must use HttpJsonError to write to the ResponseRecorder before checking the result.
+		// Normally Get() writes to the buffer, but when encountering an error it won't have a chance to.
 		test.HttpJsonError(w, err)
+		resp := w.Result()
+
+		if verbose {
+			test.ErrorLog(t, err)
+
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				log.Fatal(err)
+			}
+			test.PrintServerResponse(t, resp, body)
+		}
+
+		validateErrorResponse(t, resp, validValues)
+		return
 	}
 
 	resp := w.Result()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 
 	if verbose {
@@ -213,12 +219,92 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 		test.PrintServerResponse(t, resp, body)
 	}
 
-	validateResponse(t, body, validKeys)
+	validateResponse(t, body, validValues)
 
 	// Make sure that all expectations were met
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
+}
+
+func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *sqlmock.Rows, data []test.MockCo2Row) error {
+	for _, v := range data {
+		switch testName {
+		case "TestGetAll":
+			// Add all entries to mock database response
+			rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+		case "TestGetYear":
+			if _, ok := testVal.(int); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
+			}
+
+			// Only add 2020 entries to mock database response
+			if v.Year == testVal.(int) {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestGetMonth":
+			if _, ok := testVal.(int); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
+			}
+
+			// Only add January entries to mock database response
+			if v.Month == testVal.(int) {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestGetGt":
+			if _, ok := testVal.(float32); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
+			}
+
+			// Only add January entries to mock database response
+			if v.Average > testVal.(float32) {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestGetGte":
+			if _, ok := testVal.(float32); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
+			}
+
+			// Only add January entries to mock database response
+			if v.Average >= testVal.(float32) {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestGetLt":
+			if _, ok := testVal.(float32); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
+			}
+
+			// Only add January entries to mock database response
+			if v.Average < testVal.(float32) {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestGetLte":
+			if _, ok := testVal.(float32); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
+			}
+
+			// Only add January entries to mock database response
+			if v.Average <= testVal.(float32) {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestGetCombo":
+			if _, ok := testVal.([]float32); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type []float32.", testVal, testName)
+			}
+
+			// Only add January entries to mock database response
+			if v.Average == testVal.([]float32)[0] || v.Average == testVal.([]float32)[1] {
+				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			}
+		case "TestErrors":
+			if testVal != nil {
+				return fmt.Errorf("Test value '%v' for test '%v' is not nil.", testVal, testName)
+			}
+		default:
+			return fmt.Errorf("A test named '%s' has not been implemented in the 'RunTest' function.", testName)
+		}
+	}
+	return nil
 }
 
 func validateResponse(t *testing.T, body []byte, validKeys []string) {
@@ -234,4 +320,28 @@ func validateResponse(t *testing.T, body []byte, validKeys []string) {
 			t.Errorf("Entry with key: '%s' was not present in JSON response.", v)
 		}
 	}
+}
+
+func validateErrorResponse(t *testing.T, r *http.Response, expectedCode []string) {
+	if len(expectedCode) != 1 {
+		t.Errorf("Exactly one http status code required for error validation. Got: %v", expectedCode)
+		return
+	}
+
+	val, err := strconv.Atoi(expectedCode[0])
+	if err != nil {
+		t.Errorf("Problem converting http status code string to int: %v", err)
+		return
+	}
+
+	if val < 100 || val > 599 {
+		t.Errorf("Invalid http status code value '%v'. Valid http status codes range from [100-599]", val)
+		return
+	}
+
+	if r.StatusCode != val {
+		t.Errorf("Response status code '%v' does not match expected code '%v'.", r.StatusCode, val)
+		return
+	}
+	t.Logf("Response code '%v: %v'. This is correct.", val, http.StatusText(val))
 }

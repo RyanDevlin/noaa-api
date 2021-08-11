@@ -36,7 +36,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type mockCo2Row struct {
+type MockCo2Row struct {
 	Year                int
 	Month               int
 	Day                 int
@@ -50,7 +50,7 @@ type mockCo2Row struct {
 }
 
 // NewMockCo2Db returns an sqlmock database to be used for unit tests.
-func NewMockCo2Db() (*sql.DB, sqlmock.Sqlmock, *sqlmock.Rows, []mockCo2Row, error) {
+func NewMockCo2Db() (*sql.DB, sqlmock.Sqlmock, *sqlmock.Rows, []MockCo2Row, error) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		return nil, nil, nil, nil, err
@@ -82,8 +82,8 @@ func indent(indent, b []byte) []byte {
 }
 
 // GetMockCo2Rows returns a list hardcoded co2 measurement data used to mock the database.
-func GetMockCo2Rows() []mockCo2Row {
-	return []mockCo2Row{
+func GetMockCo2Rows() []MockCo2Row {
+	return []MockCo2Row{
 		{
 			Year:                1974,
 			Month:               5,

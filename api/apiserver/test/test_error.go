@@ -56,8 +56,8 @@ func ErrorLog(t *testing.T, serverError *utils.ServerError) {
 		serverError.Message,
 	)
 	if serverError.Fatal {
-		t.Error(errString)
-		t.Error("MOCK ERROR LOG = This error would have been fatal.")
+		t.Log(errString)
+		t.Log("MOCK ERROR LOG = This error would have been fatal.")
 		return
 	}
 	t.Log(errString)
