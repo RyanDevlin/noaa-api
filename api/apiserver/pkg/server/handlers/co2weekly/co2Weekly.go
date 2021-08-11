@@ -42,11 +42,7 @@ import (
 func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	query := database.DBQuery{
-		Table:   "public.co2_weekly_mlo",
-		Cols:    []string{"*"},
-		OrderBy: "year,month,day",
-	}
+	query := database.NewQuery("public.co2_weekly_mlo", []string{"*"}, "year,month,day")
 
 	filters, internalArgs, err := parseParams(r)
 	if err != nil {
@@ -131,6 +127,25 @@ func parseParam(filterType string, params []string, sqlFilters *[]string, intern
 			return err
 		}
 		internalArgs[filterType] = result
+	case "limit":
+		result, err := validateInt(params, 0)
+		if err != nil {
+			return err
+		}
+		internalArgs[filterType] = result
+	case "offset":
+		result, err := validateInt(params, 0)
+		if err != nil {
+			return err
+		}
+		internalArgs[filterType] = result
+	case "page":
+		result, err := validateInt(params, 1)
+		result-- // validateInt ensures result > 0. This is done so page # '1' is indexed as '0'.
+		if err != nil {
+			return err
+		}
+		internalArgs[filterType] = result
 	}
 	return nil
 }
@@ -170,11 +185,22 @@ func parseInternalArgs(internalArgs map[string]interface{}, query *database.DBQu
 	for key, val := range internalArgs {
 		switch key {
 		case "simple":
-			if result := val.(bool); result {
+			if result, ok := val.(bool); ok && result {
 				query.Cols = []string{"year", "month", "day", "average", "Increase_since_1800"}
 				query.Simple = result
 			}
-
+		case "limit":
+			if result, ok := val.(int); ok {
+				query.Limit = result
+			}
+		case "offset":
+			if result, ok := val.(int); ok {
+				query.Offset = result
+			}
+		case "page":
+			if result, ok := val.(int); ok {
+				query.Page = result
+			}
 		}
 	}
 	return nil
@@ -221,7 +247,7 @@ func validatePpm(param []string) error {
 // validateBool validates a boolean parameter.
 func validateBool(param []string) (bool, error) {
 	if len(param) != 1 {
-		return false, fmt.Errorf("malformed query parameters, only one boolean value per argument")
+		return false, fmt.Errorf("malformed query parameters, only one boolean value allowed for this argument")
 	}
 
 	result, err := strconv.ParseBool(param[0])
@@ -229,4 +255,21 @@ func validateBool(param []string) (bool, error) {
 		return false, fmt.Errorf("malformed query parameters, invalid boolean value")
 	}
 	return result, nil
+}
+
+// validateBool validates an integer parameter.
+func validateInt(param []string, min int) (int, error) {
+	if len(param) != 1 {
+		return -1, fmt.Errorf("malformed query parameters, only one integer value allowed for this argument")
+	}
+
+	result, err := strconv.ParseInt(param[0], 10, 32)
+	if err != nil {
+		return -1, fmt.Errorf("malformed query parameters, invalid integer value")
+	}
+
+	if int(result) < min {
+		return 0, fmt.Errorf("malformed query parameters, integer value cannot be less than %v", min)
+	}
+	return int(result), nil
 }

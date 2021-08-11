@@ -75,6 +75,15 @@ type DBQuery struct {
 	// An expression passed directly to the ORDER BY keyword. Usually should just be one or more cols.
 	OrderBy string
 
+	// Offset shifts the rows returned using the OFFSET clause of an SQL query
+	Offset int
+
+	// Limit limits the number rows returned
+	Limit int
+
+	// Page shifts the offset value to provide the next page of data
+	Page int
+
 	// Simple provides a way to tell the Query function that the data returned will be simplified.
 	Simple bool
 }
@@ -94,7 +103,17 @@ func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
 	co2table := models.Co2Table{}
 	defer rows.Close()
 	for rows.Next() {
-		if query.Simple {
+		if !query.Simple {
+			var co2entry models.Co2Entry
+			if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.DateDecimal, &co2entry.Average, &co2entry.NumDays, &co2entry.OneYearAgo, &co2entry.TenYearsAgo, &co2entry.IncSincePreIndustrial, &co2entry.Timestamp); err != nil {
+				return nil, err
+			}
+
+			// Use the unique date of measurement as the key to the co2table
+			year, month, day := co2entry.Timestamp.Date()
+			key := strconv.Itoa(year) + "-" + formatInt(int(month)) + "-" + formatInt(day)
+			co2table[key] = co2entry
+		} else {
 			var co2entry models.Co2EntrySimple
 			var year, month, day int
 
@@ -103,17 +122,7 @@ func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
 			}
 
 			// Use the unique date of measurement as the key to the co2table
-			key := strconv.Itoa(year) + "-" + strconv.Itoa(int(month)) + "-" + strconv.Itoa(day)
-			co2table[key] = co2entry
-		} else {
-			var co2entry models.Co2Entry
-			if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.DateDecimal, &co2entry.Average, &co2entry.NumDays, &co2entry.OneYearAgo, &co2entry.TenYearsAgo, &co2entry.IncSincePreIndustrial, &co2entry.Timestamp); err != nil {
-				return nil, err
-			}
-
-			// Use the unique date of measurement as the key to the co2table
-			year, month, day := co2entry.Timestamp.Date()
-			key := strconv.Itoa(year) + "-" + strconv.Itoa(int(month)) + "-" + strconv.Itoa(day)
+			key := strconv.Itoa(year) + "-" + formatInt(int(month)) + "-" + formatInt(day)
 			co2table[key] = co2entry
 		}
 
@@ -167,6 +176,18 @@ func (database *Database) ProbeConnection() error {
 	return nil
 }
 
+func NewQuery(table string, cols []string, orderBy string) DBQuery {
+	return DBQuery{
+		Table:   table,
+		Cols:    cols,
+		OrderBy: orderBy,
+		Limit:   -1,
+		Offset:  0,
+		Page:    0,
+		Simple:  false,
+	}
+}
+
 // ToString marshalls a DBQuery object into a string query that can be sent to an SQL database.
 func (query DBQuery) ToString() string {
 	sqlString := "SELECT "
@@ -195,8 +216,31 @@ func (query DBQuery) ToString() string {
 	}
 
 	if query.OrderBy != "" {
-		sqlString += "ORDER BY " + query.OrderBy
+		sqlString += "ORDER BY " + query.OrderBy + " "
+	}
+
+	offset := query.Offset
+	if query.Limit >= 0 {
+		offset = query.Offset + (query.Limit * query.Page)
+		sqlString += "LIMIT " + strconv.Itoa(query.Limit) + " "
+	}
+
+	if offset > 0 {
+		sqlString += "OFFSET " + strconv.Itoa(offset)
 	}
 
 	return sqlString
+}
+
+// formatInt pads integers lower than 10 with a leading '0'.
+// This was implemented mainly to combat problems with the way the JSON
+// Marshall() function sorts dictionary keys. If ints are not padded with 0
+// when they are less than 10, the values will show up out of order in a
+// server response.
+func formatInt(val int) string {
+	if val < 10 {
+		return fmt.Sprintf("%02d", val)
+	} else {
+		return fmt.Sprintf("%d", val)
+	}
 }
