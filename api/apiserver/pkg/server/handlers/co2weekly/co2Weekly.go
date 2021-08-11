@@ -60,7 +60,7 @@ func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.R
 	query.Where = filters
 
 	co2Table, dberr := handlerConfig.Database.Query(query)
-	if err != nil {
+	if dberr != nil {
 		return utils.NewError(dberr, "failed to connect to database", 500, false)
 	}
 
