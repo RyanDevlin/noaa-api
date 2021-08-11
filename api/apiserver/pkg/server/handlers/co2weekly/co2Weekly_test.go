@@ -122,6 +122,8 @@ func TestGetCombo(t *testing.T) {
 	RunTest(t, t.Name(), []float32{343.89, 368.89}, sqlString, query, validKeys)
 }
 
+// TODO: Add error tests
+
 func RunTest(t *testing.T, testName string, testVal interface{}, sqlString string, query string, validKeys []string) {
 	db, mock, rows, data, err := test.NewMockCo2Db()
 	if err != nil {
