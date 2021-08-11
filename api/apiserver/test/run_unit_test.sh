@@ -20,4 +20,32 @@
 # API version: 0.1.0
 # Contact: planetpulse.api@gmail.com
 
-go test -v $(go list apiserver/...|grep -ve '.*/test')
+#!/usr/bin/env bash
+
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    -v|--verbose)
+      VERBOSE=true
+      shift # past argument
+      shift # past value
+      ;;
+    *)    # unknown option
+      echo "run_unit_tests.sh $1: unknown argument"
+      cat << EOF
+Usage: ./run_unit_tests.sh [OPTIONS]
+
+Options: 
+    -v, --verbose        run tests with verbosity on
+EOF
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$VERBOSE" = true ] ; then
+    go test -v $(go list apiserver/...|grep -ve '.*/test') -verbose
+else
+    go test -v $(go list apiserver/...|grep -ve '.*/test')
+fi
