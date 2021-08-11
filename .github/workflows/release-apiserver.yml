@@ -41,6 +41,7 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.IMAGE_NAME }}
         # generate Docker tags based on the following events/attributes
         tags: |
+          type=raw,value=foo
           latest=true
           type=ref,event=branch
           type=semver,pattern={{version}}
@@ -60,6 +61,6 @@ jobs:
       with:
         context: ./api/apiserver/
         file: ./api/apiserver/Containerfile
-        push: true
+        push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
