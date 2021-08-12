@@ -221,7 +221,7 @@ func (query DBQuery) ToString() string {
 
 	offset := query.Offset
 	if query.Limit >= 0 {
-		offset = query.Offset + (query.Limit * query.Page)
+		offset += (query.Limit * query.Page)
 		sqlString += "LIMIT " + strconv.Itoa(query.Limit) + " "
 	}
 

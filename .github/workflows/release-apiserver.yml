@@ -25,7 +25,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-      
+    - name: Validate OpenAPI definition
+      uses: char0n/swagger-editor-validate@v1
+      with:
+        swagger-editor-url: http://localhost/
+        definition-file: examples/openapi-2-0.yaml
+    
     - name: Run Unit Tests
       run: |
         ./test/run_unit_test.sh -v
@@ -33,11 +38,6 @@ jobs:
     - name: PrepareReg Names
       run: |
         echo IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-        
-    - name: Extract branch name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: branch_name
     
     - name: Docker meta
       id: meta

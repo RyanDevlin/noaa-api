@@ -25,6 +25,7 @@ Contact: planetpulse.api@gmail.com
 package utils
 
 import (
+	"apiserver/pkg/database/models"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -45,18 +46,6 @@ type ServerError struct {
 
 	File string
 	Line int
-}
-
-// ErrorResp represents the format of the JSON response returned to the client when an error occurs.
-type ErrorResp struct {
-	Description string
-	Content     ErrorType
-}
-
-// ErrorType represents the context of an error returned to the client.
-type ErrorType struct {
-	Code    int
-	Message string
 }
 
 // NewError returns a new ServerError object used to encode contextual information about a runtime error
@@ -97,9 +86,9 @@ func HttpJsonError(w http.ResponseWriter, err *ServerError) {
 	enc.SetIndent("", "    ")
 	enc.SetEscapeHTML(false)
 	enc.Encode(
-		ErrorResp{
+		models.ErrorResp{
 			Description: http.StatusText(err.HttpCode),
-			Content: ErrorType{
+			Content: models.ErrorType{
 				Code:    err.HttpCode,
 				Message: err.Message,
 			},
