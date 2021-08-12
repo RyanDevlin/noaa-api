@@ -242,6 +242,7 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 			// This can occur with a badly written test case. Usually if the SQL query
 			// regex in the test case does not match what is actually used by the server.
 			test.ErrorLog(t, err)
+			t.Error("Test failed. Is the 'sqlString' regex correct?")
 			return
 		}
 
