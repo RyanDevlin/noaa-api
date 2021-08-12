@@ -25,11 +25,11 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+
     - name: Validate OpenAPI definition
-      uses: char0n/swagger-editor-validate@v1
+      uses: char0n/swagger-editor-validate@v1.2.1
       with:
-        swagger-editor-url: http://localhost/
-        definition-file: examples/openapi-2-0.yaml
+        definition-file: ../openapi/spec-v1.json
     
     - name: Run Unit Tests
       run: |
