@@ -13,7 +13,7 @@ defaults:
     working-directory: ./api/apiserver/
 
 jobs:
-  run-unit-tests:
+  test-build-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,19 +23,12 @@ jobs:
       PLANET_DB_PASS: hunter2
       PLANET_DB_HOST: db.example.com
     steps:
-    - name: Checkout Repository
+    - name: Checkout repository
       uses: actions/checkout@v2
+      
     - name: Run Unit Tests
       run: |
         ./test/run_unit_test.sh -v
-  build-and-push-image:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
     
     - name: PrepareReg Names
       run: |
