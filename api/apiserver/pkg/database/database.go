@@ -86,55 +86,35 @@ type DBQuery struct {
 
 	// Simple provides a way to tell the Query function that the data returned will be simplified.
 	Simple bool
+
+	// Pretty controls whether or not to pretty-print json responses.
+	Pretty bool
 }
 
-// Query querys the database according to the supplied DBQuery.
-// It returns a Co2Table of the requested data.
-func (database *Database) Query(query DBQuery) (models.Co2Table2, error) {
+// Query queries the database according to the supplied DBQuery.
+// It loads a supplied dataObject with the requested data.
+func (database *Database) Query(query DBQuery, dataObject models.DataObject) error {
 	if err := database.ProbeConnection(); err != nil {
-		return nil, err
+		return err
 	}
 
 	rows, err := database.DB.Query(query.ToString())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	//co2table := models.Co2Table{}
-	co2table := models.Co2Table2{}
 	defer rows.Close()
 	for rows.Next() {
-		if !query.Simple {
-			var co2entry models.Co2Entry
-			if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.DateDecimal, &co2entry.Average, &co2entry.NumDays, &co2entry.OneYearAgo, &co2entry.TenYearsAgo, &co2entry.IncSincePreIndustrial, &co2entry.Timestamp); err != nil {
-				return nil, err
-			}
-
-			// Use the unique date of measurement as the key to the co2table
-			//year, month, day := co2entry.Timestamp.Date()
-			//key := strconv.Itoa(year) + "-" + formatInt(int(month)) + "-" + formatInt(day)
-			//co2table[key] = co2entry
-			co2table = append(co2table, co2entry)
-		} else {
-			var co2entry models.Co2EntrySimple
-			//var year, month, day int
-
-			if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.Average, &co2entry.IncSincePreIndustrial); err != nil {
-				return nil, err
-			}
-
-			// Use the unique date of measurement as the key to the co2table
-			//key := strconv.Itoa(year) + "-" + formatInt(int(month)) + "-" + formatInt(day)
-			//co2table[key] = co2entry
-			co2table = append(co2table, co2entry)
+		err := dataObject.Load(rows, query.Simple)
+		if err != nil {
+			return err
 		}
-
 	}
 	err = rows.Err()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return co2table, nil
+	return nil
 }
 
 // Connect establishes a database connection based on the DBConfig values.
@@ -179,6 +159,8 @@ func (database *Database) ProbeConnection() error {
 	return nil
 }
 
+// NewQuery returns an initialized DBQuery to be used by a handler to
+// setup a new database request.
 func NewQuery(table string, cols []string, orderBy string) DBQuery {
 	return DBQuery{
 		Table:   table,
@@ -188,6 +170,7 @@ func NewQuery(table string, cols []string, orderBy string) DBQuery {
 		Offset:  0,
 		Page:    0,
 		Simple:  false,
+		Pretty:  true,
 	}
 }
 
@@ -231,19 +214,5 @@ func (query DBQuery) ToString() string {
 	if offset > 0 {
 		sqlString += "OFFSET " + strconv.Itoa(offset)
 	}
-
 	return sqlString
-}
-
-// formatInt pads integers lower than 10 with a leading '0'.
-// This was implemented mainly to combat problems with the way the JSON
-// Marshall() function sorts dictionary keys. If ints are not padded with 0
-// when they are less than 10, the values will show up out of order in a
-// server response.
-func formatInt(val int) string {
-	if val < 10 {
-		return fmt.Sprintf("%02d", val)
-	} else {
-		return fmt.Sprintf("%d", val)
-	}
 }

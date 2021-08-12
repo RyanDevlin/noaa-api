@@ -25,6 +25,7 @@ Contact: planetpulse.api@gmail.com
 package models
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -36,11 +37,8 @@ const (
 	Co2PpmMin = 0
 )
 
-// Co2Table represents a mapping of dates to Co2Entry or Co2EntrySimple structs.
-// The index of the Co2Table map must be '<year>-<month>-<day>'
-type Co2Table map[string]interface{}
-
-type Co2Table2 []interface{}
+// Co2Table represents a list of Co2Entry objects
+type Co2Table []interface{}
 
 // Co2Entry represents the JSON data to be returned from an individual Co2 measurement in the database.
 type Co2Entry struct {
@@ -65,193 +63,20 @@ type Co2EntrySimple struct {
 	IncSincePreIndustrial float32
 }
 
-/*
-
-	Here lies a ton of code I wrote to filter data from the database server-side.
-	This has now been simplified by properly querying the database, thus this
-	code is useless. I'm leaving it here on the off chance I need it again during this
-	initial architecture push. Also I put too much work into it :(
-
-
-	Draw things out on paper before you write the code 🤦‍♂️.
-
-        .
-       -|-
-        |
-    .-'~~~`-.
-  .'         `.
-  |  R  I  P  |
-  |           |
-  |           |
-\\|           |//
-^^^^^^^^^^^^^^^^^
-*/
-
-/*
-func (co2Table *Co2Table) Filter(r *http.Request) *utils.ServerError {
-	params := utils.ParseQuery(r)
-	for key, val := range params {
-		query := Query{key, val}
-		err := query.execute(co2Table)
-		if err != nil {
-			message := err.Error() + ": " + utils.ParseQuery(r).Encode()
-			return utils.NewError(fmt.Errorf("error when parsing query parameters"), message, 400, false)
-		}
-	}
-	return nil
-}
-
-func (query Query) execute(data *Co2Table) error {
-	var err error
-	switch query.filterType {
-	case "year":
-		err = dateParse(data, query.params, 0)
-	case "month":
-		err = dateParse(data, query.params, 1)
-	case "gt":
-		err = filterPpmCompare(data, query.params, ">")
-	case "lt":
-		err = filterPpmCompare(data, query.params, "<")
-	case "gte":
-		err = filterPpmCompare(data, query.params, ">=")
-	case "lte":
-		err = filterPpmCompare(data, query.params, "<=")
-	case "simple":
-		err = simple(data, query.params)
-	}
-	return err
-}
-
-// ====	HELPER FUNCTIONS ====
-
-func dateParse(table *Co2Table, params []string, index int) error {
-	result := make(Co2Table)
-
-	for key, val := range *table {
-		date := strings.Split(key, "-")
-		if index < 0 || index > len(date) {
-			return fmt.Errorf("internal error") //TODO: is this correct?
-		}
-
-		match, err := paramMatch(params, date[index])
-		if err != nil {
+// Load imports the results of a database query into a Co2Table slice
+func (co2Table *Co2Table) Load(rows *sql.Rows, simple bool) error {
+	if !simple {
+		var co2entry Co2Entry
+		if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.DateDecimal, &co2entry.Average, &co2entry.NumDays, &co2entry.OneYearAgo, &co2entry.TenYearsAgo, &co2entry.IncSincePreIndustrial, &co2entry.Timestamp); err != nil {
 			return err
 		}
-		if match {
-			result[key] = val
+		*co2Table = append(*co2Table, co2entry)
+	} else {
+		var co2entry Co2EntrySimple
+		if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.Average, &co2entry.IncSincePreIndustrial); err != nil {
+			return err
 		}
+		*co2Table = append(*co2Table, co2entry)
 	}
-
-	*table = result
 	return nil
 }
-
-func paramMatch(params []string, input string) (bool, error) {
-	for _, v := range params {
-		if _, err := strconv.Atoi(v); err != nil {
-			return false, fmt.Errorf("malformed query parameters, invalid date value")
-		}
-		if v == input {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-func filterPpmCompare(table *Co2Table, params []string, comparison string) error {
-	result := make(Co2Table)
-
-	ppm, err := validateAndDigestPpm(params)
-	if err != nil {
-		return err
-	}
-	for key, val := range *table {
-		average := float32(reflect.ValueOf(val).FieldByName("Average").Float())
-
-		switch comparison {
-		case ">":
-			if average > ppm {
-				result[key] = val
-			}
-		case "<":
-			if average < ppm {
-				result[key] = val
-			}
-		case ">=":
-			if average >= ppm {
-				result[key] = val
-			}
-		case "<=":
-			if average <= ppm {
-				result[key] = val
-			}
-		default:
-			return fmt.Errorf("(internal) malformed ppm comparison string '%s'", comparison) //TODO: is this correct?
-		}
-	}
-
-	*table = result
-	return nil
-}
-
-func validateAndDigestPpm(param []string) (float32, error) {
-	if len(param) != 1 {
-		return 0, fmt.Errorf("malformed query parameters, too many ppm constraints")
-	}
-
-	ppm, err := strconv.ParseFloat(param[0], 32)
-	if err != nil {
-		return 0, fmt.Errorf("malformed query parameters, ppm value should be a decimal number")
-	}
-	if !(ppm <= Co2PpmMax && ppm >= Co2PpmMin) {
-		return 0, fmt.Errorf("malformed query parameters, ppm query range is %v to %v", Co2PpmMin, Co2PpmMax)
-	}
-	return float32(ppm), nil
-}
-
-func validateAndDigestBool(param []string) (bool, error) {
-	if len(param) != 1 {
-		return false, fmt.Errorf("malformed query parameters, only one boolean value per argument")
-	}
-
-	result, err := strconv.ParseBool(param[0])
-	if err != nil {
-		return false, fmt.Errorf("malformed query parameters, invalid boolean value")
-	}
-	return result, nil
-}
-
-func simple(table *Co2Table, params []string) error {
-	result := make(Co2Table)
-
-	param, err := validateAndDigestBool(params)
-	if err != nil {
-		return err
-	}
-	if !param {
-		table = &result
-		return nil
-	}
-
-	for key, val := range *table {
-		result[key] = convToSimple(val)
-	}
-
-	*table = result
-	return nil
-}
-
-func convToSimple(data interface{}) interface{} {
-	simple := Co2EntrySimple{}
-
-	dataVal := reflect.ValueOf(data)
-	simpleVal := reflect.ValueOf(simple)
-	simplePtr := reflect.ValueOf(&simple)
-
-	for i := 0; i < simpleVal.NumField(); i++ {
-		field := dataVal.FieldByName(simpleVal.Type().Field(i).Name)
-		simplePtr.Elem().Field(i).Set(field)
-	}
-	return simple
-}
-*/

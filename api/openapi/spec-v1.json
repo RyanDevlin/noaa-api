@@ -119,11 +119,23 @@
                             "default": false
                         }
                     },
+                    {
+                        "in": "query",
+                        "name": "pretty",
+                        "description": "If true, json responses are indented for readability.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    },
                     {   
                         "$ref": "#/components/parameters/LimitParam"
                     },
                     {
                         "$ref": "#/components/parameters/OffsetParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PageParam"
                     }
                 ],
                 "responses": {
@@ -159,7 +171,7 @@
                 "tags": [
                     "co2WeeklyIncrease"
                 ],
-                "summary": "Requests weekly CO2 measurements by increase in ppm since 1800..",
+                "summary": "Requests weekly CO2 measurements by increase in ppm since 1800.",
                 "parameters": [
                     {
                         "in": "query",
@@ -169,13 +181,35 @@
                             "type": "number",
                             "format": "float",
                             "minimum": 0,
-                            "maximum": 1000
+                            "maximum": 500
                         }
                     },
                     {
                         "in": "query",
                         "name": "lt",
                         "description": "Return all CO2 measurements with a ppm increase since 1800 less than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 500
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "gte",
+                        "description": "Return all CO2 measurements with a ppm reading greater than OR equal to the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lte",
+                        "description": "Return all CO2 measurements with a ppm reading less than OR equal to the supplied value.",
                         "schema": {
                             "type": "number",
                             "format": "float",
@@ -192,11 +226,23 @@
                             "default": false
                         }
                     },
+                    {
+                        "in": "query",
+                        "name": "pretty",
+                        "description": "If true, json responses are indented for readability.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    },
                     {   
                         "$ref": "#/components/parameters/LimitParam"
                     },
                     {
                         "$ref": "#/components/parameters/OffsetParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PageParam"
                     }
                 ],
                 "responses": {
@@ -390,9 +436,21 @@
                 "schema": {
                     "type": "integer",
                     "format": "int32",
-                    "minimum": 1,
+                    "minimum": 0,
                     "maximum": 1000,
                     "default": 10
+                }
+            },
+            "PageParam": {
+                "name": "page",
+                "description": "Shifts the response data by offset + (limit * page).",
+                "in": "query",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 1,
+                    "default": 1
                 }
             }
         },

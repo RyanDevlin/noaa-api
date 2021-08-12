@@ -26,7 +26,7 @@ package server
 
 import (
 	"apiserver/pkg/server/handlers"
-	"apiserver/pkg/server/handlers/co2weekly"
+	"apiserver/pkg/server/handlers/co2"
 	utils "apiserver/pkg/utils"
 	"context"
 	"strings"
@@ -106,7 +106,7 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 			strings.ToUpper("Get"),
 			"/v1/co2",
 			handlers.ApiHandler{
-				Handler: co2weekly.Get,
+				Handler: co2.Get,
 				Config: &handlers.ApiHandlerConfig{
 					Database: apiserver.Database,
 				},
@@ -118,7 +118,18 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 			strings.ToUpper("Get"),
 			"/v1/co2/weekly",
 			handlers.ApiHandler{
-				Handler: co2weekly.Get,
+				Handler: co2.Get,
+				Config: &handlers.ApiHandlerConfig{
+					Database: apiserver.Database,
+				},
+			},
+		},
+		Route{
+			"co2Weekly",
+			strings.ToUpper("Get"),
+			"/v1/co2/weekly/increase",
+			handlers.ApiHandler{
+				Handler: co2.Get,
 				Config: &handlers.ApiHandlerConfig{
 					Database: apiserver.Database,
 				},

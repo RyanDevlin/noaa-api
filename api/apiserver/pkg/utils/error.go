@@ -86,11 +86,13 @@ func HttpJsonError(w http.ResponseWriter, err *ServerError) {
 	enc.SetIndent("", "    ")
 	enc.SetEscapeHTML(false)
 	enc.Encode(
-		models.ErrorResp{
-			Description: http.StatusText(err.HttpCode),
-			Content: models.ErrorType{
-				Code:    err.HttpCode,
-				Message: err.Message,
+		models.ServerResp{
+			Results:   nil,
+			Status:    "ERROR",
+			RequestId: "0",
+			Error: &models.ErrorResp{
+				Description: fmt.Sprintf("%v - %v", err.HttpCode, http.StatusText(err.HttpCode)),
+				Message:     err.Message,
 			},
 		},
 	)

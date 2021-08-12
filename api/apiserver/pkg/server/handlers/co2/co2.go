@@ -22,33 +22,54 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package handlers
+package co2
 
 import (
+	"apiserver/pkg/database"
 	"apiserver/pkg/database/models"
-	utils "apiserver/pkg/utils"
+	"apiserver/pkg/server/handlers"
+	"apiserver/pkg/utils"
 	"context"
 	"encoding/json"
 	"net/http"
 )
 
-// GetHealth checks the API server's connection to the database and reports this status.
-// In the future, there may be more health checks to implement here. For now, the main error case
-// inside the API server is the connection to the database.
-func GetHealth(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
-	if err := handlerConfig.Database.ProbeConnection(); err != nil {
-		return utils.NewError(err, "failed to connect to database", 500, false)
+// Get is an ApiHandlerFunc type. It queries the database for requested co2weekly data and returns a JSON representation of the data
+// to the client.
+func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	query := database.NewQuery("public.co2_weekly_mlo", []string{"*"}, "year,month,day")
+
+	//filters, internalArgs, err := parseParams(r)
+	filters, internalArgs, err := ParseParams(r)
+	if err != nil {
+		return err
 	}
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "    ")
+
+	if len(internalArgs) != 0 {
+		ParseInternalArgs(internalArgs, &query)
+	}
+
+	query.Where = filters
+
+	co2Table := models.Co2Table{}
+	dberr := handlerConfig.Database.Query(query, &co2Table)
+	if dberr != nil {
+		return utils.NewError(dberr, "failed to connect to database", 500, false)
+	}
 
 	resp := models.ServerResp{
-		Results:   nil,
+		Results:   co2Table,
 		Status:    "OK",
 		RequestId: "0",
 		Error:     nil,
 	}
 
+	enc := json.NewEncoder(w)
+	if query.Pretty {
+		enc.SetIndent("", "    ")
+	}
 	if err := enc.Encode(resp); err != nil {
 		return utils.NewError(err, "error encoding data as json", 500, false)
 	}
