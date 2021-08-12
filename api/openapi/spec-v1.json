@@ -18,15 +18,6 @@
     "paths": {
         "/health": {
             "get": {
-                "description":"",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            },
-            "getq": {
                 "tags": [
                     "heatlh"
                 ],
