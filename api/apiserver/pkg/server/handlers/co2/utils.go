@@ -22,61 +22,27 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package co2weekly
+package co2
 
 import (
 	"apiserver/pkg/database"
 	"apiserver/pkg/database/models"
-	"apiserver/pkg/server/handlers"
-	utils "apiserver/pkg/utils"
-	"context"
-	"encoding/json"
+	"apiserver/pkg/utils"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
-// Get is an ApiHandlerFunc type. It queries the database for requested co2weekly data and returns a JSON representation of the data
-// to the client.
-func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
-	query := database.NewQuery("public.co2_weekly_mlo", []string{"*"}, "year,month,day")
-
-	filters, internalArgs, err := parseParams(r)
-	if err != nil {
-		return err
-	}
-
-	if len(internalArgs) != 0 {
-		parseInternalArgs(internalArgs, &query)
-	}
-
-	query.Where = filters
-
-	co2Table, dberr := handlerConfig.Database.Query(query)
-	if dberr != nil {
-		return utils.NewError(dberr, "failed to connect to database", 500, false)
-	}
-
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "    ")
-	if err := enc.Encode(co2Table); err != nil {
-		return utils.NewError(err, "error encoding data as json", 500, false)
-	}
-	return nil
-}
-
 // parseParams returns a list of SQL WHERE directives and a map of internal arguments
 // to the server, derived from http.Request parameters.
-func parseParams(r *http.Request) ([]string, map[string]interface{}, *utils.ServerError) {
+func ParseParams(r *http.Request) ([]string, map[string]interface{}, *utils.ServerError) {
 	params := utils.ParseQuery(r)
 	var sqlFilters []string
 	internalArgs := make(map[string]interface{})
 
 	for key, val := range params {
-		err := parseParam(key, val, &sqlFilters, internalArgs)
+		err := parseParam(key, val, r.URL.Path, &sqlFilters, internalArgs)
 		if err != nil {
 			message := err.Error() + ": " + key + "=[" + strings.Join(val, ",") + "]"
 			return nil, nil, utils.NewError(fmt.Errorf("error when parsing query parameters"), message, 400, false)
@@ -88,7 +54,7 @@ func parseParams(r *http.Request) ([]string, map[string]interface{}, *utils.Serv
 // parseParam appends a single boolean expression to the sqlFilters list. This list of expressions is later passed
 // directly to the WHERE clause of an SQL query. parseParam also will add specific arguments to the internalArgs map
 // to be later used by the server.
-func parseParam(filterType string, params []string, sqlFilters *[]string, internalArgs map[string]interface{}) error {
+func parseParam(filterType string, params []string, urlPath string, sqlFilters *[]string, internalArgs map[string]interface{}) error {
 
 	switch filterType {
 	case "year", "month":
@@ -98,25 +64,25 @@ func parseParam(filterType string, params []string, sqlFilters *[]string, intern
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "gt":
-		result, err := ppmParse(params, ">")
+		result, err := ppmParse(params, urlPath, ">")
 		if err != nil {
 			return err
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "lt":
-		result, err := ppmParse(params, "<")
+		result, err := ppmParse(params, urlPath, "<")
 		if err != nil {
 			return err
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "gte":
-		result, err := ppmParse(params, ">=")
+		result, err := ppmParse(params, urlPath, ">=")
 		if err != nil {
 			return err
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "lte":
-		result, err := ppmParse(params, "<=")
+		result, err := ppmParse(params, urlPath, "<=")
 		if err != nil {
 			return err
 		}
@@ -146,6 +112,12 @@ func parseParam(filterType string, params []string, sqlFilters *[]string, intern
 			return err
 		}
 		internalArgs[filterType] = result
+	case "pretty":
+		result, err := validateBool(params)
+		if err != nil {
+			return err
+		}
+		internalArgs[filterType] = result
 	}
 	return nil
 }
@@ -169,24 +141,31 @@ func dateParse(params []string, section string) (string, error) {
 	return result, nil
 }
 
-func ppmParse(params []string, comparison string) (string, error) {
+func ppmParse(params []string, urlPath string, comparison string) (string, error) {
 
 	err := validatePpm(params)
 	if err != nil {
 		return "", err
 	}
 
-	// Note: validatePpm checks that params only has one element so it is okay to hardcode this here.
-	return "average " + comparison + " " + params[0], nil
+	// Note: validatePpm checks that params only has one element so it is okay to hardcode params[0] here.
+	switch urlPath {
+	case "/v1/co2/weekly":
+		return "average " + comparison + " " + params[0], nil
+	case "/v1/co2/weekly/increase":
+		return "increase_since_1800 " + comparison + " " + params[0], nil
+	default:
+		return "", fmt.Errorf("the path '%v' is not known", urlPath)
+	}
 }
 
 // parseInternalArgs iterates through arguments originally provided as query params and changes the default query accordingly.
-func parseInternalArgs(internalArgs map[string]interface{}, query *database.DBQuery) error {
+func ParseInternalArgs(internalArgs map[string]interface{}, query *database.DBQuery) error {
 	for key, val := range internalArgs {
 		switch key {
 		case "simple":
-			if result, ok := val.(bool); ok && result {
-				query.Cols = []string{"year", "month", "day", "average", "Increase_since_1800"}
+			if result, ok := val.(bool); ok {
+				query.Cols = []string{"year", "month", "day", "average", "increase_since_1800"}
 				query.Simple = result
 			}
 		case "limit":
@@ -200,6 +179,10 @@ func parseInternalArgs(internalArgs map[string]interface{}, query *database.DBQu
 		case "page":
 			if result, ok := val.(int); ok {
 				query.Page = result
+			}
+		case "pretty":
+			if result, ok := val.(bool); ok {
+				query.Pretty = result
 			}
 		}
 	}
