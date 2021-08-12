@@ -90,7 +90,7 @@ type DBQuery struct {
 
 // Query querys the database according to the supplied DBQuery.
 // It returns a Co2Table of the requested data.
-func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
+func (database *Database) Query(query DBQuery) (models.Co2Table2, error) {
 	if err := database.ProbeConnection(); err != nil {
 		return nil, err
 	}
@@ -100,7 +100,8 @@ func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
 		return nil, err
 	}
 
-	co2table := models.Co2Table{}
+	//co2table := models.Co2Table{}
+	co2table := models.Co2Table2{}
 	defer rows.Close()
 	for rows.Next() {
 		if !query.Simple {
@@ -110,20 +111,22 @@ func (database *Database) Query(query DBQuery) (models.Co2Table, error) {
 			}
 
 			// Use the unique date of measurement as the key to the co2table
-			year, month, day := co2entry.Timestamp.Date()
-			key := strconv.Itoa(year) + "-" + formatInt(int(month)) + "-" + formatInt(day)
-			co2table[key] = co2entry
+			//year, month, day := co2entry.Timestamp.Date()
+			//key := strconv.Itoa(year) + "-" + formatInt(int(month)) + "-" + formatInt(day)
+			//co2table[key] = co2entry
+			co2table = append(co2table, co2entry)
 		} else {
 			var co2entry models.Co2EntrySimple
-			var year, month, day int
+			//var year, month, day int
 
-			if err := rows.Scan(&year, &month, &day, &co2entry.Average, &co2entry.IncSincePreIndustrial); err != nil {
+			if err := rows.Scan(&co2entry.Year, &co2entry.Month, &co2entry.Day, &co2entry.Average, &co2entry.IncSincePreIndustrial); err != nil {
 				return nil, err
 			}
 
 			// Use the unique date of measurement as the key to the co2table
-			key := strconv.Itoa(year) + "-" + formatInt(int(month)) + "-" + formatInt(day)
-			co2table[key] = co2entry
+			//key := strconv.Itoa(year) + "-" + formatInt(int(month)) + "-" + formatInt(day)
+			//co2table[key] = co2entry
+			co2table = append(co2table, co2entry)
 		}
 
 	}

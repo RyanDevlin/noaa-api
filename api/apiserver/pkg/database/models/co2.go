@@ -40,6 +40,8 @@ const (
 // The index of the Co2Table map must be '<year>-<month>-<day>'
 type Co2Table map[string]interface{}
 
+type Co2Table2 []interface{}
+
 // Co2Entry represents the JSON data to be returned from an individual Co2 measurement in the database.
 type Co2Entry struct {
 	Year                  int
@@ -56,6 +58,9 @@ type Co2Entry struct {
 
 // Co2EntrySimple represents the simplified JSON data to be returned from an individual Co2 measurement in the database.
 type Co2EntrySimple struct {
+	Year                  int
+	Month                 int
+	Day                   int
 	Average               float32
 	IncSincePreIndustrial float32
 }
