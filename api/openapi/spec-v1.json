@@ -163,7 +163,7 @@
                 "parameters": [
                     {
                         "in": "query",
-                        "name": "greaterThan",
+                        "name": "gt",
                         "description": "Return all CO2 measurements with a ppm increase since 1800 greater than the supplied value.",
                         "schema": {
                             "type": "number",
@@ -174,7 +174,7 @@
                     },
                     {
                         "in": "query",
-                        "name": "lessThan",
+                        "name": "lt",
                         "description": "Return all CO2 measurements with a ppm increase since 1800 less than the supplied value.",
                         "schema": {
                             "type": "number",
