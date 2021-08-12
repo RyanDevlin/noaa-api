@@ -135,7 +135,8 @@ func TestGetPage(t *testing.T) {
 	page := 2
 	limit := 2
 
-	offset := (limit * (page - 1))
+	//offset := (limit * (page - 1))
+	offset := (limit * (page))
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT %v OFFSET %v`, limit, offset))
 	query := fmt.Sprintf("/v1/co2/weekly?limit=%v&page=%v", limit, page)
