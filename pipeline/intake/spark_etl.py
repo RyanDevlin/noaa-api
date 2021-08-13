@@ -52,4 +52,4 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
-    spark_run_etl(args.source, args.output_path, os.environ.get('AWS_ACCESS_KEY_ID'), os.environ.get('AWS_SECRET_ACCESS_KEY'))
+    spark_run_etl(args.source, args.output_path, os.environ.get('AWS_ACCESS_KEY_ID'), os.environ.get('AWS_SECRET_ACCESS_KEY'), local=os.environ.get('LOCAL', True))
