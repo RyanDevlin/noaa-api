@@ -166,7 +166,7 @@ func NewQuery(table string, cols []string, orderBy string) DBQuery {
 		Table:   table,
 		Cols:    cols,
 		OrderBy: orderBy,
-		Limit:   -1,
+		Limit:   10,
 		Offset:  0,
 		Page:    0,
 		Simple:  false,
