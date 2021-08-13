@@ -7,6 +7,12 @@ data_files = [
         [
             'intake/sources/co2_weekly_mlo/co2_weekly_mlo_config.yml'
         ]
+    ),
+    (
+        'intake/jars/co2_weekly_mlo',
+        [
+            'intake/jars/postgresql-42.2.23.jar'
+        ]
     )
 ]
 

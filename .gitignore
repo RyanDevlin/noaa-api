@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# ENV VARS SCRIPT
+set_env_vars.sh
+
+# SECRET AIRFLOW VARS
+airflow/variables.json
+
 # Python Specific
 dist/
 *.egg-info

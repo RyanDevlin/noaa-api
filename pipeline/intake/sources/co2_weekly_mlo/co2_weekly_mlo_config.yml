@@ -1,12 +1,12 @@
 source: https://gml.noaa.gov/aftp/products/trends/co2/co2_weekly_mlo.csv
 header_keys: 
-  - year
-  - month
-  - day
-  - decimal
-  - average
-  - ndays
-  - one_yr_ago
-  - ten_yrs_ago
-  - inc_since_1800
+  year: int
+  month: int
+  day: int
+  decimal: float
+  average: float
+  ndays: int
+  1_year_ago: float
+  10_years_ago: float
+  increase_since_1800: float
 ignore_symbol: '#'
