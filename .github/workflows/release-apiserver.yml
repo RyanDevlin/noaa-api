@@ -1,0 +1,72 @@
+name: Go
+on:
+  push:
+    branches:
+    - release-*
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: apiserver
+
+defaults:
+  run:
+    working-directory: ./api/apiserver/
+
+jobs:
+  test-build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PLANET_DB_USER: Kanye
+      PLANET_DB_PASS: hunter2
+      PLANET_DB_HOST: db.example.com
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Validate OpenAPI definition
+      uses: char0n/swagger-editor-validate@v1.2.1
+      with:
+        definition-file: api/openapi/spec-v1.json
+    
+    - name: Run Unit Tests
+      run: |
+        ./test/run_unit_test.sh -v
+    
+    - name: PrepareReg Names
+      run: |
+        echo IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+    
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.IMAGE_NAME }}
+        # generate Docker tags based on the following events/attributes
+        flavor: |
+          latest=true
+        tags: |
+          type=ref,event=branch
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+
+    - name: Log in to the Container registry
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: ./api/apiserver/
+        file: ./api/apiserver/Containerfile
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
