@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+sudo yum install -y git
+sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo yum install -y ansible
+sudo yum install -y vim
+mkdir -p ~/go/src/github.com/RyanDevlin/
+git clone https://github.com/RyanDevlin/planet-pulse.git ~/go/src/github.com/RyanDevlin/
+ansible-playbook ~/go/src/github.com/RyanDevlin/api/apiserver/aws/setup.yml

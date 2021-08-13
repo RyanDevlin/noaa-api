@@ -1,0 +1,46 @@
+{
+    "ServerResp": {
+        "type": "object",
+        "description": "This object represents a server response containing simplified weekly gas measurement data.",
+        "properties": {
+            "Results": [
+                {
+                    "Year": {
+                        "desciption": "The year this measurement was taken.",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "Month": {
+                        "desciption": "The month this measurement was taken.",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "Day": {
+                        "desciption": "The day representing the start of the week for this measurement. Measurements are taken hourly and averaged together over a week.",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "Average": {
+                        "desciption": "The average gas measurement recorded for the week.",
+                        "type": "integer",
+                        "format": "float"
+                    },
+                    "IncSincePreIndustrial": {
+                        "desciption": "The CO2 mole fraction difference in dry air (in parts-per-million) between this measurement and measurements from 1800.",
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    }
+                }
+            ],
+            "Status": {
+                "desciption": "The status of the response. Currently either 'OK' or 'ERROR'.",
+                "type": "string"
+            },
+            "RequestId": {
+                "desciption": "The identifier associated with this request.",
+                "type": "string"
+            }
+        }
+    }
+}

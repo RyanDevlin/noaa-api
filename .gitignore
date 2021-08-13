@@ -8,6 +8,11 @@ set_env_vars.sh
 
 # SECRET AIRFLOW VARS
 airflow/variables.json
+# Used to hold env vars locally for testing
+*.secret
+
+# The name of the binary artifact produces by the build scripts
+planetpulse
 
 # Python Specific
 dist/

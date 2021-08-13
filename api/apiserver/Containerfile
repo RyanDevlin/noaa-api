@@ -1,0 +1,18 @@
+FROM docker.io/library/golang:1.16.6 AS build
+WORKDIR /usr/local/go/src/apiserver
+COPY cmd/ ./cmd/
+COPY pkg/ ./pkg/
+COPY go.mod .
+COPY go.sum .
+
+ENV CGO_ENABLED=0
+RUN go get -d -v ./...
+
+RUN go build -a -o planetpulse ./cmd/planetpulse/
+
+FROM alpine:3.14 AS runtime
+WORKDIR /opt/apiserver
+COPY --from=build /usr/local/go/src/apiserver/planetpulse ./
+COPY ./images/favicon.ico .
+EXPOSE 8080/tcp
+ENTRYPOINT ["./planetpulse"]

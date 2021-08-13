@@ -7,9 +7,10 @@ This is a data ingestion framework to intake enironment-specific data from the f
 ## Setup
     # Actiate Virtual Environment
     python3 -m venv venv
+    source venv/bin/activate
 
     # Install Requirements
-    pip install requirements.txt
+    pip install -r requirements.txt
     brew install adoptopenjdk11
     brew install adoptopenjdk11
 
