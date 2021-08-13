@@ -68,8 +68,7 @@ func (apiserver *ApiServer) ServerInit() *utils.ServerError {
 	defer cancel()
 
 	// Generate routes
-	router := apiserver.NewRouter(ctx, apiserver.CreateRoutes())
-	apiserver.Router = router
+	apiserver.Router = apiserver.NewRouter(ctx, apiserver.CreateRoutes())
 
 	// Establish database connection. If this fails the server will recover and
 	// begin serving, but will only return error messages to the client until a
