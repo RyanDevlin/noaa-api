@@ -94,19 +94,19 @@ func parseParam(filterType string, params []string, urlPath string, sqlFilters *
 		}
 		internalArgs[filterType] = result
 	case "limit":
-		result, err := validateInt(params, 0)
+		result, err := validateInt(params, 0, 10000)
 		if err != nil {
 			return err
 		}
 		internalArgs[filterType] = result
 	case "offset":
-		result, err := validateInt(params, 0)
+		result, err := validateInt(params, 0, 10000)
 		if err != nil {
 			return err
 		}
 		internalArgs[filterType] = result
 	case "page":
-		result, err := validateInt(params, 1)
+		result, err := validateInt(params, 1, 10000)
 		result-- // validateInt ensures result > 0. This is done so page # '1' is indexed as '0'.
 		if err != nil {
 			return err
@@ -241,7 +241,7 @@ func validateBool(param []string) (bool, error) {
 }
 
 // validateBool validates an integer parameter.
-func validateInt(param []string, min int) (int, error) {
+func validateInt(param []string, min int, max int) (int, error) {
 	if len(param) != 1 {
 		return -1, fmt.Errorf("malformed query parameters, only one integer value allowed for this argument")
 	}
@@ -251,7 +251,7 @@ func validateInt(param []string, min int) (int, error) {
 		return -1, fmt.Errorf("malformed query parameters, invalid integer value")
 	}
 
-	if int(result) < min {
+	if int(result) < min || int(result) > max {
 		return 0, fmt.Errorf("malformed query parameters, integer value cannot be less than %v", min)
 	}
 	return int(result), nil

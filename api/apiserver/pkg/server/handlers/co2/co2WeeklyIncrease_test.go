@@ -31,7 +31,7 @@ import (
 )
 
 func TestIncreaseGetAll(t *testing.T) {
-	sqlString := regexp.QuoteMeta(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day`)
+	sqlString := regexp.QuoteMeta(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT 10`)
 	query := "/v1/co2/weekly/increase"
 	validDates := []string{"1974-05-19", "1974-05-26", "1984-01-01", "1984-01-08", "2000-01-02", "2000-01-09", "2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
 
@@ -41,7 +41,7 @@ func TestIncreaseGetAll(t *testing.T) {
 func TestIncreaseGetYear(t *testing.T) {
 	testVal := 2020
 
-	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE year in ('%v') ORDER BY year,month,day`, testVal))
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE year in ('%v') ORDER BY year,month,day LIMIT 10`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly/increase?year=%v", testVal)
 	validDates := []string{"2020-02-02", "2020-05-24"}
 
@@ -51,7 +51,7 @@ func TestIncreaseGetYear(t *testing.T) {
 func TestIncreaseGetMonth(t *testing.T) {
 	testVal := 1
 
-	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE month in ('%v') ORDER BY year,month,day`, testVal))
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE month in ('%v') ORDER BY year,month,day LIMIT 10`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly/increase?month=%v", testVal)
 	validDates := []string{"1984-01-01", "1984-01-08", "2000-01-02", "2000-01-09"}
 
@@ -61,7 +61,7 @@ func TestIncreaseGetMonth(t *testing.T) {
 func TestIncreaseGetGt(t *testing.T) {
 	testVal := 128.89
 
-	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 > %v ORDER BY year,month,day`, testVal))
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 > %v ORDER BY year,month,day LIMIT 10`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly/increase?gt=%v", testVal)
 	validDates := []string{"2018-10-07", "2020-02-02", "2020-05-24"}
 
@@ -71,7 +71,7 @@ func TestIncreaseGetGt(t *testing.T) {
 func TestIncreaseGetGte(t *testing.T) {
 	testVal := 128.89
 
-	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 >= %v ORDER BY year,month,day`, testVal))
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 >= %v ORDER BY year,month,day LIMIT 10`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly/increase?gte=%v", testVal)
 	validDates := []string{"2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
 
@@ -81,7 +81,7 @@ func TestIncreaseGetGte(t *testing.T) {
 func TestIncreaseGetLt(t *testing.T) {
 	testVal := 64.53
 
-	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 < %v ORDER BY year,month,day`, testVal))
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 < %v ORDER BY year,month,day LIMIT 10`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly/increase?lt=%v", testVal)
 	validDates := []string{"1974-05-19", "1974-05-26", "1984-01-08"}
 
@@ -91,7 +91,7 @@ func TestIncreaseGetLt(t *testing.T) {
 func TestIncreaseGetLte(t *testing.T) {
 	testVal := 64.53
 
-	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 <= %v ORDER BY year,month,day`, testVal))
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 <= %v ORDER BY year,month,day LIMIT 10`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly/increase?lte=%v", testVal)
 	validDates := []string{"1974-05-19", "1974-05-26", "1984-01-01", "1984-01-08"}
 
@@ -111,7 +111,7 @@ func TestIncreaseGetLimit(t *testing.T) {
 func TestIncreaseGetOffset(t *testing.T) {
 	testVal := 4
 
-	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day OFFSET %v`, testVal))
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT 10 OFFSET %v`, testVal))
 	query := fmt.Sprintf("/v1/co2/weekly/increase?offset=%v", testVal)
 	validDates := []string{"2000-01-02", "2000-01-09", "2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
 
@@ -140,7 +140,7 @@ func TestIncreaseGetCombo(t *testing.T) {
 	lte := 88.88
 
 	// This regex will match the SELECT query with any arbitrary ordering of the WHERE clauses. This is needed because the order that the server concatenates WHERE clauses is semi-random
-	sqlString := `SELECT \* FROM public\.co2_weekly_mlo WHERE (increase_since_1800 [<>=]+ [\d\.]+( AND )*|year in \(('[\d]+'(,)?[ ]*)*\)( AND )*|month in \(('[\d]+'(,)?[ ]*)*\)( AND )*)* ORDER BY year,month,day`
+	sqlString := `SELECT \* FROM public\.co2_weekly_mlo WHERE (increase_since_1800 [<>=]+ [\d\.]+( AND )*|year in \(('[\d]+'(,)?[ ]*)*\)( AND )*|month in \(('[\d]+'(,)?[ ]*)*\)( AND )*)* ORDER BY year,month,day LIMIT 10`
 	query := fmt.Sprintf("/v1/co2/weekly/increase?year=%v,%v&month=%v&gt=%v&gte=%v&lt=%v&lte=%v", years[0], years[1], month, gt, gte, lt, lte)
 	validDates := []string{"1984-01-01", "2000-01-09"}
 

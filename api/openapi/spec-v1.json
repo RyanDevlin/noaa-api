@@ -144,10 +144,20 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WeeklyDataPoint"
-                                    }
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerResp"
+                                            }
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                            }
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -181,7 +191,7 @@
                             "type": "number",
                             "format": "float",
                             "minimum": 0,
-                            "maximum": 500
+                            "maximum": 1000
                         }
                     },
                     {
@@ -192,7 +202,7 @@
                             "type": "number",
                             "format": "float",
                             "minimum": 0,
-                            "maximum": 500
+                            "maximum": 1000
                         }
                     },
                     {
@@ -251,10 +261,20 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WeeklyDataPoint"
-                                    }
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerResp"
+                                            }
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                            }
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -271,7 +291,7 @@
                 }
             }
         },
-        "/co2/weekly/{ppm}": {
+        "/co2/weekly/ppm/{ppm}": {
             "summary": "Represents weekly CO2 measurements by ppm.",
             "description": "This resource represents specific weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory querried by ppm. The supplied ppm value must be an integer, and the server will return all measurements that match the supplied integer. Since measurements are represented as floats, any float where the integer portion matches the supplied value will be returned.",
             "get": {
@@ -313,10 +333,20 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WeeklyDataPoint"
-                                    }
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerResp"
+                                            }
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                            }
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -333,7 +363,7 @@
                 }
             }
         },
-        "/co2/weekly/{id}": {
+        "/co2/weekly/id/{id}": {
             "summary": "Represents weekly CO2 measurements.",
             "description": "This resource represents a specific weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory.",
             "get": {
@@ -373,10 +403,20 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WeeklyDataPoint"
-                                    }
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerResp"
+                                            }
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                            }
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -396,23 +436,14 @@
     },
     "components": {
         "schemas": {
-            "WeeklyDataPoint": {
-                "$ref": "./models/WeeklyDataPoint.json"
+            "ServerResp": {
+                "$ref": "./models/ServerResp.json"
             },
-            "Error": {
-                "type": "object",
-                "properties": {
-                    "code": {
-                        "type": "integer"
-                    },
-                    "message": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "code",
-                    "message"
-                ]
+            "ServerRespSimple": {
+                "$ref": "./models/ServerRespSimple.json"
+            },
+            "ServerRespError": {
+                "$ref": "./models/ServerRespError.json"
             }
         },
         "parameters": {
@@ -425,6 +456,7 @@
                     "type": "integer",
                     "format": "int32",
                     "minimum": 0,
+                    "maximum": 10000,
                     "default": 0
                 }
             },
@@ -437,7 +469,7 @@
                     "type": "integer",
                     "format": "int32",
                     "minimum": 0,
-                    "maximum": 1000,
+                    "maximum": 10000,
                     "default": 10
                 }
             },
@@ -450,6 +482,7 @@
                     "type": "integer",
                     "format": "int32",
                     "minimum": 1,
+                    "maximum": 10000,
                     "default": 1
                 }
             }
@@ -460,7 +493,7 @@
                 "content": {
                     "application/json": {
                         "schema": {
-                            "$ref": "#/components/schemas/Error"
+                            "$ref": "#/components/schemas/ServerRespError"
                         }
                     }
                 }
@@ -470,7 +503,7 @@
                 "content": {
                     "application/json": {
                         "schema": {
-                            "$ref": "#/components/schemas/Error"
+                            "$ref": "#/components/schemas/ServerRespError"
                         }
                     }
                 }
@@ -480,7 +513,7 @@
                 "content": {
                     "application/json": {
                         "schema": {
-                            "$ref": "#/components/schemas/Error"
+                            "$ref": "#/components/schemas/ServerRespError"
                         }
                     }
                 }
@@ -490,7 +523,7 @@
                 "content": {
                     "application/json": {
                         "schema": {
-                            "$ref": "#/components/schemas/Error"
+                            "$ref": "#/components/schemas/ServerRespError"
                         }
                     }
                 }

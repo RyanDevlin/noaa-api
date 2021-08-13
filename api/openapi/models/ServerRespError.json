@@ -1,0 +1,28 @@
+{
+    "ServerResp": {
+        "type": "object",
+        "description": "This object represents a server response when there is an error.",
+        "properties": {
+            "Status": {
+                "desciption": "The status of the response. Will be 'ERROR'.",
+                "type": "string"
+            },
+            "RequestId": {
+                "desciption": "The identifier associated with this request.",
+                "type": "string"
+            },
+            "Error": {
+                "ErrorResp": {
+                    "Description": {
+                        "desciption": "A short description of the error, eg. '400 - Bad Request'",
+                        "type": "string"
+                    },
+                    "Message": {
+                        "desciption": "A message which provides context for the error, eg. why it occured",
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}
