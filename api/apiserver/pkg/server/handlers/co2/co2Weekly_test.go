@@ -147,6 +147,16 @@ func TestGetCombo(t *testing.T) {
 	RunTest(t, t.Name(), []float32{343.89, 368.89}, sqlString, query, validDates)
 }
 
+func TestGetNull(t *testing.T) {
+	testVal := 500.00
+
+	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 > %.2f ORDER BY year,month,day LIMIT 10`, testVal))
+	query := fmt.Sprintf("/v1/co2/weekly/increase?gt=%v", testVal)
+	validValues := []string{}
+
+	RunTest(t, t.Name(), float32(testVal), sqlString, query, validValues)
+}
+
 func TestErrors(t *testing.T) {
 	testVals := []string{
 		"/v1/co2/weekly?year=2020a",
@@ -157,10 +167,6 @@ func TestErrors(t *testing.T) {
 		"/v1/co2/weekly?lt=400a",
 		"/v1/co2/weekly?gte=400a",
 		"/v1/co2/weekly?lte=400a",
-		"/v1/co2/weekly?gt=300,400",
-		"/v1/co2/weekly?lt=300,400",
-		"/v1/co2/weekly?lte=300,400",
-		"/v1/co2/weekly?gt=300&gt=400",
 		"/v1/co2/weekly?gt=40000",
 		"/v1/co2/weekly?gt=-1",
 	}

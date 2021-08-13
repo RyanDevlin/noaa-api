@@ -263,6 +263,21 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 				}
 			}
+		case "TestGetNull", "TestIncreaseGetNull":
+			if _, ok := testVal.(float32); !ok {
+				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
+			}
+
+			// Add desired entries to mock database response
+			if strings.Contains(testName, "Increase") {
+				if v.Increase_since_1800 > testVal.(float32) {
+					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+				}
+			} else {
+				if v.Average > testVal.(float32) {
+					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+				}
+			}
 		case "TestErrors", "TestIncreaseErrors":
 			if testVal != nil {
 				return fmt.Errorf("Test value '%v' for test '%v' is not nil.", testVal, testName)
@@ -279,6 +294,10 @@ func validateResponse(t *testing.T, body []byte, validDates []string) {
 	json.Unmarshal(body, &results)
 
 	if len(results.Results) != len(validDates) {
+		// If we expect there to be no results, the test case should initialize validDates as an empty slice.
+		if len(validDates) == 0 && results.Results[0] == nil {
+			return
+		}
 		t.Error("Incorrect number of values returned from query.")
 		return
 	}
