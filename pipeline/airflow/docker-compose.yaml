@@ -39,7 +39,7 @@
 version: '3'
 x-airflow-common:
   &airflow-common
-  image: ${AIRFLOW_IMAGE_NAME:-airflow:2.0.1}
+  image: ${AIRFLOW_IMAGE_NAME:-airflow:2.0.1} # tylerkobil/airflow:2.0.1 when not local image...
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor

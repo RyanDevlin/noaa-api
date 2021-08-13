@@ -1,3 +1,5 @@
 pyspark==3.1.2
 PyYAML==5.4.1
 apache-airflow==2.1.0
+apache-airflow-providers-amazon
+apache-airflow-providers-apache-spark
