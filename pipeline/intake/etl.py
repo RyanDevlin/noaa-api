@@ -25,7 +25,7 @@ def filter_helper(partitionData, header, ignore_symbol): # TODO - move into file
             yield row
 
 
-def structure_as_row(partitionData, header_keys):
+def structure_as_row(partitionData, header_keys, src_type):
     """
     Map unstructured data (string) to structured representation
     with keys and values.
@@ -33,11 +33,22 @@ def structure_as_row(partitionData, header_keys):
     :params partitionData - generator of strings.
     :params header_keys (dict) - ordered dict of headers in row, with correspondign
                                 data type expressions as their values
+    :params src_type (str) - cvs or txt!
 
     :returns generator of Row records
     """
+
     for row in partitionData:
-        values = row.split(',')
+
+        # For now, we'll assume all txt files are whitespace separated...
+        if src_type == 'csv':
+            values = row.split(',')
+        elif src_type == 'txt':
+            values = [ele for ele in row.split(' ') if ele]
+        else:
+            raise RuntimeError(f'source type {src_type} not accepted!')
+
+
         if len(values) != len(header_keys):
             raise RuntimeError("Error! Number of Header Keys Does Not Match Number of Field Values!")
 
@@ -66,9 +77,27 @@ def create_yyyymmdd_index(row_dict):
     """
     year = str(row_dict['year'])
     month = str(row_dict.get('month', '01')).zfill(2)
-    day = str(row_dict.get('day', '01')).zfill(2)
+    day = str(row_dict.get('day', '01')).zfill(2) # default to first day of month
     row_dict['YYYYMMDD'] = datetime.strptime(f'{year}{month}{day}', '%Y%m%d')
     return Row(**row_dict)
+
+def column_rename_factory(df, file_type):
+    """
+    Method to figure out columns that need to be renamed,
+    and rename said columns
+
+    :params df (spark Dataframe)
+    :params file_type (str) - source file type
+    """
+    if file_type == 'co2_weekly_mlo':
+        df = df.withColumnRenamed("1_year_ago", "one_year_ago") \
+            .withColumnRenamed("10_years_ago", "ten_years_ago") \
+            .withColumnRenamed("decimal", "date_decimal")
+
+    elif file_type == 'ch4_mm_gl':
+        df = df.withColumnRenamed("decimal", "date_decimal")
+
+    return df
 
 
 def run_etl(source, output_path, spark=None):
@@ -84,6 +113,7 @@ def run_etl(source, output_path, spark=None):
     
     config = yaml.safe_load(pkg_resources.resource_stream(f'intake.sources.{source}', f'{source}_config.yml'))
     file_path = config['source']
+    src_type = file_path.split('.')[-1]
     header_keys = config['header_keys']
     ignore_symbol = config['ignore_symbol']
 
@@ -96,9 +126,8 @@ def run_etl(source, output_path, spark=None):
     # broadcasting the header_keys to workers...
     # TODO - refactor column renames/yyyymmdd index creation as add more data sources...
     df = rdd.mapPartitions(lambda partition: filter_helper(partition, header=','.join(list(header_keys.keys())), ignore_symbol=ignore_symbol)) \
-        .mapPartitions(lambda partition: structure_as_row(partition, header_keys)) \
+        .mapPartitions(lambda partition: structure_as_row(partition, header_keys, src_type)) \
         .map(lambda Row: create_yyyymmdd_index(Row.asDict())).toDF() \
-        .withColumnRenamed("1_year_ago", "one_year_ago") \
-        .withColumnRenamed("10_years_ago", "ten_years_ago") \
-        .withColumnRenamed("decimal", "date_decimal")
+    
+    df = column_rename_factory(df, source)
     df.write.mode("overwrite").parquet(output_path) # Always overwrite with latest dataset
