@@ -59,6 +59,14 @@ func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.R
 		return utils.NewError(dberr, "failed to connect to database", 500, false)
 	}
 
+	// This prevents the 'Results' part of the response from being omitted if
+	// there are no results.
+	if len(co2Table) == 0 {
+		co2Table = models.Co2Table{
+			nil,
+		}
+	}
+
 	resp := models.ServerResp{
 		Results:   co2Table,
 		Status:    "OK",

@@ -64,25 +64,41 @@ func parseParam(filterType string, params []string, urlPath string, sqlFilters *
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "gt":
-		result, err := ppmParse(params, urlPath, ">")
+		ppm, err := getPPM(params, true)
+		if err != nil {
+			return err
+		}
+		result, err := ppmParse(ppm, urlPath, ">")
 		if err != nil {
 			return err
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "lt":
-		result, err := ppmParse(params, urlPath, "<")
+		ppm, err := getPPM(params, false)
+		if err != nil {
+			return err
+		}
+		result, err := ppmParse(ppm, urlPath, "<")
 		if err != nil {
 			return err
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "gte":
-		result, err := ppmParse(params, urlPath, ">=")
+		ppm, err := getPPM(params, true)
+		if err != nil {
+			return err
+		}
+		result, err := ppmParse(ppm, urlPath, ">=")
 		if err != nil {
 			return err
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "lte":
-		result, err := ppmParse(params, urlPath, "<=")
+		ppm, err := getPPM(params, false)
+		if err != nil {
+			return err
+		}
+		result, err := ppmParse(ppm, urlPath, "<=")
 		if err != nil {
 			return err
 		}
@@ -141,19 +157,12 @@ func dateParse(params []string, section string) (string, error) {
 	return result, nil
 }
 
-func ppmParse(params []string, urlPath string, comparison string) (string, error) {
-
-	err := validatePpm(params)
-	if err != nil {
-		return "", err
-	}
-
-	// Note: validatePpm checks that params only has one element so it is okay to hardcode params[0] here.
+func ppmParse(ppm string, urlPath string, comparison string) (string, error) {
 	switch urlPath {
 	case "/v1/co2/weekly":
-		return "average " + comparison + " " + params[0], nil
+		return "average " + comparison + " " + ppm, nil
 	case "/v1/co2/weekly/increase":
-		return "increase_since_1800 " + comparison + " " + params[0], nil
+		return "increase_since_1800 " + comparison + " " + ppm, nil
 	default:
 		return "", fmt.Errorf("the path '%v' is not known", urlPath)
 	}
@@ -211,20 +220,36 @@ func validateDate(val string, section string) error {
 	return nil
 }
 
-// validatePpm validates a ppm parameter against the current API spec.
-func validatePpm(param []string) error {
-	if len(param) != 1 {
-		return fmt.Errorf("malformed query parameters, too many ppm constraints")
-	}
-
-	ppm, err := strconv.ParseFloat(param[0], 32)
+func getPPM(array []string, max bool) (string, error) {
+	target, err := validatePpm(array[0])
 	if err != nil {
-		return fmt.Errorf("malformed query parameters, ppm value should be a decimal number")
+		return "", err
+	}
+	for _, value := range array {
+		curr, err := validatePpm(value)
+		if err != nil {
+			return "", err
+		}
+		if max && curr > target {
+			target = curr
+		} else if !max && curr < target {
+			target = curr
+		}
+	}
+	return strconv.FormatFloat(target, 'f', 2, 32), nil
+}
+
+// validatePpm validates a ppm parameter against the current API spec.
+func validatePpm(ppmStr string) (float64, error) {
+
+	ppm, err := strconv.ParseFloat(ppmStr, 32)
+	if err != nil {
+		return 0, fmt.Errorf("malformed query parameters, ppm value should be a decimal number")
 	}
 	if !(ppm <= models.Co2PpmMax && ppm >= models.Co2PpmMin) {
-		return fmt.Errorf("malformed query parameters, ppm query range is %v to %v", models.Co2PpmMin, models.Co2PpmMax)
+		return 0, fmt.Errorf("malformed query parameters, ppm query range is %v to %v", models.Co2PpmMin, models.Co2PpmMax)
 	}
-	return nil
+	return ppm, nil
 }
 
 // validateBool validates a boolean parameter.
