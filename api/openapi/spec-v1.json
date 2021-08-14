@@ -28,8 +28,10 @@
                         "content": {
                             "text/plain": {
                                "schema": {
-                                   "type": "string",
-                                   "example": "OK"
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ServerResp"
+                                    }
                                } 
                             }
                         }
@@ -430,6 +432,280 @@
                     "default": {
                         "$ref": "#/components/responses/GenericError"
                     }
+                }
+            }
+        }
+    },
+    "/ch4/monthly": {
+        "summary": "Represents monthly CH4 (methane) measurements.",
+        "description": "This resource represents a range of monthly average atmospheric CH4 (methane) measurements taken at Mauna Loa Observatory since 1983.",
+        "get": {
+            "tags": [
+                "ch4Monthly"
+            ],
+            "summary": "Requests monthly CH4 measurements.",
+            "parameters": [
+                {
+                    "in": "query",
+                    "name": "year",
+                    "description": "Return all CH4 measurements for a given year.",
+                    "schema": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 3000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "month",
+                    "description": "Return all CH4 measurements for a given month.",
+                    "schema": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 12
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "gt",
+                    "description": "Return all CH4 measurements with an average ppb reading greater than the supplied value.",
+                    "schema": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0,
+                        "maximum": 1000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "lt",
+                    "description": "Return all CH4 measurements with an average ppb reading less than the supplied value.",
+                    "schema": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0,
+                        "maximum": 1000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "gte",
+                    "description": "Return all CH4 measurements with an average ppb reading greater than OR equal to the supplied value.",
+                    "schema": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0,
+                        "maximum": 1000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "lte",
+                    "description": "Return all CH4 measurements with an average ppb reading less than OR equal to the supplied value.",
+                    "schema": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0,
+                        "maximum": 1000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "simple",
+                    "description": "If true, a smaller, simplified version of each CH4 measurement will be returned.",
+                    "schema": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "pretty",
+                    "description": "If true, json responses are indented for readability.",
+                    "schema": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                },
+                {   
+                    "$ref": "#/components/parameters/LimitParam"
+                },
+                {
+                    "$ref": "#/components/parameters/OffsetParam"
+                },
+                {
+                    "$ref": "#/components/parameters/PageParam"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Request successful.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/ServerResp"
+                                        }
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/ServerRespSimple"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "400": {
+                    "$ref": "#/components/responses/400"
+                },
+                "404": {
+                    "$ref": "#/components/responses/404"
+                },
+                "default": {
+                    "$ref": "#/components/responses/GenericError"
+                }
+            }
+        }
+    },
+    "/ch4/monthly/trend": {
+        "summary": "Represents monthly CH4 (methane) measurements.",
+        "description": "This resource represents a range of monthly average atmospheric CH4 (methane) measurements taken at Mauna Loa Observatory since 1983.",
+        "get": {
+            "tags": [
+                "ch4Monthly"
+            ],
+            "summary": "Requests monthly CH4 measurements.",
+            "parameters": [
+                {
+                    "in": "query",
+                    "name": "year",
+                    "description": "Return all CH4 measurements for a given year.",
+                    "schema": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 3000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "month",
+                    "description": "Return all CH4 measurements for a given month.",
+                    "schema": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 12
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "gt",
+                    "description": "Return all CH4 measurements with a trend ppb value greater than the supplied value.",
+                    "schema": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0,
+                        "maximum": 1000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "lt",
+                    "description": "Return all CH4 measurements with a trend ppb value less than the supplied value.",
+                    "schema": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0,
+                        "maximum": 1000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "gte",
+                    "description": "Return all CH4 measurements with a trend ppb value greater than OR equal to the supplied value.",
+                    "schema": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0,
+                        "maximum": 1000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "lte",
+                    "description": "Return all CH4 measurements with a trend ppb value less than OR equal to the supplied value.",
+                    "schema": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0,
+                        "maximum": 1000
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "simple",
+                    "description": "If true, a smaller, simplified version of each CH4 measurement will be returned.",
+                    "schema": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                {
+                    "in": "query",
+                    "name": "pretty",
+                    "description": "If true, json responses are indented for readability.",
+                    "schema": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                },
+                {   
+                    "$ref": "#/components/parameters/LimitParam"
+                },
+                {
+                    "$ref": "#/components/parameters/OffsetParam"
+                },
+                {
+                    "$ref": "#/components/parameters/PageParam"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Request successful.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/ServerResp"
+                                        }
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/ServerRespSimple"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "400": {
+                    "$ref": "#/components/responses/400"
+                },
+                "404": {
+                    "$ref": "#/components/responses/404"
+                },
+                "default": {
+                    "$ref": "#/components/responses/GenericError"
                 }
             }
         }

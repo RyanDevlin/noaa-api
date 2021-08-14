@@ -41,7 +41,6 @@ func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.R
 
 	query := database.NewQuery("public.co2_weekly_mlo", []string{"*"}, "year,month,day")
 
-	//filters, internalArgs, err := parseParams(r)
 	filters, internalArgs, err := ParseParams(r)
 	if err != nil {
 		return err
@@ -52,6 +51,53 @@ func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.R
 	}
 
 	query.Where = filters
+
+	co2Table := models.Co2Table{}
+	dberr := handlerConfig.Database.Query(query, &co2Table)
+	if dberr != nil {
+		return utils.NewError(dberr, "failed to connect to database", 500, false)
+	}
+
+	// This prevents the 'Results' part of the response from being omitted if
+	// there are no results.
+	if len(co2Table) == 0 {
+		co2Table = models.Co2Table{
+			nil,
+		}
+	}
+
+	resp := models.ServerResp{
+		Results:   co2Table,
+		Status:    "OK",
+		RequestId: "0",
+		Error:     nil,
+	}
+
+	enc := json.NewEncoder(w)
+	if query.Pretty {
+		enc.SetIndent("", "    ")
+	}
+	if err := enc.Encode(resp); err != nil {
+		return utils.NewError(err, "error encoding data as json", 500, false)
+	}
+	return nil
+}
+
+// GetPpm is an ApiHandlerFunc type. It queries the database for requested co2weekly data with an average ppm of a specified value and returns a JSON representation of the data
+// to the client.
+func GetPpm(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	query := database.NewQuery("public.co2_weekly_mlo", []string{"*"}, "year,month,day")
+
+	_, internalArgs, err := ParseParams(r)
+	if err != nil {
+		return err
+	}
+
+	if len(internalArgs) != 0 {
+		ParseInternalArgs(internalArgs, &query)
+	}
 
 	co2Table := models.Co2Table{}
 	dberr := handlerConfig.Database.Query(query, &co2Table)

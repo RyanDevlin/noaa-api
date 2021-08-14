@@ -135,6 +135,12 @@ func parseParam(filterType string, params []string, urlPath string, sqlFilters *
 		}
 		internalArgs[filterType] = result
 	}
+
+	// Url based parameters are handled here
+	/*if strings.Contains(urlPath, "/v1/ch4/monthly/") {
+		ppb := path.Base(urlPath)
+		query
+	}*/
 	return nil
 }
 
