@@ -31,6 +31,7 @@ import (
 	"apiserver/pkg/utils"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -41,8 +42,7 @@ func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.R
 
 	query := database.NewQuery("public.ch4_mm_gl", []string{"*"}, "year,month")
 
-	//filters, internalArgs, err := parseParams(r)
-	filters, internalArgs, err := ParseParams(r)
+	filters, internalArgs, err := ParseParams(r, handlerConfig.PathParam, handlerConfig.SortBy)
 	if err != nil {
 		return err
 	}
@@ -53,10 +53,12 @@ func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.R
 
 	query.Where = filters
 
+	fmt.Println(query.ToString())
+
 	ch4Table := models.Ch4Table{}
 	dberr := handlerConfig.Database.Query(query, &ch4Table)
 	if dberr != nil {
-		return utils.NewError(dberr, "failed to connect to database", 500, false)
+		return utils.NewError(dberr, "internal database error", 500, false)
 	}
 
 	// This prevents the 'Results' part of the response from being omitted if

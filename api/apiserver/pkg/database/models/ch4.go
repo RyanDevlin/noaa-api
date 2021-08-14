@@ -26,11 +26,12 @@ package models
 
 import (
 	"database/sql"
+	"time"
 )
 
 const (
 	// Ch4PpbMax is the maximum ppb value that may be used in a query for Ch4 data
-	Ch4PpbMax = 1000
+	Ch4PpbMax = 3000
 
 	// Ch4PpbMin is the minimum ppb value that may be used in a query for Ch4 data
 	Ch4PpbMin = 0
@@ -48,6 +49,7 @@ type Ch4Entry struct {
 	AverageUncertainty float32
 	Trend              float32
 	TrendUncertainty   float32
+	Timestamp          time.Time
 }
 
 // Ch4EntrySimple represents the simplified JSON data to be returned from an individual Ch4 measurement in the database.
@@ -62,7 +64,7 @@ type Ch4EntrySimple struct {
 func (ch4Table *Ch4Table) Load(rows *sql.Rows, simple bool) error {
 	if !simple {
 		var ch4entry Ch4Entry
-		if err := rows.Scan(&ch4entry.Year, &ch4entry.Month, &ch4entry.DateDecimal, &ch4entry.Average, &ch4entry.AverageUncertainty, &ch4entry.Trend, &ch4entry.TrendUncertainty); err != nil {
+		if err := rows.Scan(&ch4entry.Year, &ch4entry.Month, &ch4entry.DateDecimal, &ch4entry.Average, &ch4entry.AverageUncertainty, &ch4entry.Trend, &ch4entry.TrendUncertainty, &ch4entry.Timestamp); err != nil {
 			return err
 		}
 		*ch4Table = append(*ch4Table, ch4entry)

@@ -30,7 +30,7 @@ import (
 	"testing"
 )
 
-func TestIncreaseGetAll(t *testing.T) {
+func TestCo2IncreaseGetAll(t *testing.T) {
 	sqlString := regexp.QuoteMeta(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT 10`)
 	query := "/v1/co2/weekly/increase"
 	validDates := []string{"1974-05-19", "1974-05-26", "1984-01-01", "1984-01-08", "2000-01-02", "2000-01-09", "2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
@@ -38,7 +38,7 @@ func TestIncreaseGetAll(t *testing.T) {
 	RunTest(t, t.Name(), nil, sqlString, query, validDates)
 }
 
-func TestIncreaseGetYear(t *testing.T) {
+func TestCo2IncreaseGetYear(t *testing.T) {
 	testVal := 2020
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE year in ('%v') ORDER BY year,month,day LIMIT 10`, testVal))
@@ -48,7 +48,7 @@ func TestIncreaseGetYear(t *testing.T) {
 	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
 }
 
-func TestIncreaseGetMonth(t *testing.T) {
+func TestCo2IncreaseGetMonth(t *testing.T) {
 	testVal := 1
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE month in ('%v') ORDER BY year,month,day LIMIT 10`, testVal))
@@ -58,7 +58,7 @@ func TestIncreaseGetMonth(t *testing.T) {
 	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
 }
 
-func TestIncreaseGetGt(t *testing.T) {
+func TestCo2IncreaseGetGt(t *testing.T) {
 	testVal := 128.89
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 > %v ORDER BY year,month,day LIMIT 10`, testVal))
@@ -68,7 +68,7 @@ func TestIncreaseGetGt(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
 }
 
-func TestIncreaseGetGte(t *testing.T) {
+func TestCo2IncreaseGetGte(t *testing.T) {
 	testVal := 128.89
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 >= %v ORDER BY year,month,day LIMIT 10`, testVal))
@@ -78,7 +78,7 @@ func TestIncreaseGetGte(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
 }
 
-func TestIncreaseGetLt(t *testing.T) {
+func TestCo2IncreaseGetLt(t *testing.T) {
 	testVal := 64.53
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 < %v ORDER BY year,month,day LIMIT 10`, testVal))
@@ -88,7 +88,7 @@ func TestIncreaseGetLt(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
 }
 
-func TestIncreaseGetLte(t *testing.T) {
+func TestCo2IncreaseGetLte(t *testing.T) {
 	testVal := 64.53
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 <= %v ORDER BY year,month,day LIMIT 10`, testVal))
@@ -98,7 +98,7 @@ func TestIncreaseGetLte(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
 }
 
-func TestIncreaseGetLimit(t *testing.T) {
+func TestCo2IncreaseGetLimit(t *testing.T) {
 	testVal := 2
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT %v`, testVal))
@@ -108,7 +108,7 @@ func TestIncreaseGetLimit(t *testing.T) {
 	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
 }
 
-func TestIncreaseGetOffset(t *testing.T) {
+func TestCo2IncreaseGetOffset(t *testing.T) {
 	testVal := 4
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT 10 OFFSET %v`, testVal))
@@ -118,7 +118,7 @@ func TestIncreaseGetOffset(t *testing.T) {
 	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
 }
 
-func TestIncreaseGetPage(t *testing.T) {
+func TestCo2IncreaseGetPage(t *testing.T) {
 	page := 2
 	limit := 2
 
@@ -131,7 +131,7 @@ func TestIncreaseGetPage(t *testing.T) {
 	RunTest(t, t.Name(), offset, sqlString, query, validDates)
 }
 
-func TestIncreaseGetCombo(t *testing.T) {
+func TestCo2IncreaseGetCombo(t *testing.T) {
 	years := []int{1984, 2000}
 	month := 1
 	gt := 64.09
@@ -147,7 +147,7 @@ func TestIncreaseGetCombo(t *testing.T) {
 	RunTest(t, t.Name(), []float32{64.53, 88.88}, sqlString, query, validDates)
 }
 
-func TestIncreaseGetNull(t *testing.T) {
+func TestCo2IncreaseGetNull(t *testing.T) {
 	testVal := 500.00
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 > %.2f ORDER BY year,month,day LIMIT 10`, testVal))
@@ -157,7 +157,7 @@ func TestIncreaseGetNull(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validValues)
 }
 
-func TestIncreaseErrors(t *testing.T) {
+func TestCo2IncreaseErrors(t *testing.T) {
 	testVals := []string{
 		"/v1/co2/weekly/increase?year=2020a",
 		"/v1/co2/weekly/increase?year=20200",

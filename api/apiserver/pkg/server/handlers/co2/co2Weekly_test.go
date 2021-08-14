@@ -30,7 +30,7 @@ import (
 	"testing"
 )
 
-func TestGetAll(t *testing.T) {
+func TestCo2GetAll(t *testing.T) {
 	sqlString := regexp.QuoteMeta(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT 10`)
 	query := "/v1/co2/weekly"
 	validDates := []string{"1974-05-19", "1974-05-26", "1984-01-01", "1984-01-08", "2000-01-02", "2000-01-09", "2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
@@ -38,7 +38,7 @@ func TestGetAll(t *testing.T) {
 	RunTest(t, t.Name(), nil, sqlString, query, validDates)
 }
 
-func TestGetYear(t *testing.T) {
+func TestCo2GetYear(t *testing.T) {
 	testVal := 2020
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE year in ('%v') ORDER BY year,month,day LIMIT 10`, testVal))
@@ -48,7 +48,7 @@ func TestGetYear(t *testing.T) {
 	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
 }
 
-func TestGetMonth(t *testing.T) {
+func TestCo2GetMonth(t *testing.T) {
 	testVal := 1
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE month in ('%v') ORDER BY year,month,day LIMIT 10`, testVal))
@@ -58,7 +58,7 @@ func TestGetMonth(t *testing.T) {
 	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
 }
 
-func TestGetGt(t *testing.T) {
+func TestCo2GetGt(t *testing.T) {
 	testVal := 405.68
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE average > %v ORDER BY year,month,day LIMIT 10`, testVal))
@@ -68,7 +68,7 @@ func TestGetGt(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
 }
 
-func TestGetGte(t *testing.T) {
+func TestCo2GetGte(t *testing.T) {
 	testVal := 405.68
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE average >= %v ORDER BY year,month,day LIMIT 10`, testVal))
@@ -78,7 +78,7 @@ func TestGetGte(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
 }
 
-func TestGetLt(t *testing.T) {
+func TestCo2GetLt(t *testing.T) {
 	testVal := 344.19
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE average < %v ORDER BY year,month,day LIMIT 10`, testVal))
@@ -88,7 +88,7 @@ func TestGetLt(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
 }
 
-func TestGetLte(t *testing.T) {
+func TestCo2GetLte(t *testing.T) {
 	testVal := 344.19
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE average <= %v ORDER BY year,month,day LIMIT 10`, testVal))
@@ -98,7 +98,7 @@ func TestGetLte(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
 }
 
-func TestGetLimit(t *testing.T) {
+func TestCo2GetLimit(t *testing.T) {
 	testVal := 2
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT %v`, testVal))
@@ -108,7 +108,7 @@ func TestGetLimit(t *testing.T) {
 	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
 }
 
-func TestGetOffset(t *testing.T) {
+func TestCo2GetOffset(t *testing.T) {
 	testVal := 4
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT 10 OFFSET %v`, testVal))
@@ -118,7 +118,7 @@ func TestGetOffset(t *testing.T) {
 	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
 }
 
-func TestGetPage(t *testing.T) {
+func TestCo2GetPage(t *testing.T) {
 	page := 2
 	limit := 2
 
@@ -131,7 +131,7 @@ func TestGetPage(t *testing.T) {
 	RunTest(t, t.Name(), offset, sqlString, query, validDates)
 }
 
-func TestGetCombo(t *testing.T) {
+func TestCo2GetCombo(t *testing.T) {
 	years := []int{1984, 2000}
 	month := 1
 	gt := 344.19
@@ -147,7 +147,7 @@ func TestGetCombo(t *testing.T) {
 	RunTest(t, t.Name(), []float32{343.89, 368.89}, sqlString, query, validDates)
 }
 
-func TestGetNull(t *testing.T) {
+func TestCo2GetNull(t *testing.T) {
 	testVal := 500.00
 
 	sqlString := regexp.QuoteMeta(fmt.Sprintf(`SELECT * FROM public.co2_weekly_mlo WHERE increase_since_1800 > %.2f ORDER BY year,month,day LIMIT 10`, testVal))
@@ -157,7 +157,7 @@ func TestGetNull(t *testing.T) {
 	RunTest(t, t.Name(), float32(testVal), sqlString, query, validValues)
 }
 
-func TestErrors(t *testing.T) {
+func TestCo2Errors(t *testing.T) {
 	testVals := []string{
 		"/v1/co2/weekly?year=2020a",
 		"/v1/co2/weekly?year=20200",

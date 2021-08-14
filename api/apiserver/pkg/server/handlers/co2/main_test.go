@@ -140,10 +140,10 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *sqlmock.Rows, data []test.MockCo2Row) error {
 	for i, v := range data {
 		switch testName {
-		case "TestGetAll", "TestIncreaseGetAll":
+		case "TestCo2GetAll", "TestCo2IncreaseGetAll":
 			// Add all entries to mock database response
 			rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-		case "TestGetYear", "TestIncreaseGetYear":
+		case "TestCo2GetYear", "TestCo2IncreaseGetYear":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
@@ -152,7 +152,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 			if v.Year == testVal.(int) {
 				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 			}
-		case "TestGetMonth", "TestIncreaseGetMonth":
+		case "TestCo2GetMonth", "TestCo2IncreaseGetMonth":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
@@ -161,7 +161,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 			if v.Month == testVal.(int) {
 				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 			}
-		case "TestGetGt", "TestIncreaseGetGt":
+		case "TestCo2GetGt", "TestCo2IncreaseGetGt":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
@@ -176,7 +176,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 				}
 			}
-		case "TestGetGte", "TestIncreaseGetGte":
+		case "TestCo2GetGte", "TestCo2IncreaseGetGte":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
@@ -191,7 +191,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 				}
 			}
-		case "TestGetLt", "TestIncreaseGetLt":
+		case "TestCo2GetLt", "TestCo2IncreaseGetLt":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
@@ -206,7 +206,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 				}
 			}
-		case "TestGetLte", "TestIncreaseGetLte":
+		case "TestCo2GetLte", "TestCo2IncreaseGetLte":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
@@ -221,7 +221,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 				}
 			}
-		case "TestGetLimit", "TestIncreaseGetLimit":
+		case "TestCo2GetLimit", "TestCo2IncreaseGetLimit":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
@@ -230,7 +230,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 			if i < testVal.(int) {
 				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 			}
-		case "TestGetOffset", "TestIncreaseGetOffset":
+		case "TestCo2GetOffset", "TestCo2IncreaseGetOffset":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
@@ -239,7 +239,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 			if i+1 > testVal.(int) {
 				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 			}
-		case "TestGetPage", "TestIncreaseGetPage":
+		case "TestCo2GetPage", "TestCo2IncreaseGetPage":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
@@ -248,7 +248,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 			if i+1 > testVal.(int) && i+1 < 5 {
 				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 			}
-		case "TestGetCombo", "TestIncreaseGetCombo":
+		case "TestCo2GetCombo", "TestCo2IncreaseGetCombo":
 			if _, ok := testVal.([]float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type []float32.", testVal, testName)
 			}
@@ -263,7 +263,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 				}
 			}
-		case "TestGetNull", "TestIncreaseGetNull":
+		case "TestCo2GetNull", "TestCo2IncreaseGetNull":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
@@ -278,7 +278,7 @@ func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *s
 					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
 				}
 			}
-		case "TestErrors", "TestIncreaseErrors":
+		case "TestCo2Errors", "TestCo2IncreaseErrors":
 			if testVal != nil {
 				return fmt.Errorf("Test value '%v' for test '%v' is not nil.", testVal, testName)
 			}

@@ -30,19 +30,37 @@ import (
 	"apiserver/pkg/utils"
 	"fmt"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 )
 
 // parseParams returns a list of SQL WHERE directives and a map of internal arguments
-// to the server, derived from http.Request parameters.
-func ParseParams(r *http.Request) ([]string, map[string]interface{}, *utils.ServerError) {
+// to the server, derived from http.Request parameters. The urlParams tells the function if
+// the parameters should be derived mainly from the query params (eg. '/v1/co2/weekly?year=2020&gte=417')
+// or the url path (eg. '/v1/ch4/monthly/317.22?simple=true'). This is needed because when specifying
+// a specific resource in the url path, filters like gt,gte,lt,lte, etc. are not needed as only one
+// resource is returned.
+func ParseParams(r *http.Request, pathParam bool, sortBy string) ([]string, map[string]interface{}, *utils.ServerError) {
 	params := utils.ParseQuery(r)
 	var sqlFilters []string
 	internalArgs := make(map[string]interface{})
+	var err error
+
+	if pathParam {
+		err = parsePathParams(r.URL.Path, sortBy, &sqlFilters)
+		if err != nil {
+			message := err.Error() + ": " + path.Dir(r.URL.Path) + "=[" + path.Base(r.URL.Path) + "]"
+			return nil, nil, utils.NewError(fmt.Errorf("error when parsing path parameter"), message, 400, false)
+		}
+	}
 
 	for key, val := range params {
-		err := parseParam(key, val, r.URL.Path, &sqlFilters, internalArgs)
+		if pathParam {
+			err = parseSingleResource(key, val, sortBy, &sqlFilters, internalArgs)
+		} else {
+			err = parseParam(key, val, sortBy, &sqlFilters, internalArgs)
+		}
 		if err != nil {
 			message := err.Error() + ": " + key + "=[" + strings.Join(val, ",") + "]"
 			return nil, nil, utils.NewError(fmt.Errorf("error when parsing query parameters"), message, 400, false)
@@ -54,7 +72,7 @@ func ParseParams(r *http.Request) ([]string, map[string]interface{}, *utils.Serv
 // parseParam appends a single boolean expression to the sqlFilters list. This list of expressions is later passed
 // directly to the WHERE clause of an SQL query. parseParam also will add specific arguments to the internalArgs map
 // to be later used by the server.
-func parseParam(filterType string, params []string, urlPath string, sqlFilters *[]string, internalArgs map[string]interface{}) error {
+func parseParam(filterType string, params []string, sortBy string, sqlFilters *[]string, internalArgs map[string]interface{}) error {
 
 	switch filterType {
 	case "year", "month":
@@ -68,7 +86,7 @@ func parseParam(filterType string, params []string, urlPath string, sqlFilters *
 		if err != nil {
 			return err
 		}
-		result, err := ppbParse(ppb, urlPath, ">")
+		result, err := ppbParse(ppb, sortBy, ">")
 		if err != nil {
 			return err
 		}
@@ -78,7 +96,7 @@ func parseParam(filterType string, params []string, urlPath string, sqlFilters *
 		if err != nil {
 			return err
 		}
-		result, err := ppbParse(ppb, urlPath, "<")
+		result, err := ppbParse(ppb, sortBy, "<")
 		if err != nil {
 			return err
 		}
@@ -88,7 +106,7 @@ func parseParam(filterType string, params []string, urlPath string, sqlFilters *
 		if err != nil {
 			return err
 		}
-		result, err := ppbParse(ppb, urlPath, ">=")
+		result, err := ppbParse(ppb, sortBy, ">=")
 		if err != nil {
 			return err
 		}
@@ -98,7 +116,7 @@ func parseParam(filterType string, params []string, urlPath string, sqlFilters *
 		if err != nil {
 			return err
 		}
-		result, err := ppbParse(ppb, urlPath, "<=")
+		result, err := ppbParse(ppb, sortBy, "<=")
 		if err != nil {
 			return err
 		}
@@ -135,6 +153,69 @@ func parseParam(filterType string, params []string, urlPath string, sqlFilters *
 		}
 		internalArgs[filterType] = result
 	}
+
+	return nil
+}
+
+// parseSingleResource appends a single boolean expression to the sqlFilters list. This list of expressions is later passed
+// directly to the WHERE clause of an SQL query. parseParam also will add specific arguments to the internalArgs map
+// to be later used by the server.
+func parseSingleResource(filterType string, params []string, urlPath string, sqlFilters *[]string, internalArgs map[string]interface{}) error {
+
+	switch filterType {
+	case "simple":
+		result, err := validateBool(params)
+		if err != nil {
+			return err
+		}
+		internalArgs[filterType] = result
+	case "limit":
+		result, err := validateInt(params, 0, 10000)
+		if err != nil {
+			return err
+		}
+		internalArgs[filterType] = result
+	case "offset":
+		result, err := validateInt(params, 0, 10000)
+		if err != nil {
+			return err
+		}
+		internalArgs[filterType] = result
+	case "page":
+		result, err := validateInt(params, 1, 10000)
+		result-- // validateInt ensures result > 0. This is done so page # '1' is indexed as '0'.
+		if err != nil {
+			return err
+		}
+		internalArgs[filterType] = result
+	case "pretty":
+		result, err := validateBool(params)
+		if err != nil {
+			return err
+		}
+		internalArgs[filterType] = result
+	}
+
+	return nil
+}
+
+func parsePathParams(urlPath string, sortBy string, sqlFilters *[]string) error {
+	val := path.Base(urlPath)
+
+	switch sortBy {
+	case "average", "trend":
+		_, err := validatePpb(val)
+		if err != nil {
+			return err
+		}
+		result, err := ppbParse(val, sortBy, "=")
+		if err != nil {
+			return err
+		}
+		*sqlFilters = append(*sqlFilters, result)
+	default:
+		return fmt.Errorf("cannot sort database results by '%v'. Unknown column", sortBy)
+	}
 	return nil
 }
 
@@ -157,14 +238,14 @@ func dateParse(params []string, section string) (string, error) {
 	return result, nil
 }
 
-func ppbParse(ppb string, urlPath string, comparison string) (string, error) {
-	switch urlPath {
-	case "/v1/ch4/monthly":
+func ppbParse(ppb string, sortBy string, comparison string) (string, error) {
+	switch sortBy {
+	case "average":
 		return "average " + comparison + " " + ppb, nil
-	case "/v1/ch4/monthly/trend":
+	case "trend":
 		return "trend " + comparison + " " + ppb, nil
 	default:
-		return "", fmt.Errorf("the path '%v' is not known", urlPath)
+		return "", fmt.Errorf("cannot sort results by '%v'. '%v' is not a column in the database", sortBy, sortBy)
 	}
 }
 
@@ -241,10 +322,9 @@ func getPPB(array []string, max bool) (string, error) {
 
 // validatePpb validates a ppb parameter against the current API spec.
 func validatePpb(ppbStr string) (float64, error) {
-
 	ppb, err := strconv.ParseFloat(ppbStr, 32)
 	if err != nil {
-		return 0, fmt.Errorf("malformed query parameters, ppb value should be a decimal number")
+		return 0, fmt.Errorf("malformed query parameters, ppm value should be a decimal number")
 	}
 	if !(ppb <= models.Ch4PpbMax && ppb >= models.Ch4PpbMin) {
 		return 0, fmt.Errorf("malformed query parameters, ppb query range is %v to %v", models.Ch4PpbMin, models.Ch4PpbMax)

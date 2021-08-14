@@ -43,7 +43,9 @@ type ApiHandler struct {
 // ApiHandlerConfig represents configuration parameters to be passed to an ApiHandlerFunc.
 // It is a struct to allow for future extensions.
 type ApiHandlerConfig struct {
-	Database *database.Database
+	Database  *database.Database
+	PathParam bool
+	SortBy    string
 }
 
 // ApiHandlerFunc represents an http handler used to serve data at a specific URL path.
