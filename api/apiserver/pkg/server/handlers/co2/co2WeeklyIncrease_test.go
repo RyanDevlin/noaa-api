@@ -25,17 +25,22 @@ Contact: planetpulse.api@gmail.com
 package co2
 
 import (
+	"apiserver/pkg/server/handlers"
 	"fmt"
 	"regexp"
 	"testing"
 )
+
+var handlerConfigIncrease = &handlers.ApiHandlerConfig{
+	SortBy: "increase",
+}
 
 func TestCo2IncreaseGetAll(t *testing.T) {
 	sqlString := regexp.QuoteMeta(`SELECT * FROM public.co2_weekly_mlo ORDER BY year,month,day LIMIT 10`)
 	query := "/v1/co2/weekly/increase"
 	validDates := []string{"1974-05-19", "1974-05-26", "1984-01-01", "1984-01-08", "2000-01-02", "2000-01-09", "2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
 
-	RunTest(t, t.Name(), nil, sqlString, query, validDates)
+	RunTest(t, t.Name(), nil, sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetYear(t *testing.T) {
@@ -45,7 +50,7 @@ func TestCo2IncreaseGetYear(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?year=%v", testVal)
 	validDates := []string{"2020-02-02", "2020-05-24"}
 
-	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
+	RunTest(t, t.Name(), testVal, sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetMonth(t *testing.T) {
@@ -55,7 +60,7 @@ func TestCo2IncreaseGetMonth(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?month=%v", testVal)
 	validDates := []string{"1984-01-01", "1984-01-08", "2000-01-02", "2000-01-09"}
 
-	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
+	RunTest(t, t.Name(), testVal, sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetGt(t *testing.T) {
@@ -65,7 +70,7 @@ func TestCo2IncreaseGetGt(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?gt=%v", testVal)
 	validDates := []string{"2018-10-07", "2020-02-02", "2020-05-24"}
 
-	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
+	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetGte(t *testing.T) {
@@ -75,7 +80,7 @@ func TestCo2IncreaseGetGte(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?gte=%v", testVal)
 	validDates := []string{"2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
 
-	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
+	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetLt(t *testing.T) {
@@ -85,7 +90,7 @@ func TestCo2IncreaseGetLt(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?lt=%v", testVal)
 	validDates := []string{"1974-05-19", "1974-05-26", "1984-01-08"}
 
-	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
+	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetLte(t *testing.T) {
@@ -95,7 +100,7 @@ func TestCo2IncreaseGetLte(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?lte=%v", testVal)
 	validDates := []string{"1974-05-19", "1974-05-26", "1984-01-01", "1984-01-08"}
 
-	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates)
+	RunTest(t, t.Name(), float32(testVal), sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetLimit(t *testing.T) {
@@ -105,7 +110,7 @@ func TestCo2IncreaseGetLimit(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?limit=%v", testVal)
 	validDates := []string{"1974-05-19", "1974-05-26"}
 
-	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
+	RunTest(t, t.Name(), testVal, sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetOffset(t *testing.T) {
@@ -115,7 +120,7 @@ func TestCo2IncreaseGetOffset(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?offset=%v", testVal)
 	validDates := []string{"2000-01-02", "2000-01-09", "2018-09-02", "2018-10-07", "2020-02-02", "2020-05-24"}
 
-	RunTest(t, t.Name(), testVal, sqlString, query, validDates)
+	RunTest(t, t.Name(), testVal, sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetPage(t *testing.T) {
@@ -128,7 +133,7 @@ func TestCo2IncreaseGetPage(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?limit=%v&page=%v", limit, page)
 	validDates := []string{"1984-01-01", "1984-01-08"}
 
-	RunTest(t, t.Name(), offset, sqlString, query, validDates)
+	RunTest(t, t.Name(), offset, sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetCombo(t *testing.T) {
@@ -144,7 +149,7 @@ func TestCo2IncreaseGetCombo(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?year=%v,%v&month=%v&gt=%v&gte=%v&lt=%v&lte=%v", years[0], years[1], month, gt, gte, lt, lte)
 	validDates := []string{"1984-01-01", "2000-01-09"}
 
-	RunTest(t, t.Name(), []float32{64.53, 88.88}, sqlString, query, validDates)
+	RunTest(t, t.Name(), []float32{64.53, 88.88}, sqlString, query, validDates, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseGetNull(t *testing.T) {
@@ -154,7 +159,7 @@ func TestCo2IncreaseGetNull(t *testing.T) {
 	query := fmt.Sprintf("/v1/co2/weekly/increase?gt=%v", testVal)
 	validValues := []string{}
 
-	RunTest(t, t.Name(), float32(testVal), sqlString, query, validValues)
+	RunTest(t, t.Name(), float32(testVal), sqlString, query, validValues, handlerConfigIncrease)
 }
 
 func TestCo2IncreaseErrors(t *testing.T) {
@@ -176,6 +181,6 @@ func TestCo2IncreaseErrors(t *testing.T) {
 
 	for _, v := range testVals {
 		query := fmt.Sprintf("%v", v)
-		RunTest(t, t.Name(), nil, sqlString, query, validValues)
+		RunTest(t, t.Name(), nil, sqlString, query, validValues, handlerConfigIncrease)
 	}
 }

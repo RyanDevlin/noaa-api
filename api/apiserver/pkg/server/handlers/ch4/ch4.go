@@ -31,7 +31,6 @@ import (
 	"apiserver/pkg/utils"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -52,8 +51,6 @@ func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.R
 	}
 
 	query.Where = filters
-
-	fmt.Println(query.ToString())
 
 	ch4Table := models.Ch4Table{}
 	dberr := handlerConfig.Database.Query(query, &ch4Table)

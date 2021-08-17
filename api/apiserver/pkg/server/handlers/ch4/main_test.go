@@ -30,6 +30,7 @@ import (
 	"apiserver/pkg/server/handlers"
 	"apiserver/test"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -41,6 +42,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
@@ -55,8 +57,8 @@ func TestMain(m *testing.M) {
 
 /* HELPER FUNCTIONS */
 
-func RunTest(t *testing.T, testName string, testVal interface{}, sqlString string, query string, validValues []string) {
-	db, mock, rows, data, err := test.NewMockCo2Db()
+func RunTest(t *testing.T, testName string, testVal interface{}, sqlString string, query string, validValues []string, config *handlers.ApiHandlerConfig) {
+	db, mock, rows, data, err := newMockDb()
 	if err != nil {
 		t.Errorf("error generating mock database: %s", err.Error())
 		return
@@ -77,21 +79,19 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 	req := httptest.NewRequest("GET", query, nil)
 	w := httptest.NewRecorder()
 
-	config := &handlers.ApiHandlerConfig{
-		Database: &database.Database{
-			DB: db,
-		},
-	}
-
 	t.Logf("Attempting request: %s %s",
 		req.Method,
 		req.RequestURI,
 	)
 
+	config.Database = &database.Database{
+		DB: db,
+	}
+
 	// Execute method under test
 	if err := Get(ctx, config, w, req); err != nil {
 		// Because the Get function returned an error, we must use HttpJsonError to write to the ResponseRecorder before checking the result.
-		// Normally Get() writes to the buffer, but when encountering an error it won't have a chance to.
+		// Normally Get() writes to the io buffer, but when encountering an error it won't have a chance to.
 		test.HttpJsonError(w, err)
 		resp := w.Result()
 
@@ -137,148 +137,148 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 	}
 }
 
-func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *sqlmock.Rows, data []test.MockCo2Row) error {
+func configureDbRows(t *testing.T, testName string, testVal interface{}, rows *sqlmock.Rows, data []mockCh4Row) error {
 	for i, v := range data {
 		switch testName {
-		case "TestGetAll", "TestIncreaseGetAll":
+		case "TestCh4GetAll", "TestCh4TrendGetAll":
 			// Add all entries to mock database response
-			rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
-		case "TestGetYear", "TestIncreaseGetYear":
+			rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
+		case "TestCh4GetYear", "TestCh4TrendGetYear":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
 			if v.Year == testVal.(int) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+				rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 			}
-		case "TestGetMonth", "TestIncreaseGetMonth":
+		case "TestCh4GetMonth", "TestCh4TrendGetMonth":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
 			if v.Month == testVal.(int) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+				rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 			}
-		case "TestGetGt", "TestIncreaseGetGt":
+		case "TestCh4GetGt", "TestCh4TrendGetGt":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
-			if strings.Contains(testName, "Increase") {
-				if v.Increase_since_1800 > testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			if strings.Contains(testName, "Trend") {
+				if v.Trend > testVal.(float32) {
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			} else {
 				if v.Average > testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			}
-		case "TestGetGte", "TestIncreaseGetGte":
+		case "TestCh4GetGte", "TestCh4TrendGetGte":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
-			if strings.Contains(testName, "Increase") {
-				if v.Increase_since_1800 >= testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			if strings.Contains(testName, "Trend") {
+				if v.Trend >= testVal.(float32) {
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			} else {
 				if v.Average >= testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			}
-		case "TestGetLt", "TestIncreaseGetLt":
+		case "TestCh4GetLt", "TestCh4TrendGetLt":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
-			if strings.Contains(testName, "Increase") {
-				if v.Increase_since_1800 < testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			if strings.Contains(testName, "Trend") {
+				if v.Trend < testVal.(float32) {
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			} else {
 				if v.Average < testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			}
-		case "TestGetLte", "TestIncreaseGetLte":
+		case "TestCh4GetLte", "TestCh4TrendGetLte":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
-			if strings.Contains(testName, "Increase") {
-				if v.Increase_since_1800 <= testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			if strings.Contains(testName, "Trend") {
+				if v.Trend <= testVal.(float32) {
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			} else {
 				if v.Average <= testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			}
-		case "TestGetLimit", "TestIncreaseGetLimit":
+		case "TestCh4GetLimit", "TestCh4TrendGetLimit":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
 			if i < testVal.(int) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+				rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 			}
-		case "TestGetOffset", "TestIncreaseGetOffset":
+		case "TestCh4GetOffset", "TestCh4TrendGetOffset":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
 			if i+1 > testVal.(int) {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+				rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 			}
-		case "TestGetPage", "TestIncreaseGetPage":
+		case "TestCh4GetPage", "TestCh4TrendGetPage":
 			if _, ok := testVal.(int); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type int.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
 			if i+1 > testVal.(int) && i+1 < 5 {
-				rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+				rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 			}
-		case "TestGetCombo", "TestIncreaseGetCombo":
+		case "TestCh4GetCombo", "TestCh4TrendGetCombo":
 			if _, ok := testVal.([]float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type []float32.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
-			if strings.Contains(testName, "Increase") {
-				if v.Increase_since_1800 == testVal.([]float32)[0] || v.Increase_since_1800 == testVal.([]float32)[1] {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			if strings.Contains(testName, "Trend") {
+				if fmt.Sprintf("%.2f", v.Trend) == fmt.Sprintf("%.2f", testVal.([]float32)[0]) || fmt.Sprintf("%.2f", v.Trend) == fmt.Sprintf("%.2f", testVal.([]float32)[1]) {
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			} else {
-				if v.Average == testVal.([]float32)[0] || v.Average == testVal.([]float32)[1] {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+				if fmt.Sprintf("%.2f", v.Average) == fmt.Sprintf("%.2f", testVal.([]float32)[0]) || fmt.Sprintf("%.2f", v.Average) == fmt.Sprintf("%.2f", testVal.([]float32)[1]) {
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			}
-		case "TestGetNull", "TestIncreaseGetNull":
+		case "TestCh4GetNull", "TestCh4TrendGetNull":
 			if _, ok := testVal.(float32); !ok {
 				return fmt.Errorf("Test value '%v' for test '%v' is not of type float32.", testVal, testName)
 			}
 
 			// Add desired entries to mock database response
-			if strings.Contains(testName, "Increase") {
-				if v.Increase_since_1800 > testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+			if strings.Contains(testName, "Trend") {
+				if v.Trend < testVal.(float32) {
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			} else {
-				if v.Average > testVal.(float32) {
-					rows.AddRow(v.Year, v.Month, v.Day, v.Date_decimal, v.Average, v.Ndays, v.One_year_ago, v.Ten_years_ago, v.Increase_since_1800, v.YYYYMMDD)
+				if v.Average < testVal.(float32) {
+					rows.AddRow(v.Year, v.Month, v.DateDecimal, v.Average, v.AverageUncertainty, v.Trend, v.TrendUncertainty, v.Timestamp)
 				}
 			}
-		case "TestErrors", "TestIncreaseErrors":
+		case "TestCh4Errors", "TestCh4TrendErrors":
 			if testVal != nil {
 				return fmt.Errorf("Test value '%v' for test '%v' is not nil.", testVal, testName)
 			}
@@ -299,11 +299,12 @@ func validateResponse(t *testing.T, body []byte, validDates []string) {
 			return
 		}
 		t.Error("Incorrect number of values returned from query.")
+		t.Errorf("Expected '%v' values, instead got '%v' values.", len(validDates), len(results.Results))
 		return
 	}
 
 	for i, val := range results.Results {
-		y, m, d, err := parseDate(validDates[i])
+		dateDecimal, err := strconv.ParseFloat(validDates[i], 32)
 		if err != nil {
 			t.Error(err)
 		}
@@ -312,47 +313,19 @@ func validateResponse(t *testing.T, body []byte, validDates []string) {
 		for k, v := range result {
 			switch entry := v.(type) {
 			case float64:
-				if k == "Year" && entry != float64(y) {
-					t.Errorf("Entry with year: '%v' was not present in JSON response or appeared in an incorrect order.", y)
-					t.Errorf("Wanted: '%v', Got: '%v'.", y, entry)
-				}
-				if k == "Month" && entry != float64(m) {
-					t.Errorf("Entry with month: '%v' was not present in JSON response or appeared in an incorrect order.", m)
-					t.Errorf("Wanted: '%v', Got: '%v'.", m, entry)
-				}
-				if k == "Day" && entry != float64(d) {
-					t.Errorf("Entry with day: '%v' was not present in JSON response or appeared in an incorrect order.", d)
-					t.Errorf("Wanted: '%v', Got: '%v'.", d, entry)
+				if k == "DateDecimal" && fmt.Sprintf("%.2f", entry) != fmt.Sprintf("%.2f", dateDecimal) {
+					t.Errorf("Entry date with decimal representation '%v' was not present in JSON response or appeared in an incorrect order.", dateDecimal)
+					t.Errorf("Wanted: '%v', Got: '%v'.", dateDecimal, entry)
 				}
 			}
 		}
 	}
 }
 
-func parseDate(date string) (year int, month int, day int, err error) {
-	ymd := strings.Split(date, "-")
-	if len(ymd) != 3 {
-		return -1, -1, -1, fmt.Errorf("Improper format for date '%v'. Should be yyyy-mm-dd.", ymd)
-	}
-
-	year, err = strconv.Atoi(ymd[0])
-	if err != nil {
-		return -1, -1, -1, err
-	}
-	month, err = strconv.Atoi(ymd[1])
-	if err != nil {
-		return -1, -1, -1, err
-	}
-	day, err = strconv.Atoi(ymd[2])
-	if err != nil {
-		return -1, -1, -1, err
-	}
-	return year, month, day, nil
-}
-
 func validateErrorResponse(t *testing.T, r *http.Response, expectedCode []string) {
 	if len(expectedCode) != 1 {
 		t.Errorf("Exactly one http status code required for error validation. Got: %v", expectedCode)
+		t.Errorf("Should this test case return a database error?")
 		return
 	}
 
@@ -372,4 +345,117 @@ func validateErrorResponse(t *testing.T, r *http.Response, expectedCode []string
 		return
 	}
 	t.Logf("Response code '%v: %v'. This is correct.", val, http.StatusText(val))
+}
+
+type mockCh4Row struct {
+	Year               int
+	Month              int
+	DateDecimal        float32
+	Average            float32
+	AverageUncertainty float32
+	Trend              float32
+	TrendUncertainty   float32
+	Timestamp          time.Time
+}
+
+// newMockDb returns an sqlmock database to be used for unit tests.
+func newMockDb() (*sql.DB, sqlmock.Sqlmock, *sqlmock.Rows, []mockCh4Row, error) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	columns := []string{"year", "month", "date_decimal", "average", "average_unc", "trend", "trend_unc", "YYYYMMDD"}
+
+	rows := sqlmock.NewRows(columns)
+
+	data := GetMockCh4Rows()
+
+	return db, mock, rows, data, nil
+}
+
+// GetMockCh4Rows returns a list hardcoded Ch4 measurement data used to mock the database.
+func GetMockCh4Rows() []mockCh4Row {
+	return []mockCh4Row{
+		{
+			Year:               1983,
+			Month:              7,
+			DateDecimal:        1983.542,
+			Average:            1625.4,
+			AverageUncertainty: 2.4,
+			Trend:              1634.5,
+			TrendUncertainty:   1.5,
+			Timestamp:          time.Date(1983, time.Month(7), 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			Year:               1983,
+			Month:              8,
+			DateDecimal:        1983.625,
+			Average:            1627.5,
+			AverageUncertainty: 2.9,
+			Trend:              1635.1,
+			TrendUncertainty:   1.4,
+			Timestamp:          time.Date(1983, time.Month(8), 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			Year:               1990,
+			Month:              1,
+			DateDecimal:        1990.042,
+			Average:            1712.1,
+			AverageUncertainty: 1.2,
+			Trend:              1710.4,
+			TrendUncertainty:   0.6,
+			Timestamp:          time.Date(1990, time.Month(1), 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			Year:               1990,
+			Month:              2,
+			DateDecimal:        1990.125,
+			Average:            1713.5,
+			AverageUncertainty: 1.3,
+			Trend:              1711.1,
+			TrendUncertainty:   0.6,
+			Timestamp:          time.Date(1990, time.Month(2), 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			Year:               2000,
+			Month:              1,
+			DateDecimal:        2000.042,
+			Average:            1776.1,
+			AverageUncertainty: 1.1,
+			Trend:              1773.5,
+			TrendUncertainty:   0.7,
+			Timestamp:          time.Date(2000, time.Month(1), 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			Year:               2000,
+			Month:              2,
+			DateDecimal:        2000.125,
+			Average:            1776,
+			AverageUncertainty: 1.4,
+			Trend:              1773.4,
+			TrendUncertainty:   0.7,
+			Timestamp:          time.Date(2000, time.Month(2), 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			Year:               2020,
+			Month:              10,
+			DateDecimal:        2020.792,
+			Average:            1890.1,
+			AverageUncertainty: -9.9,
+			Trend:              1883.9,
+			TrendUncertainty:   -9.9,
+			Timestamp:          time.Date(1983, time.Month(10), 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			Year:               2020,
+			Month:              11,
+			DateDecimal:        2020.875,
+			Average:            1891.7,
+			AverageUncertainty: -9.9,
+			Trend:              1885,
+			TrendUncertainty:   -9.9,
+			Timestamp:          time.Date(1983, time.Month(11), 1, 0, 0, 0, 0, time.UTC),
+		},
+	}
 }
