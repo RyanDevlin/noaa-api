@@ -9,7 +9,13 @@ data_files = [
         ]
     ),
     (
-        'intake/jars/co2_weekly_mlo',
+        'intake/sources/ch4_mm_gl',
+        [
+            'intake/sources/ch4_mm_gl/ch4_mm_gl_config.yml'
+        ]
+    ),
+    (
+        'intake/jars',
         [
             'intake/jars/postgresql-42.2.23.jar'
         ]

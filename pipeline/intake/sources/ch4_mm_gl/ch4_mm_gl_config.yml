@@ -1,0 +1,10 @@
+source: https://gml.noaa.gov/aftp/products/trends/ch4/ch4_mm_gl.txt
+header_keys: 
+  year: int
+  month: int
+  decimal: float
+  average: float
+  average_unc: float
+  trend: float
+  trend_unc: float
+ignore_symbol: '#'
