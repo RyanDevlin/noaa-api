@@ -22,7 +22,7 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package co2
+package ch4
 
 import (
 	"apiserver/pkg/database"
@@ -34,12 +34,12 @@ import (
 	"net/http"
 )
 
-// Get is an ApiHandlerFunc type. It queries the database for requested co2weekly data and returns a JSON representation of the data
+// Get is an ApiHandlerFunc type. It queries the database for requested ch4weekly data and returns a JSON representation of the data
 // to the client.
 func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	query := database.NewQuery("public.co2_weekly_mlo", []string{"*"}, "year,month,day")
+	query := database.NewQuery("public.ch4_mm_gl", []string{"*"}, "year,month")
 
 	filters, internalArgs, err := ParseParams(r, handlerConfig.PathParam, handlerConfig.SortBy)
 	if err != nil {
@@ -52,22 +52,22 @@ func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.R
 
 	query.Where = filters
 
-	co2Table := models.Co2Table{}
-	dberr := handlerConfig.Database.Query(query, &co2Table)
+	ch4Table := models.Ch4Table{}
+	dberr := handlerConfig.Database.Query(query, &ch4Table)
 	if dberr != nil {
 		return utils.NewError(dberr, "internal database error", 500, false)
 	}
 
 	// This prevents the 'Results' part of the response from being omitted if
 	// there are no results.
-	if len(co2Table) == 0 {
-		co2Table = models.Co2Table{
+	if len(ch4Table) == 0 {
+		ch4Table = models.Ch4Table{
 			nil,
 		}
 	}
 
 	resp := models.ServerResp{
-		Results:   co2Table,
+		Results:   ch4Table,
 		Status:    "OK",
 		RequestId: "0",
 		Error:     nil,

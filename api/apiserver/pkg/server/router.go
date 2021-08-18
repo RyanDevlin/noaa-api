@@ -26,6 +26,7 @@ package server
 
 import (
 	"apiserver/pkg/server/handlers"
+	"apiserver/pkg/server/handlers/ch4"
 	"apiserver/pkg/server/handlers/co2"
 	utils "apiserver/pkg/utils"
 	"context"
@@ -94,9 +95,10 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 			strings.ToUpper("Get"),
 			"/v1",
 			handlers.ApiHandler{
-				Handler: handlers.GetIndex,
+				Handler: co2.Get,
 				Config: &handlers.ApiHandlerConfig{
 					Database: apiserver.Database,
+					SortBy:   "average",
 				},
 			},
 		},
@@ -109,6 +111,7 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 				Handler: co2.Get,
 				Config: &handlers.ApiHandlerConfig{
 					Database: apiserver.Database,
+					SortBy:   "average",
 				},
 			},
 		},
@@ -121,6 +124,7 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 				Handler: co2.Get,
 				Config: &handlers.ApiHandlerConfig{
 					Database: apiserver.Database,
+					SortBy:   "average",
 				},
 			},
 		},
@@ -132,6 +136,56 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 				Handler: co2.Get,
 				Config: &handlers.ApiHandlerConfig{
 					Database: apiserver.Database,
+					SortBy:   "increase",
+				},
+			},
+		},
+		Route{
+			"co2Weekly",
+			strings.ToUpper("Get"),
+			"/v1/co2/weekly/{ppm}",
+			handlers.ApiHandler{
+				Handler: co2.Get,
+				Config: &handlers.ApiHandlerConfig{
+					Database:  apiserver.Database,
+					PathParam: true,
+					SortBy:    "average",
+				},
+			},
+		},
+		Route{
+			"ch4Monthly",
+			strings.ToUpper("Get"),
+			"/v1/ch4",
+			handlers.ApiHandler{
+				Handler: ch4.Get,
+				Config: &handlers.ApiHandlerConfig{
+					Database: apiserver.Database,
+					SortBy:   "average",
+				},
+			},
+		},
+		Route{
+			"ch4Monthly",
+			strings.ToUpper("Get"),
+			"/v1/ch4/monthly",
+			handlers.ApiHandler{
+				Handler: ch4.Get,
+				Config: &handlers.ApiHandlerConfig{
+					Database: apiserver.Database,
+					SortBy:   "average",
+				},
+			},
+		},
+		Route{
+			"ch4MonthlyTrend",
+			strings.ToUpper("Get"),
+			"/v1/ch4/monthly/trend",
+			handlers.ApiHandler{
+				Handler: ch4.Get,
+				Config: &handlers.ApiHandlerConfig{
+					Database: apiserver.Database,
+					SortBy:   "trend",
 				},
 			},
 		},

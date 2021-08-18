@@ -22,7 +22,7 @@ API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
-package co2
+package ch4
 
 import (
 	"apiserver/pkg/database"
@@ -38,7 +38,7 @@ import (
 // parseParams returns a list of SQL WHERE directives and a map of internal arguments
 // to the server, derived from http.Request parameters. The urlParams tells the function if
 // the parameters should be derived mainly from the query params (eg. '/v1/co2/weekly?year=2020&gte=417')
-// or the url path (eg. '/v1/co2/weekly/317.22?simple=true'). This is needed because when specifying
+// or the url path (eg. '/v1/ch4/monthly/317.22?simple=true'). This is needed because when specifying
 // a specific resource in the url path, filters like gt,gte,lt,lte, etc. are not needed as only one
 // resource is returned.
 func ParseParams(r *http.Request, pathParam bool, sortBy string) ([]string, map[string]interface{}, *utils.ServerError) {
@@ -82,41 +82,41 @@ func parseParam(filterType string, params []string, sortBy string, sqlFilters *[
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "gt":
-		ppm, err := getPPM(params, true)
+		ppb, err := getPPB(params, true)
 		if err != nil {
 			return err
 		}
-		result, err := ppmParse(ppm, sortBy, ">")
+		result, err := ppbParse(ppb, sortBy, ">")
 		if err != nil {
 			return err
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "lt":
-		ppm, err := getPPM(params, false)
+		ppb, err := getPPB(params, false)
 		if err != nil {
 			return err
 		}
-		result, err := ppmParse(ppm, sortBy, "<")
+		result, err := ppbParse(ppb, sortBy, "<")
 		if err != nil {
 			return err
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "gte":
-		ppm, err := getPPM(params, true)
+		ppb, err := getPPB(params, true)
 		if err != nil {
 			return err
 		}
-		result, err := ppmParse(ppm, sortBy, ">=")
+		result, err := ppbParse(ppb, sortBy, ">=")
 		if err != nil {
 			return err
 		}
 		*sqlFilters = append(*sqlFilters, result)
 	case "lte":
-		ppm, err := getPPM(params, false)
+		ppb, err := getPPB(params, false)
 		if err != nil {
 			return err
 		}
-		result, err := ppmParse(ppm, sortBy, "<=")
+		result, err := ppbParse(ppb, sortBy, "<=")
 		if err != nil {
 			return err
 		}
@@ -203,12 +203,12 @@ func parsePathParams(urlPath string, sortBy string, sqlFilters *[]string) error 
 	val := path.Base(urlPath)
 
 	switch sortBy {
-	case "average", "increase":
-		_, err := validatePpm(val)
+	case "average", "trend":
+		_, err := validatePpb(val)
 		if err != nil {
 			return err
 		}
-		result, err := ppmParse(val, sortBy, "=")
+		result, err := ppbParse(val, sortBy, "=")
 		if err != nil {
 			return err
 		}
@@ -238,12 +238,12 @@ func dateParse(params []string, section string) (string, error) {
 	return result, nil
 }
 
-func ppmParse(ppm string, sortBy string, comparison string) (string, error) {
+func ppbParse(ppb string, sortBy string, comparison string) (string, error) {
 	switch sortBy {
 	case "average":
-		return "average " + comparison + " " + ppm, nil
-	case "increase":
-		return "increase_since_1800 " + comparison + " " + ppm, nil
+		return "average " + comparison + " " + ppb, nil
+	case "trend":
+		return "trend " + comparison + " " + ppb, nil
 	default:
 		return "", fmt.Errorf("cannot sort results by '%v'. '%v' is not a column in the database", sortBy, sortBy)
 	}
@@ -255,7 +255,7 @@ func ParseInternalArgs(internalArgs map[string]interface{}, query *database.DBQu
 		switch key {
 		case "simple":
 			if result, ok := val.(bool); ok {
-				query.Cols = []string{"year", "month", "day", "average", "increase_since_1800"}
+				query.Cols = []string{"year", "month", "average", "trend"}
 				query.Simple = result
 			}
 		case "limit":
@@ -301,13 +301,13 @@ func validateDate(val string, section string) error {
 	return nil
 }
 
-func getPPM(array []string, max bool) (string, error) {
-	target, err := validatePpm(array[0])
+func getPPB(array []string, max bool) (string, error) {
+	target, err := validatePpb(array[0])
 	if err != nil {
 		return "", err
 	}
 	for _, value := range array {
-		curr, err := validatePpm(value)
+		curr, err := validatePpb(value)
 		if err != nil {
 			return "", err
 		}
@@ -320,17 +320,16 @@ func getPPM(array []string, max bool) (string, error) {
 	return strconv.FormatFloat(target, 'f', 2, 32), nil
 }
 
-// validatePpm validates a ppm parameter against the current API spec.
-func validatePpm(ppmStr string) (float64, error) {
-
-	ppm, err := strconv.ParseFloat(ppmStr, 32)
+// validatePpb validates a ppb parameter against the current API spec.
+func validatePpb(ppbStr string) (float64, error) {
+	ppb, err := strconv.ParseFloat(ppbStr, 32)
 	if err != nil {
 		return 0, fmt.Errorf("malformed query parameters, ppm value should be a decimal number")
 	}
-	if !(ppm <= models.Co2PpmMax && ppm >= models.Co2PpmMin) {
-		return 0, fmt.Errorf("malformed query parameters, ppm query range is %v to %v", models.Co2PpmMin, models.Co2PpmMax)
+	if !(ppb <= models.Ch4PpbMax && ppb >= models.Ch4PpbMin) {
+		return 0, fmt.Errorf("malformed query parameters, ppb query range is %v to %v", models.Ch4PpbMin, models.Ch4PpbMax)
 	}
-	return ppm, nil
+	return ppb, nil
 }
 
 // validateBool validates a boolean parameter.
