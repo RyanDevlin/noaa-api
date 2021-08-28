@@ -91,3 +91,11 @@ func Gzip(next http.Handler) http.Handler {
 		next.ServeHTTP(gzw, r)
 	})
 }
+
+// SetCReqId configured
+func SetCReqId(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.WithContext()
+		next.ServeHTTP(w, r)
+	})
+}
