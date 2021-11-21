@@ -67,38 +67,40 @@ func TestRoutes(t *testing.T) {
 		return
 	}
 
-	spec := make(map[string]Path)
-	json.Unmarshal(bytes, &spec)
+	specTable := make(map[string]Path)
+	json.Unmarshal(bytes, &specTable)
 
 	apiserver := &ApiServer{}
 	routes := apiserver.CreateRoutes()
-	hashTable := make(map[string]Route)
+	routesTable := make(map[string]Route)
 
 	for _, route := range routes {
-		hashTable[route.Pattern] = route
+		routesTable[route.Pattern] = route
 	}
 
 	problemDetected := false
 
-	for k := range spec["paths"] {
-		if _, ok := hashTable["/v1"+k]; !ok {
+	for k := range specTable["paths"] {
+		if _, ok := routesTable["/v1"+k]; !ok {
 			problemDetected = true
 			t.Logf("WARNING - The following path is defined in the OpenAPI spec file but is not defined in the Routes list: /v1%v", k)
 		}
 	}
 
-	for k := range hashTable {
-		if k == "/" || k == "/v1" {
-			break
+	for k := range routesTable {
+		if k == "/" || k == "/v1" { // Skip over the top level routes for now
+			continue
 		}
 		trimmed := strings.Replace(k, "/v1", "", 1)
 
-		if _, ok := spec["paths"][trimmed]; !ok {
+		if _, ok := specTable["paths"][trimmed]; !ok {
 			problemDetected = true
 			t.Logf("WARNING - The following path is defined in the Routes list but is not defined in the OpenAPI spec file: %v", k)
 		}
 	}
 	if problemDetected {
+		// For now, this problem is logged but won't cause test failures.
+		// When the API is more concrete, this should trigger a failure.
 		t.Skipf("There is a mismatch between the OpenAPI spec file (%v) and the routes defined in router.go", apiSpecPath)
 	}
 }

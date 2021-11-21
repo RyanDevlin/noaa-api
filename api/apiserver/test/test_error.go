@@ -26,23 +26,10 @@ package test
 
 import (
 	"apiserver/pkg/utils"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
 )
-
-// ErrorResp represents the format of the JSON response returned to the client when an error occurs.
-type ErrorResp struct {
-	Description string
-	Content     ErrorType
-}
-
-// ErrorType represents the context of an error returned to the client.
-type ErrorType struct {
-	Code    int
-	Message string
-}
 
 // ErrorLog in the test package is used to mock the behavior of ErrorLog
 // in the utils package.
@@ -61,25 +48,4 @@ func ErrorLog(t *testing.T, serverError *utils.ServerError) {
 		return
 	}
 	t.Log(errString)
-}
-
-// HttpJsonError in the test package is used to mock the behavior of HttpJsonError
-// in the utils package.
-func HttpJsonError(w http.ResponseWriter, err *utils.ServerError) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(err.HttpCode)
-
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "    ")
-	enc.SetEscapeHTML(false)
-	enc.Encode(
-		ErrorResp{
-			Description: http.StatusText(err.HttpCode),
-			Content: ErrorType{
-				Code:    err.HttpCode,
-				Message: err.Message,
-			},
-		},
-	)
 }

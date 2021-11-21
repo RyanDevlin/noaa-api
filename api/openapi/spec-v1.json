@@ -39,6 +39,143 @@
                 }
             }
         },
+        "/co2": {
+            "summary": "Represents weekly CO2 measurements (this endpoint is the same as /v1/co2/weekly).",
+            "description": "This resource represents a range of weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory since 1974.",
+            "get": {
+                "tags": [
+                    "co2Weekly"
+                ],
+                "summary": "Requests weekly CO2 measurements.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "year",
+                        "description": "Return all CO2 measurements for a given year.",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 3000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "month",
+                        "description": "Return all CO2 measurements for a given month.",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 12
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "gt",
+                        "description": "Return all CO2 measurements with a ppm reading greater than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lt",
+                        "description": "Return all CO2 measurements with a ppm reading less than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "gte",
+                        "description": "Return all CO2 measurements with a ppm reading greater than OR equal to the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lte",
+                        "description": "Return all CO2 measurements with a ppm reading less than OR equal to the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "simple",
+                        "description": "If true, a smaller, simplified version of each CO2 measurement will be returned.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "pretty",
+                        "description": "If true, json responses are indented for readability.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    },
+                    {   
+                        "$ref": "#/components/parameters/LimitParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/OffsetParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PageParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Request successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerResp"
+                                            }
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
+                    }
+                }
+            }
+        },
         "/co2/weekly": {
             "summary": "Represents weekly CO2 measurements.",
             "description": "This resource represents a range of weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory since 1974.",
@@ -293,26 +430,15 @@
                 }
             }
         },
-        "/co2/weekly/ppm/{ppm}": {
-            "summary": "Represents weekly CO2 measurements by ppm.",
-            "description": "This resource represents specific weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory querried by ppm. The supplied ppm value must be an integer, and the server will return all measurements that match the supplied integer. Since measurements are represented as floats, any float where the integer portion matches the supplied value will be returned.",
+        "/co2/weekly/{ppm}": {
+            "summary": "Represents a single CO2 measurement.",
+            "description": "This resource represents a single weekly average atmospheric CO2 measurement taken at Mauna Loa Observatory. A single CO2 measurment will be returned if the average PPM value matches the requested value.",
             "get": {
                 "tags": [
                     "co2WeeklyPpm"
                 ],
-                "summary": "Requests weekly CO2 measurements by ppm.",
+                "summary": "Requests a single weekly CO2 measurement by PPM.",
                 "parameters": [
-                    {
-                        "in": "path",
-                        "name": "ppm",
-                        "description": "The concentration of atmospheric CO2 measured in parts-per-million.",
-                        "schema": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 1000
-                        },
-                        "required": true
-                    },
                     {
                         "in": "query",
                         "name": "simple",
@@ -322,11 +448,14 @@
                             "default": false
                         }
                     },
-                    {   
-                        "$ref": "#/components/parameters/LimitParam"
-                    },
                     {
-                        "$ref": "#/components/parameters/OffsetParam"
+                        "in": "query",
+                        "name": "pretty",
+                        "description": "If true, json responses are indented for readability.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
                     }
                 ],
                 "responses": {
@@ -365,31 +494,95 @@
                 }
             }
         },
-        "/co2/weekly/id/{id}": {
-            "summary": "Represents weekly CO2 measurements.",
-            "description": "This resource represents a specific weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory.",
+        "/ch4": {
+            "summary": "Represents monthly CH4 (methane) measurements (this is the same endpoint as /v1/ch4/monthly).",
+            "description": "This resource represents a range of monthly average atmospheric CH4 (methane) measurements taken at Mauna Loa Observatory since 1983.",
             "get": {
                 "tags": [
-                    "co2WeeklyId"
+                    "ch4Monthly"
                 ],
-                "summary": "Requests weekly CO2 measurements.",
+                "summary": "Requests monthly CH4 measurements.",
                 "parameters": [
                     {
-                        "in": "path",
-                        "name": "id",
-                        "description": "The weekly CO2 measurement ID. IDs are generated in sequential and chronological order with id==1 being the first weekly measurement at Mauna Loa Observatory.",
+                        "in": "query",
+                        "name": "year",
+                        "description": "Return all CH4 measurements for a given year.",
                         "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 3000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "month",
+                        "description": "Return all CH4 measurements for a given month.",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 12
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "gt",
+                        "description": "Return all CH4 measurements with an average ppb reading greater than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lt",
+                        "description": "Return all CH4 measurements with an average ppb reading less than the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "gte",
+                        "description": "Return all CH4 measurements with an average ppb reading greater than OR equal to the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lte",
+                        "description": "Return all CH4 measurements with an average ppb reading less than OR equal to the supplied value.",
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
                     },
                     {
                         "in": "query",
                         "name": "simple",
-                        "description": "If true, a smaller, simplified version of each CO2 measurement will be returned in the array.",
+                        "description": "If true, a smaller, simplified version of each CH4 measurement will be returned.",
                         "schema": {
                             "type": "boolean",
                             "default": false
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "pretty",
+                        "description": "If true, json responses are indented for readability.",
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
                         }
                     },
                     {   
@@ -397,6 +590,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/OffsetParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PageParam"
                     }
                 ],
                 "responses": {

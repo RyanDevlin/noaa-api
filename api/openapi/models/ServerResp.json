@@ -65,7 +65,7 @@
                 "type": "string"
             },
             "RequestId": {
-                "desciption": "The identifier associated with this request.",
+                "desciption": "A UUID associated with this request.",
                 "type": "string"
             }
         }

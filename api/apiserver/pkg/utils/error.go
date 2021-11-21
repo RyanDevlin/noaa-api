@@ -77,10 +77,16 @@ func ErrorLog(serverError *ServerError) {
 
 // HttpJsonError extracts metadata from a ServerError and returns this
 // information to the client.
-func HttpJsonError(w http.ResponseWriter, err *ServerError) {
+func HttpJsonError(w http.ResponseWriter, r *http.Request, err *ServerError) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(err.HttpCode)
+
+	// Parse RequestID param
+	id, idError := GetReqId(r)
+	if idError != nil {
+		id = idError.Error()
+	}
 
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "    ")
@@ -89,7 +95,7 @@ func HttpJsonError(w http.ResponseWriter, err *ServerError) {
 		models.ServerResp{
 			Results:   nil,
 			Status:    "ERROR",
-			RequestId: "0",
+			RequestId: id,
 			Error: &models.ErrorResp{
 				Description: fmt.Sprintf("%v - %v", err.HttpCode, http.StatusText(err.HttpCode)),
 				Message:     err.Message,

@@ -58,12 +58,19 @@ func NewHandler(ctx context.Context, handler ApiHandler, name string) http.Handl
 
 		handler.ServeHTTP(ctx, w, r)
 
+		// Parse RequestID param
+		id, idError := utils.GetReqId(r)
+		if idError != nil {
+			id = idError.Error()
+		}
+
 		log.Infof(
-			"%s %s %s %s",
+			"%s %s %s %s - RequestID: %s",
 			r.Method,
 			r.RequestURI,
 			name,
 			time.Since(start),
+			id,
 		)
 	})
 }
@@ -73,6 +80,6 @@ func NewHandler(ctx context.Context, handler ApiHandler, name string) http.Handl
 func (apiHandler ApiHandler) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if e := apiHandler.Handler(ctx, apiHandler.Config, w, r); e != nil {
 		utils.ErrorLog(e)
-		utils.HttpJsonError(w, e)
+		utils.HttpJsonError(w, r, e)
 	}
 }

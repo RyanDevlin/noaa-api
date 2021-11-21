@@ -28,6 +28,7 @@ import (
 	"apiserver/pkg/database"
 	"apiserver/pkg/database/models"
 	"apiserver/pkg/server/handlers"
+	"apiserver/pkg/utils"
 	"apiserver/test"
 	"context"
 	"database/sql"
@@ -77,6 +78,7 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 	defer cancel()
 
 	req := httptest.NewRequest("GET", query, nil)
+	req = test.SetReqIdTest(req) // Attach a mock UUID to this test request
 	w := httptest.NewRecorder()
 
 	t.Logf("Attempting request: %s %s",
@@ -92,7 +94,7 @@ func RunTest(t *testing.T, testName string, testVal interface{}, sqlString strin
 	if err := Get(ctx, config, w, req); err != nil {
 		// Because the Get function returned an error, we must use HttpJsonError to write to the ResponseRecorder before checking the result.
 		// Normally Get() writes to the io buffer, but when encountering an error it won't have a chance to.
-		test.HttpJsonError(w, err)
+		utils.HttpJsonError(w, req, err)
 		resp := w.Result()
 
 		if verbose {

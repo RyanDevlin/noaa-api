@@ -25,12 +25,15 @@ Contact: planetpulse.api@gmail.com
 package test
 
 import (
+	"apiserver/pkg/utils"
 	"bytes"
+	"context"
 	"net/http"
 	"testing"
 
 	// The blank import here is used to import the pq PostgreSQL drivers
 
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -48,4 +51,12 @@ func indent(indent, b []byte) []byte {
 		lines = lines[:len(lines)-1]
 	}
 	return bytes.Join(append([][]byte{{}}, lines...), indent)
+}
+
+// SetReqIdTest is used to attach an ID to a request context during testing
+func SetReqIdTest(r *http.Request) *http.Request {
+	ctx := r.Context()
+	id := uuid.New()
+	ctx = context.WithValue(ctx, utils.RequestIdDefaultKey, id.String())
+	return r.WithContext(ctx)
 }
