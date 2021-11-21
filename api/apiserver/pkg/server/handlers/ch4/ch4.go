@@ -66,10 +66,16 @@ func Get(ctx context.Context, handlerConfig *handlers.ApiHandlerConfig, w http.R
 		}
 	}
 
+	// Parse RequestID param
+	id, idError := utils.GetReqId(r)
+	if idError != nil {
+		return utils.NewError(idError, "cannot extract request ID", 500, false)
+	}
+
 	resp := models.ServerResp{
 		Results:   ch4Table,
 		Status:    "OK",
-		RequestId: "0",
+		RequestId: id,
 		Error:     nil,
 	}
 

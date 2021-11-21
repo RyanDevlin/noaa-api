@@ -38,8 +38,11 @@ import (
 // NewRouter generates a new gorilla mux router to be used instead of the default golang http router.
 func (apiserver *ApiServer) NewRouter(ctx context.Context, routes Routes) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	router.Use(utils.SetCSPHeaders)
-	router.Use(utils.Gzip)
+
+	// == Initialize Middlware ==
+	router.Use(utils.SetCSPHeaders) // Sets headers used to allow favicon.ico to be requested
+	router.Use(utils.Gzip)          // Sets headers used to tell client response is compressed
+	router.Use(utils.SetReqId)      // Generates UUID value for each new request
 
 	for _, route := range routes {
 		router.
@@ -48,10 +51,13 @@ func (apiserver *ApiServer) NewRouter(ctx context.Context, routes Routes) *mux.R
 			Name(route.Name).
 			Handler(handlers.NewHandler(ctx, route.Handler, route.Name))
 	}
+
 	return router
 }
 
 // CreateRoutes returns a Routes list representing all routes on the server.
+// This is broken out as a function to potentially allow autogeneration from the
+// API Spec in the future. Currently this is manually edited to mirror the spec.
 func (apiserver *ApiServer) CreateRoutes() Routes {
 	return Routes{
 		Route{

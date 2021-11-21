@@ -42,10 +42,16 @@ func GetHealth(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.Resp
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "    ")
 
+	// Parse RequestID param
+	id, idError := utils.GetReqId(r)
+	if idError != nil {
+		return utils.NewError(idError, "cannot extract request ID", 500, false)
+	}
+
 	resp := models.ServerResp{
 		Results:   nil,
 		Status:    "OK",
-		RequestId: "0",
+		RequestId: id,
 		Error:     nil,
 	}
 
