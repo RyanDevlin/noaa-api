@@ -440,6 +440,19 @@
                 "summary": "Requests a single weekly CO2 measurement by PPM.",
                 "parameters": [
                     {
+                        "in": "path",
+                        "name": "ppm",
+                        "description": "The average CO2 measurement to retrieve, in parts-per-million, taken at Mauna Loa Observatory.",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "default": 0,
+                            "minimum": 0,
+                            "maximum": 1000
+                        }
+                    },
+                    {
                         "in": "query",
                         "name": "simple",
                         "description": "If true, a smaller, simplified version of each CO2 measurement will be returned.",
