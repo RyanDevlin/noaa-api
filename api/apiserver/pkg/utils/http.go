@@ -26,15 +26,10 @@ package utils
 
 import (
 	"compress/gzip"
-	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 )
 
 // ParseQuery expands the query parameters passed to an endpoint
@@ -95,43 +90,4 @@ func Gzip(next http.Handler) http.Handler {
 		gzw := gzipResponseWriter{Writer: gz, ResponseWriter: w}
 		next.ServeHTTP(gzw, r)
 	})
-}
-
-// RequestID represents a request's unique ID value. This is used with a golang
-// context to trace the request through log messages. It should be used as the key
-// when calling context.WithValue() and should always be set to "RequestID". This
-// allows the server logic to look up "RequestID" in the request context and obtain
-// the ID value.
-type RequestID string
-
-// RequestIdDefaultKey is the default value used as a "tag" to extract the RequestIdDefaultKey
-// from a request's context.
-const RequestIdDefaultKey = RequestID("RequestID")
-
-// SetReqId initializes a new reuest with a unique ID value in a safe manner.
-// Setting the requestId key/value pair without this function will usually result
-// in server errors.
-func SetReqId(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		ctx := r.Context()
-		id := uuid.New()
-		log.Tracef("Initializing new request with ID: %v\n", id)
-
-		ctx = context.WithValue(ctx, RequestIdDefaultKey, id.String())
-		r = r.WithContext(ctx)
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-// GetReqId extracts a request's unique ID value and returns it as a string.
-// If extraction fails, an error is returned.
-func GetReqId(r *http.Request) (string, error) {
-	ctx := r.Context()
-	id, ok := ctx.Value(RequestIdDefaultKey).(string)
-	if !ok {
-		return "", fmt.Errorf("request ID key was not set with SetReqId function")
-	}
-	return id, nil
 }
