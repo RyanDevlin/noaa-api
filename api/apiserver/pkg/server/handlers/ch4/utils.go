@@ -356,8 +356,10 @@ func validateInt(param []string, min int, max int) (int, error) {
 		return -1, fmt.Errorf("malformed query parameters, invalid integer value")
 	}
 
-	if int(result) < min || int(result) > max {
+	if int(result) < min {
 		return 0, fmt.Errorf("malformed query parameters, integer value cannot be less than %v", min)
+	} else if int(result) > max {
+		return 0, fmt.Errorf("malformed query parameters, integer value cannot be greater than %v", max)
 	}
 	return int(result), nil
 }
