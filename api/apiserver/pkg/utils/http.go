@@ -63,6 +63,15 @@ func SetCSPHeaders(next http.Handler) http.Handler {
 	})
 }
 
+// SetCORSHeaders is called by each route to set Cross-Origin Resource Sharing headers in http responses.
+// This is used to allow requests from any origin.
+func SetCORSHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		next.ServeHTTP(w, r)
+	})
+}
+
 // gzipResponseWriter TODO
 type gzipResponseWriter struct {
 	io.Writer

@@ -40,9 +40,10 @@ func (apiserver *ApiServer) NewRouter(ctx context.Context, routes Routes) *mux.R
 	router := mux.NewRouter().StrictSlash(true)
 
 	// == Initialize Middlware ==
-	router.Use(utils.SetCSPHeaders) // Sets headers used to allow favicon.ico to be requested
-	router.Use(utils.Gzip)          // Sets headers used to tell client response is compressed
-	router.Use(utils.SetReqId)      // Generates UUID value for each new request
+	router.Use(utils.SetCSPHeaders)  // Sets headers used to allow favicon.ico to be requested
+	router.Use(utils.SetCORSHeaders) // Sets headers used to allow requests from any origin
+	router.Use(utils.Gzip)           // Sets headers used to tell client response is compressed
+	router.Use(utils.SetReqId)       // Generates UUID value for each new request
 
 	for _, route := range routes {
 		router.
