@@ -46,9 +46,6 @@ func (apiserver *ApiServer) NewRouter(ctx context.Context, routes Routes) *mux.R
 	router.Use(utils.Gzip)           // Sets headers used to tell client response is compressed
 	router.Use(utils.SetReqId)       // Generates UUID value for each new request
 
-	// Force 404 requests to go through all the middleware
-	router.NotFoundHandler = router.NewRoute().HandlerFunc(http.NotFound).GetHandler()
-
 	for _, route := range routes {
 		router.
 			Methods(route.Method).
@@ -56,6 +53,9 @@ func (apiserver *ApiServer) NewRouter(ctx context.Context, routes Routes) *mux.R
 			Name(route.Name).
 			Handler(handlers.NewHandler(ctx, route.Handler, route.Name))
 	}
+
+	// Force 404 responses to go through all the middleware
+	router.NotFoundHandler = router.NewRoute().HandlerFunc(http.NotFound).GetHandler()
 
 	return router
 }
