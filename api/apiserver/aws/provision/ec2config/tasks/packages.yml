@@ -5,6 +5,13 @@
   loop: "{{ ec2packages }}"
   become: yes
 
+- name: Enable and start Snapd
+  systemd:
+    name: snapd
+    state: started
+    enabled: True
+  become: yes
+
 - name: Setup snapd
   shell: ln -s /var/lib/snapd/snap /snap
   become: yes
