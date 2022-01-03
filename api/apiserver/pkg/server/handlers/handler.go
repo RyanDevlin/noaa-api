@@ -64,12 +64,13 @@ func NewHandler(ctx context.Context, handler ApiHandler, name string) http.Handl
 		}
 
 		log.Infof(
-			"%s %s %s %s - RequestID: %s",
+			"%s %s %s %s - RequestID: %s, Client IP: %s",
 			r.Method,
 			r.RequestURI,
 			name,
 			time.Since(start),
 			id,
+			utils.GetIP(r),
 		)
 	})
 }
