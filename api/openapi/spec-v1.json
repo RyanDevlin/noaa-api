@@ -922,7 +922,15 @@
     "components": {
         "schemas": {
             "ServerRespHealth": {
-                "$ref": "./models/ServerRespHealth.json"
+                "type": "object",
+                "properties": {
+                    "Status": {
+                        "type": "string"
+                    },
+                    "RequestId": {
+                        "type": "string"
+                    }
+                }
             },
             "ServerRespCo2": {
                 "$ref": "./models/ServerRespCo2.json"

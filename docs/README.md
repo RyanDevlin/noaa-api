@@ -20,6 +20,7 @@ Class | Method | HTTP request | Description
 <a name="documentation-for-models"></a>
 ## Documentation for Models
 
+ - [ServerRespHealth](./Models/ServerRespHealth.md)
 
 
 <a name="documentation-for-authorization"></a>

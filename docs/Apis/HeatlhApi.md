@@ -18,7 +18,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**List**
+[**List**](../Models/ServerRespHealth.md)
 
 ### Authorization
 
