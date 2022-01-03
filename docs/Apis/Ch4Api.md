@@ -31,7 +31,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**oneOf&lt;array,array&gt;**](../Models/oneOf&lt;array,array&gt;.md)
+[**oneOf&lt;ServerRespCh4,ServerRespCh4Simple&gt;**](../Models/Ch4Resp.md)
 
 ### Authorization
 
