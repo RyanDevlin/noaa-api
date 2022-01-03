@@ -40,9 +40,6 @@
                 }
             }
         },
-        "/": {
-            "$ref": "#/paths/co2"
-        },
         "/co2": {
             "summary": "Represents weekly CO2 measurements (this endpoint is the same as /v1/co2/weekly).",
             "description": "This resource represents a range of weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory since 1974.",
