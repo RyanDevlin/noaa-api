@@ -1,15 +1,15 @@
-# Ch4MonthlyApi
+# Ch4Api
 
 All URIs are relative to *https://api.planetpulse.io/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**getCh4Monthly**](Ch4MonthlyApi.md#getCh4Monthly) | **GET** /ch4/monthly | Requests monthly CH4 measurements.
+[**getCh4**](Ch4Api.md#getCh4) | **GET** /ch4 | Requests monthly CH4 measurements.
 
 
-<a name="getCh4Monthly"></a>
-# **getCh4Monthly**
-> oneOf&lt;array,array&gt; getCh4Monthly(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
+<a name="getCh4"></a>
+# **getCh4**
+> oneOf&lt;array,array&gt; getCh4(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
 
 Requests monthly CH4 measurements.
 

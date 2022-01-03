@@ -4,12 +4,12 @@ All URIs are relative to *https://api.planetpulse.io/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**healthGet**](HeatlhApi.md#healthGet) | **GET** /health | An endpoint to perform a server health check.
+[**getServerHealth**](HeatlhApi.md#getServerHealth) | **GET** /health | An endpoint to perform a server health check.
 
 
-<a name="healthGet"></a>
-# **healthGet**
-> List healthGet()
+<a name="getServerHealth"></a>
+# **getServerHealth**
+> List getServerHealth()
 
 An endpoint to perform a server health check.
 

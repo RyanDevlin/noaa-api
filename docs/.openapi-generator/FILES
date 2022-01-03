@@ -1,3 +1,4 @@
+Apis/Ch4Api.md
 Apis/Ch4MonthlyApi.md
 Apis/Ch4MonthlyTrendApi.md
 Apis/Co2WeeklyApi.md
@@ -5,8 +6,14 @@ Apis/Co2WeeklyIncreaseApi.md
 Apis/Co2WeeklyPpmApi.md
 Apis/HeatlhApi.md
 Models/ErrorResp.md
+Models/ServerRespCh4.md
+Models/ServerRespCh4Simple.md
+Models/ServerRespCh4Simple_Results.md
+Models/ServerRespCh4_Results.md
+Models/ServerRespCo2.md
 Models/ServerRespCo2Simple.md
 Models/ServerRespCo2Simple_Results.md
+Models/ServerRespCo2_Results.md
 Models/ServerRespError.md
 Models/ServerRespHealth.md
 README.md

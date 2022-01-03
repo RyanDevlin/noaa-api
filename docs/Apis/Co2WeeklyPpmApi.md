@@ -4,12 +4,12 @@ All URIs are relative to *https://api.planetpulse.io/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**co2WeeklyPpmGet**](Co2WeeklyPpmApi.md#co2WeeklyPpmGet) | **GET** /co2/weekly/{ppm} | Requests a single weekly CO2 measurement by PPM.
+[**getCo2PPM**](Co2WeeklyPpmApi.md#getCo2PPM) | **GET** /co2/weekly/{ppm} | Requests a single weekly CO2 measurement by PPM.
 
 
-<a name="co2WeeklyPpmGet"></a>
-# **co2WeeklyPpmGet**
-> oneOf&lt;array,array&gt; co2WeeklyPpmGet(ppm, simple, pretty)
+<a name="getCo2PPM"></a>
+# **getCo2PPM**
+> oneOf&lt;array,array&gt; getCo2PPM(ppm, simple, pretty)
 
 Requests a single weekly CO2 measurement by PPM.
 

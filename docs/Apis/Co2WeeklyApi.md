@@ -4,13 +4,13 @@ All URIs are relative to *https://api.planetpulse.io/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**co2Get**](Co2WeeklyApi.md#co2Get) | **GET** /co2 | Requests weekly CO2 measurements.
-[**co2WeeklyGet**](Co2WeeklyApi.md#co2WeeklyGet) | **GET** /co2/weekly | Requests weekly CO2 measurements.
+[**getCo2**](Co2WeeklyApi.md#getCo2) | **GET** /co2 | Requests weekly CO2 measurements.
+[**getCo2Weekly**](Co2WeeklyApi.md#getCo2Weekly) | **GET** /co2/weekly | Requests weekly CO2 measurements.
 
 
-<a name="co2Get"></a>
-# **co2Get**
-> oneOf&lt;array,array&gt; co2Get(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
+<a name="getCo2"></a>
+# **getCo2**
+> oneOf&lt;array,array&gt; getCo2(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
 
 Requests weekly CO2 measurements.
 
@@ -43,9 +43,9 @@ No authorization required
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
-<a name="co2WeeklyGet"></a>
-# **co2WeeklyGet**
-> oneOf&lt;array,array&gt; co2WeeklyGet(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
+<a name="getCo2Weekly"></a>
+# **getCo2Weekly**
+> oneOf&lt;array,array&gt; getCo2Weekly(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
 
 Requests weekly CO2 measurements.
 

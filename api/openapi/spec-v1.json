@@ -22,6 +22,7 @@
                     "heatlh"
                 ],
                 "summary": "An endpoint to perform a server health check.",
+                "operationId": "getServerHealth",
                 "responses": {
                     "200": {
                         "description": "Server is up.",
@@ -47,6 +48,7 @@
                     "co2Weekly"
                 ],
                 "summary": "Requests weekly CO2 measurements.",
+                "operationId": "getCo2",
                 "parameters": [
                     {
                         "in": "query",
@@ -184,6 +186,7 @@
                     "co2Weekly"
                 ],
                 "summary": "Requests weekly CO2 measurements.",
+                "operationId": "getCo2Weekly",
                 "parameters": [
                     {
                         "in": "query",
@@ -321,6 +324,7 @@
                     "co2WeeklyIncrease"
                 ],
                 "summary": "Requests weekly CO2 measurements by increase in ppm since 1800.",
+                "operationId": "getCo2WeeklyIncrease",
                 "parameters": [
                     {
                         "in": "query",
@@ -438,6 +442,7 @@
                     "co2WeeklyPpm"
                 ],
                 "summary": "Requests a single weekly CO2 measurement by PPM.",
+                "operationId": "getCo2PPM",
                 "parameters": [
                     {
                         "in": "path",
@@ -512,9 +517,10 @@
             "description": "This resource represents a range of monthly average atmospheric CH4 (methane) measurements taken at Mauna Loa Observatory since 1983.",
             "get": {
                 "tags": [
-                    "ch4Monthly"
+                    "ch4"
                 ],
                 "summary": "Requests monthly CH4 measurements.",
+                "operationId": "getCh4",
                 "parameters": [
                     {
                         "in": "query",
@@ -652,6 +658,7 @@
                     "ch4Monthly"
                 ],
                 "summary": "Requests monthly CH4 measurements.",
+                "operationId": "getCh4Monthly",
                 "parameters": [
                     {
                         "in": "query",
@@ -789,6 +796,7 @@
                     "ch4MonthlyTrend"
                 ],
                 "summary": "Requests monthly CH4 measurements.",
+                "operationId": "getCh4MonthlyTrend",
                 "parameters": [
                     {
                         "in": "query",
@@ -936,7 +944,80 @@
                 }
             },
             "ServerRespCo2": {
-                "$ref": "./models/ServerRespCo2.json"
+                "type": "object",
+                "description": "This object represents a server response containing weekly gas measurement data.",
+                "properties": {
+                    "Results": {
+                        "type": "array",
+                        "description": "Results contains an array of all objects matching the request.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Year": {
+                                    "description": "The year this measurement was taken.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "Month": {
+                                    "description": "The month this measurement was taken.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "Day": {
+                                    "description": "The day representing the start of the week for this measurement. Measurements are taken hourly and averaged together over a week.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "DateDecimal": {
+                                    "description": "A decimal representation of the week this measurement was taken.",
+                                    "type": "number",
+                                    "format": "float"
+                                },
+                                "Average": {
+                                    "description": "The average gas measurement recorded for the week.",
+                                    "type": "integer",
+                                    "format": "float"
+                                },
+                                "NumDays": {
+                                    "description": "The number of days measurements were taken to compute the weekly average.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "OneYearAgo": {
+                                    "description": "The CO2 mole fraction in dry air (in parts-per-million) exactly 365 days prior to this measurement.",
+                                    "type": "number",
+                                    "format": "float",
+                                    "nullable": true
+                                },
+                                "TenYearsAgo": {
+                                    "description": "The CO2 mole fraction in dry air (in parts-per-million) exactly 10*365 days + 3 days (for leap years) prior to this measurement.",
+                                    "type": "number",
+                                    "format": "float",
+                                    "nullable": true
+                                },
+                                "IncSincePreIndustrial": {
+                                    "description": "The CO2 mole fraction difference in dry air (in parts-per-million) between this measurement and measurements from 1800.",
+                                    "type": "number",
+                                    "format": "float",
+                                    "nullable": true
+                                },
+                                "Timestamp": {
+                                    "description": "The unix timestamp of when the measurement was recorded. This is always recorded as a date with the hh:mm:ss portion of the timestamp set to zero.",
+                                    "type": "integer",
+                                    "format": "unix-time"
+                                }
+                            }
+                        }
+                    },
+                    "Status": {
+                        "description": "The status of the response. Currently either 'OK' or 'ERROR'.",
+                        "type": "string"
+                    },
+                    "RequestId": {
+                        "description": "The identifier associated with this request.",
+                        "type": "string"
+                    }
+                }
             },
             "ServerRespCo2Simple": {
                 "type": "object",
@@ -988,10 +1069,110 @@
                 }
             },
             "ServerRespCh4": {
-                "$ref": "./models/ServerRespCh4.json"
+                "type": "object",
+                "description": "This object represents a server response containing CH4 measurement data.",
+                "properties": {
+                    "Results": {
+                        "type": "array",
+                        "description": "Results contains an array of all objects matching the request.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Year": {
+                                    "description": "The year this measurement was taken.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "Month": {
+                                    "description": "The month this measurement was taken.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "DateDecimal": {
+                                    "description": "A decimal representation of the date this measurement was taken.",
+                                    "type": "number",
+                                    "format": "float"
+                                },
+                                "Average": {
+                                    "description": "The average gas measurement recorded for the month.",
+                                    "type": "integer",
+                                    "format": "float"
+                                },
+                                "AverageUncertainty": {
+                                    "description": "The uncertainty range for the average gas measurement recorded for the month.",
+                                    "type": "integer",
+                                    "format": "float"
+                                },
+                                "Trend": {
+                                    "description": "An average value representing a trendline point for the measurement recorded this month.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "TrendUncertainty": {
+                                    "description": "The uncertainty range for the treand gas measurement calculated for the month.",
+                                    "type": "integer",
+                                    "format": "float"
+                                },
+                                "Timestamp": {
+                                    "description": "The unix timestamp of when the measurement was recorded. This is always recorded as a date with the hh:mm:ss portion of the timestamp set to zero.",
+                                    "type": "integer",
+                                    "format": "unix-time"
+                                }
+                            }
+                        }
+                    },
+                    "Status": {
+                        "description": "The status of the response. Currently either 'OK' or 'ERROR'.",
+                        "type": "string"
+                    },
+                    "RequestId": {
+                        "description": "The identifier associated with this request.",
+                        "type": "string"
+                    }
+                }
             },
             "ServerRespCh4Simple": {
-                "$ref": "./models/ServerRespCh4Simple.json"
+                "type": "object",
+                "description": "This object represents a simplified server response containing CH4 measurement data.",
+                "properties": {
+                    "Results": {
+                        "type": "array",
+                        "description": "Results contains an array of all objects matching the request.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Year": {
+                                    "description": "The year this measurement was taken.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "Month": {
+                                    "description": "The month this measurement was taken.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "Average": {
+                                    "description": "The average gas measurement recorded for the month.",
+                                    "type": "integer",
+                                    "format": "float"
+                                },
+                                "Trend": {
+                                    "description": "An average value representing a trendline point for the measurement recorded this month.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                }
+                            }
+                        }
+                    },
+                    "Status": {
+                        "description": "The status of the response. Currently either 'OK' or 'ERROR'.",
+                        "type": "string"
+                    },
+                    "RequestId": {
+                        "description": "The identifier associated with this request.",
+                        "type": "string"
+                    }
+                }
             },
             "ServerRespError": {
                 "type": "object",

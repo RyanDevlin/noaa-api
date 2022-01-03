@@ -4,12 +4,12 @@ All URIs are relative to *https://api.planetpulse.io/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**ch4MonthlyTrendGet**](Ch4MonthlyTrendApi.md#ch4MonthlyTrendGet) | **GET** /ch4/monthly/trend | Requests monthly CH4 measurements.
+[**getCh4MonthlyTrend**](Ch4MonthlyTrendApi.md#getCh4MonthlyTrend) | **GET** /ch4/monthly/trend | Requests monthly CH4 measurements.
 
 
-<a name="ch4MonthlyTrendGet"></a>
-# **ch4MonthlyTrendGet**
-> oneOf&lt;array,array&gt; ch4MonthlyTrendGet(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
+<a name="getCh4MonthlyTrend"></a>
+# **getCh4MonthlyTrend**
+> oneOf&lt;array,array&gt; getCh4MonthlyTrend(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
 
 Requests monthly CH4 measurements.
 
