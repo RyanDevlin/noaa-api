@@ -18,7 +18,6 @@ GNU General Public License for more details.
 A copy of the GNU General Public License can be found here:
 https://www.gnu.org/licenses/
 
-API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
@@ -200,33 +199,5 @@ func (apiserver *ApiServer) CreateRoutes() Routes {
 				},
 			},
 		},
-		/*
-			Route{
-				"co2WeeklyId",
-				strings.ToUpper("Get"),
-				"/v1/co2/weekly/{id}",
-				apiHandler.GetIndexHandler,
-			},
-
-			Route{
-				"co2WeeklyIncrease",
-				strings.ToUpper("Get"),
-				"/v1/co2/weekly/increase",
-				apiHandler.GetIndexHandler,
-			},
-
-			Route{
-				"co2WeeklyPpm",
-				strings.ToUpper("Get"),
-				"/v1/co2/weekly/{ppm}",
-				apiHandler.GetIndexHandler,
-			},
-
-			Route{
-				"heatlh",
-				strings.ToUpper("Get"),
-				"/v1/health",
-				apiHandler.GetHealthHandler,
-			},*/
 	}
 }

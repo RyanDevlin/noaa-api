@@ -18,7 +18,6 @@ GNU General Public License for more details.
 A copy of the GNU General Public License can be found here:
 https://www.gnu.org/licenses/
 
-API version: 0.1.0
 Contact: planetpulse.api@gmail.com
 */
 
@@ -42,7 +41,6 @@ func (apiserver *ApiServer) Start() {
 	defer apiserver.Database.DB.Close()
 	log.Info("Server started.")
 
-	//log.Fatal(http.ListenAndServeTLS(":"+apiserver.Config.HttpsPort, "apiserver.crt", "apiserver.key", apiserver.Router))
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(apiserver.Config.HttpPort), apiserver.Router))
 }
 

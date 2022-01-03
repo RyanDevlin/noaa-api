@@ -1,0 +1,16 @@
+{
+    "ServerResp": {
+        "type": "object",
+        "description": "This object represents a health check endpoint response.",
+        "properties": {
+            "Status": {
+                "desciption": "The status of the response. Currently either 'OK' or 'ERROR'.",
+                "type": "string"
+            },
+            "RequestId": {
+                "desciption": "A UUID associated with this request.",
+                "type": "string"
+            }
+        }
+    }
+}

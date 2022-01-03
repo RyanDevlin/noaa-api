@@ -1,0 +1,60 @@
+{
+    "ServerResp": {
+        "type": "object",
+        "description": "This object represents a server response containing CH4 measurement data.",
+        "properties": {
+            "Results": [
+                {
+                    "Year": {
+                        "desciption": "The year this measurement was taken.",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "Month": {
+                        "desciption": "The month this measurement was taken.",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "DateDecimal": {
+                        "desciption": "A decimal representation of the date this measurement was taken.",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "Average": {
+                        "desciption": "The average gas measurement recorded for the month.",
+                        "type": "integer",
+                        "format": "float"
+                    },
+                    "AverageUncertainty": {
+                        "desciption": "The uncertainty range for the average gas measurement recorded for the month.",
+                        "type": "integer",
+                        "format": "float"
+                    },
+                    "Trend": {
+                        "desciption": "An average value representing a trendline point for the measurement recorded this month.",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "TrendUncertainty": {
+                        "desciption": "The uncertainty range for the treand gas measurement calculated for the month.",
+                        "type": "integer",
+                        "format": "float"
+                    },
+                    "Timestamp": {
+                        "desciption": "The unix timestamp of when the measurement was recorded. This is always recorded as a date with the hh:mm:ss portion of the timestamp set to zero.",
+                        "type": "integer",
+                        "format": "unix-time"
+                    }
+                }
+            ],
+            "Status": {
+                "desciption": "The status of the response. Currently either 'OK' or 'ERROR'.",
+                "type": "string"
+            },
+            "RequestId": {
+                "desciption": "A UUID associated with this request.",
+                "type": "string"
+            }
+        }
+    }
+}

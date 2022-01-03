@@ -1,0 +1,40 @@
+{
+    "ServerResp": {
+        "type": "object",
+        "description": "This object represents a simplified server response containing CH4 measurement data.",
+        "properties": {
+            "Results": [
+                {
+                    "Year": {
+                        "desciption": "The year this measurement was taken.",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "Month": {
+                        "desciption": "The month this measurement was taken.",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "Average": {
+                        "desciption": "The average gas measurement recorded for the month.",
+                        "type": "integer",
+                        "format": "float"
+                    },
+                    "Trend": {
+                        "desciption": "An average value representing a trendline point for the measurement recorded this month.",
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            ],
+            "Status": {
+                "desciption": "The status of the response. Currently either 'OK' or 'ERROR'.",
+                "type": "string"
+            },
+            "RequestId": {
+                "desciption": "A UUID associated with this request.",
+                "type": "string"
+            }
+        }
+    }
+}

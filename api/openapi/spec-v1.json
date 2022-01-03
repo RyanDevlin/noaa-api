@@ -3,7 +3,7 @@
     "info": {
         "title":"Planet Pulse",
         "description": "Planet Pulse is an API designed to serve climate data pulled from NOAA's Global Monitoring Laboratory FTP server. This API is based on the OpenAPI v3 specification.",
-        "version":"0.1.0",
+        "version":"1.0.0",
         "contact": {
             "name": "API Support",
             "email": "planetpulse.api@gmail.com"
@@ -11,8 +11,8 @@
     },
     "servers": [
         {
-            "url":"http://localhost:8080/v1",
-            "description": "This server path will remain localhost until we have an actual server and domain."
+            "url":"https://api.planetpulse.io/v1",
+            "description": "The domain 'planetpulse.io' hosts a frontend for this API. The 'api' subdomain hosts the actual API."
         }
     ],
     "paths": {
@@ -30,7 +30,7 @@
                                "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/ServerResp"
+                                        "$ref": "#/components/schemas/ServerRespHealth"
                                     }
                                } 
                             }
@@ -150,13 +150,13 @@
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerResp"
+                                                "$ref": "#/components/schemas/ServerRespCo2"
                                             }
                                         },
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                                "$ref": "#/components/schemas/ServerRespCo2Simple"
                                             }
                                         }
                                     ]
@@ -287,13 +287,13 @@
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerResp"
+                                                "$ref": "#/components/schemas/ServerRespCo2"
                                             }
                                         },
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                                "$ref": "#/components/schemas/ServerRespCo2Simple"
                                             }
                                         }
                                     ]
@@ -404,13 +404,13 @@
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerResp"
+                                                "$ref": "#/components/schemas/ServerRespCo2"
                                             }
                                         },
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                                "$ref": "#/components/schemas/ServerRespCo2Simple"
                                             }
                                         }
                                     ]
@@ -481,13 +481,13 @@
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerResp"
+                                                "$ref": "#/components/schemas/ServerRespCo2"
                                             }
                                         },
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                                "$ref": "#/components/schemas/ServerRespCo2Simple"
                                             }
                                         }
                                     ]
@@ -618,13 +618,13 @@
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerResp"
+                                                "$ref": "#/components/schemas/ServerRespCh4"
                                             }
                                         },
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                                "$ref": "#/components/schemas/ServerRespCh4Simple"
                                             }
                                         }
                                     ]
@@ -755,13 +755,13 @@
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerResp"
+                                                "$ref": "#/components/schemas/ServerRespCh4"
                                             }
                                         },
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                                "$ref": "#/components/schemas/ServerRespCh4Simple"
                                             }
                                         }
                                     ]
@@ -782,11 +782,11 @@
             }
         },
         "/ch4/monthly/trend": {
-            "summary": "Represents monthly CH4 (methane) measurements.",
-            "description": "This resource represents a range of monthly average atmospheric CH4 (methane) measurements taken at Mauna Loa Observatory since 1983.",
+            "summary": "Represents monthly CH4 (methane) trend measurements.",
+            "description": "This resource represents a range of monthly average atmospheric CH4 (methane) measurements (smoothed on a trend line) taken at Mauna Loa Observatory since 1983.",
             "get": {
                 "tags": [
-                    "ch4Monthly"
+                    "ch4MonthlyTrend"
                 ],
                 "summary": "Requests monthly CH4 measurements.",
                 "parameters": [
@@ -892,13 +892,13 @@
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerResp"
+                                                "$ref": "#/components/schemas/ServerRespCh4"
                                             }
                                         },
                                         {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ServerRespSimple"
+                                                "$ref": "#/components/schemas/ServerRespCh4Simple"
                                             }
                                         }
                                     ]
@@ -921,11 +921,20 @@
     },
     "components": {
         "schemas": {
-            "ServerResp": {
-                "$ref": "./models/ServerResp.json"
+            "ServerRespHealth": {
+                "$ref": "./models/ServerRespHealth.json"
             },
-            "ServerRespSimple": {
-                "$ref": "./models/ServerRespSimple.json"
+            "ServerRespCo2": {
+                "$ref": "./models/ServerRespCo2.json"
+            },
+            "ServerRespCo2Simple": {
+                "$ref": "./models/ServerRespCo2Simple.json"
+            },
+            "ServerRespCh4": {
+                "$ref": "./models/ServerRespCh4.json"
+            },
+            "ServerRespCh4Simple": {
+                "$ref": "./models/ServerRespCh4Simple.json"
             },
             "ServerRespError": {
                 "$ref": "./models/ServerRespError.json"

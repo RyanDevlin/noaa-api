@@ -17,7 +17,6 @@
 # A copy of the GNU General Public License can be found here:
 # https://www.gnu.org/licenses/
 
-# API version: 0.1.0
 # Contact: planetpulse.api@gmail.com
 
 #!/usr/bin/env bash

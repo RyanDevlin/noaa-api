@@ -1,7 +1,7 @@
 {
     "ServerResp": {
         "type": "object",
-        "description": "This object represents a server response containing simplified weekly gas measurement data.",
+        "description": "This object represents a server response containing CO2 measurement data.",
         "properties": {
             "Results": [
                 {
@@ -20,16 +20,43 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "DateDecimal": {
+                        "desciption": "A decimal representation of the week this measurement was taken.",
+                        "type": "number",
+                        "format": "float"
+                    },
                     "Average": {
                         "desciption": "The average gas measurement recorded for the week.",
                         "type": "integer",
                         "format": "float"
+                    },
+                    "NumDays": {
+                        "desciption": "The number of days measurements were taken to compute the weekly average.",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "OneYearAgo": {
+                        "desciption": "The CO2 mole fraction in dry air (in parts-per-million) exactly 365 days prior to this measurement.",
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "TenYearsAgo": {
+                        "desciption": "The CO2 mole fraction in dry air (in parts-per-million) exactly 10*365 days + 3 days (for leap years) prior to this measurement.",
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
                     },
                     "IncSincePreIndustrial": {
                         "desciption": "The CO2 mole fraction difference in dry air (in parts-per-million) between this measurement and measurements from 1800.",
                         "type": "number",
                         "format": "float",
                         "nullable": true
+                    },
+                    "Timestamp": {
+                        "desciption": "The unix timestamp of when the measurement was recorded. This is always recorded as a date with the hh:mm:ss portion of the timestamp set to zero.",
+                        "type": "integer",
+                        "format": "unix-time"
                     }
                 }
             ],
@@ -38,7 +65,7 @@
                 "type": "string"
             },
             "RequestId": {
-                "desciption": "The identifier associated with this request.",
+                "desciption": "A UUID associated with this request.",
                 "type": "string"
             }
         }
