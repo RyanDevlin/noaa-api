@@ -7,8 +7,8 @@ All URIs are relative to *https://api.planetpulse.io/v1*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*Co2WeeklyApi* | [**getCo2**](Apis/Co2WeeklyApi.md#getco2) | **GET** / | Requests weekly CO2 measurements.
-*Co2WeeklyApi* | [**getCo2**](Apis/Co2WeeklyApi.md#getco2) | **GET** /co2 | Requests weekly CO2 measurements.
+*Co2WeeklyApi* | [**getCo2Weekly**](Apis/Co2WeeklyApi.md#getco2weekly) | **GET** / | Requests weekly CO2 measurements.
+*Co2WeeklyApi* | [**getCo2Weekly**](Apis/Co2WeeklyApi.md#getco2weekly) | **GET** /co2 | Requests weekly CO2 measurements.
 *Co2WeeklyApi* | [**getCo2Weekly**](Apis/Co2WeeklyApi.md#getco2weekly) | **GET** /co2/weekly | Requests weekly CO2 measurements.
 *Co2WeeklyIncreaseApi* | [**getCo2WeeklyIncrease**](Apis/Co2WeeklyIncreaseApi.md#getco2weeklyincrease) | **GET** /co2/weekly/increase | Requests weekly CO2 measurements by increase in ppm since 1800.
 *Co2WeeklyPpmApi* | [**getCo2PPM**](Apis/Co2WeeklyPpmApi.md#getco2ppm) | **GET** /co2/weekly/{ppm} | Requests a single weekly CO2 measurement by PPM.

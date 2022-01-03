@@ -51,7 +51,7 @@
                     "co2Weekly"
                 ],
                 "summary": "Requests weekly CO2 measurements.",
-                "operationId": "getCo2",
+                "operationId": "co2Weekly",
                 "parameters": [
                     {
                         "in": "query",
