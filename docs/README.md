@@ -7,7 +7,7 @@ All URIs are relative to *https://api.planetpulse.io/v1*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*Ch4Api* | [**getCh4**](Apis/Ch4Api.md#getch4) | **GET** /ch4 | Requests monthly CH4 measurements.
+*Ch4MonthlyApi* | [**getCh4**](Apis/Ch4MonthlyApi.md#getch4) | **GET** /ch4 | Requests monthly CH4 measurements.
 *Ch4MonthlyApi* | [**getCh4Monthly**](Apis/Ch4MonthlyApi.md#getch4monthly) | **GET** /ch4/monthly | Requests monthly CH4 measurements.
 *Ch4MonthlyTrendApi* | [**getCh4MonthlyTrend**](Apis/Ch4MonthlyTrendApi.md#getch4monthlytrend) | **GET** /ch4/monthly/trend | Requests monthly CH4 measurements.
 *Co2WeeklyApi* | [**getCo2**](Apis/Co2WeeklyApi.md#getco2) | **GET** /co2 | Requests weekly CO2 measurements.

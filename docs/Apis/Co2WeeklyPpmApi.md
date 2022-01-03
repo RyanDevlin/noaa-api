@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 <a name="getCo2PPM"></a>
 # **getCo2PPM**
-> oneOf&lt;array,array&gt; getCo2PPM(ppm, simple, pretty)
+> oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt; getCo2PPM(ppm, simple, pretty)
 
 Requests a single weekly CO2 measurement by PPM.
 
@@ -23,7 +23,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**oneOf&lt;array,array&gt;**](../Models/oneOf&lt;array,array&gt;.md)
+[**oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt;**](../Models/oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt;.md)
 
 ### Authorization
 

@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 <a name="getCo2WeeklyIncrease"></a>
 # **getCo2WeeklyIncrease**
-> oneOf&lt;array,array&gt; getCo2WeeklyIncrease(gt, lt, gte, lte, simple, pretty, limit, offset, page)
+> oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt; getCo2WeeklyIncrease(gt, lt, gte, lte, simple, pretty, limit, offset, page)
 
 Requests weekly CO2 measurements by increase in ppm since 1800.
 
@@ -29,7 +29,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**oneOf&lt;array,array&gt;**](../Models/oneOf&lt;array,array&gt;.md)
+[**oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt;**](../Models/oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt;.md)
 
 ### Authorization
 

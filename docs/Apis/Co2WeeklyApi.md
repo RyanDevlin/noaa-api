@@ -45,7 +45,7 @@ No authorization required
 
 <a name="getCo2Weekly"></a>
 # **getCo2Weekly**
-> oneOf&lt;array,array&gt; getCo2Weekly(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
+> oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt; getCo2Weekly(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
 
 Requests weekly CO2 measurements.
 
@@ -67,7 +67,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**oneOf&lt;array,array&gt;**](../Models/oneOf&lt;array,array&gt;.md)
+[**oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt;**](../Models/oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt;.md)
 
 ### Authorization
 

@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 <a name="getCh4MonthlyTrend"></a>
 # **getCh4MonthlyTrend**
-> oneOf&lt;array,array&gt; getCh4MonthlyTrend(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
+> oneOf&lt;ServerRespCh4,ServerRespCh4Simple&gt; getCh4MonthlyTrend(year, month, gt, lt, gte, lte, simple, pretty, limit, offset, page)
 
 Requests monthly CH4 measurements.
 
@@ -31,7 +31,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**oneOf&lt;array,array&gt;**](../Models/oneOf&lt;array,array&gt;.md)
+[**oneOf&lt;ServerRespCh4,ServerRespCh4Simple&gt;**](../Models/oneOf&lt;ServerRespCh4,ServerRespCh4Simple&gt;.md)
 
 ### Authorization
 
