@@ -27,17 +27,3 @@
 - name: Perpare Certbot
   shell: ln -s /snap/bin/certbot /usr/bin/certbot
   become: yes
-
-- name: Install golang
-  unarchive:
-    src: "https://golang.org/dl/go{{ goversion }}.linux-amd64.tar.gz"
-    dest: /usr/local
-    remote_src: yes
-  become: yes
-
-- name: Add Golang bin to PATH in .bash_profile
-  lineinfile: 
-    dest: "~/.bash_profile" 
-    line: 'export PATH=$PATH:/usr/local/go/bin'
-    insertafter: 'EOF'
-    state: present
