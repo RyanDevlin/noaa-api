@@ -150,16 +150,10 @@
                                 "schema": {
                                     "oneOf": [
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCo2"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCo2"
                                         },
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCo2Simple"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCo2Simple"
                                         }
                                     ]
                                 }
