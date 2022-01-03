@@ -12,7 +12,14 @@ http {
 
     server {
         listen       80;
-        server_name  _;
+        server_name  api.planetpulse.io;
+
+	return 301 https://api.planetpulse.io$request_uri;
+    }
+
+    server {
+        listen       80;
+        server_name  planetpulse.io;
 
 	return 301 https://planetpulse.io$request_uri;
     }
