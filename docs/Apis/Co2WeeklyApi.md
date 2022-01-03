@@ -67,7 +67,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt;**](../Models/oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt;.md)
+[**oneOf&lt;ServerRespCo2,ServerRespCo2Simple&gt;**](../Models/Co2Responses.md)
 
 ### Authorization
 

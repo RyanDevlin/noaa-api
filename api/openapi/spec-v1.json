@@ -906,7 +906,7 @@
             },
             "ServerRespCo2": {
                 "type": "object",
-                "description": "This object represents a server response containing weekly gas measurement data.",
+                "description": "This object represents a server response containing Co2 gas measurement data.",
                 "properties": {
                     "Results": {
                         "type": "array",
@@ -982,7 +982,7 @@
             },
             "ServerRespCo2Simple": {
                 "type": "object",
-                "description": "This object represents a simplified server response containing weekly gas measurement data.",
+                "description": "This object represents a simplified server response containing Co2 gas measurement data.",
                 "properties": {
                     "Results": {
                         "type": "array",
