@@ -10,7 +10,7 @@
   become: yes
 
 - name: Update snapd
-  shell: snap install core; sudo snap refresh core
+  shell: snap install core; snap refresh core
   become: yes
 
 - name: Install Certbot
