@@ -1,5 +1,5 @@
 # Co2Reponses
-### Return type [ONLY one of the following]
+### Return type [only one of the following]
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
