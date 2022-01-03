@@ -14,24 +14,37 @@ http {
         listen       80;
         server_name  _;
 
-	return 301 https://{{ apiserver_fqdn }}$request_uri;
+	return 301 https://planetpulse.io$request_uri;
     }
     
     server {
-        server_name  www.{{ apiserver_fqdn }};
+        server_name  www.planetpulse.io;
 
-	return 301 $scheme://{{ apiserver_fqdn }}$request_uri;
+	return 301 $scheme://planetpulse.io$request_uri;
     }
     
     server {
         listen       443 ssl http2;
-        server_name  {{ apiserver_fqdn }};
+        server_name  api.planetpulse.io;
 
-        ssl_certificate /etc/letsencrypt/live/{{ apiserver_fqdn }}/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/{{ apiserver_fqdn }}/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/planetpulse.io/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/planetpulse.io/privkey.pem;
 
         location / {
-	    proxy_pass http://localhost:{{ apiserver_port }}/;
+	    proxy_pass http://localhost:8080;
+            index  index.html index.htm;
+        }
+    }
+    
+    server {
+        listen       443 ssl http2;
+        server_name  planetpulse.io;
+
+       ssl_certificate /etc/letsencrypt/live/planetpulse.io/fullchain.pem;
+       ssl_certificate_key /etc/letsencrypt/live/planetpulse.io/privkey.pem;
+
+        location / {
+	    proxy_pass http://localhost:5000;
             index  index.html index.htm;
         }
     }
