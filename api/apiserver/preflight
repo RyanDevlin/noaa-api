@@ -3,3 +3,4 @@
 sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 sudo yum install -y ansible
 git filter-branch --subdirectory-filter api/apiserver/aws/ --prune-empty -- --all
+ansible-playbook provision/setup.yml
