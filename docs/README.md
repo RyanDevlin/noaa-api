@@ -20,6 +20,8 @@ Class | Method | HTTP request | Description
 <a name="documentation-for-models"></a>
 ## Documentation for Models
 
+ - [ErrorResp](./Models/ErrorResp.md)
+ - [ServerRespError](./Models/ServerRespError.md)
  - [ServerRespHealth](./Models/ServerRespHealth.md)
 
 

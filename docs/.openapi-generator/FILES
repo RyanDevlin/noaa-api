@@ -4,5 +4,7 @@ Apis/Co2WeeklyApi.md
 Apis/Co2WeeklyIncreaseApi.md
 Apis/Co2WeeklyPpmApi.md
 Apis/HeatlhApi.md
+Models/ErrorResp.md
+Models/ServerRespError.md
 Models/ServerRespHealth.md
 README.md

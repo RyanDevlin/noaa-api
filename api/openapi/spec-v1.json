@@ -948,7 +948,35 @@
                 "$ref": "./models/ServerRespCh4Simple.json"
             },
             "ServerRespError": {
-                "$ref": "./models/ServerRespError.json"
+                "type": "object",
+                "description": "This object represents a server response when there is an error.",
+                "properties": {
+                    "Status": {
+                        "description": "The status of the response. Will be 'ERROR'.",
+                        "type": "string"
+                    },
+                    "RequestId": {
+                        "description": "The identifier associated with this request.",
+                        "type": "string"
+                    },
+                    "Error": {
+                        "$ref": "#/components/schemas/ErrorResp"
+                    }
+                }
+            },
+            "ErrorResp": {
+                "type": "object",
+                "description": "This object represents a single error response.",
+                "properties": {
+                    "Description": {
+                        "description": "A short description of the error, eg. '400 - Bad Request'",
+                        "type": "string"
+                    },
+                    "Message": {
+                        "description": "A message which provides context for the error, eg. why it occured",
+                        "type": "string"
+                    }
+                }
             }
         },
         "parameters": {
