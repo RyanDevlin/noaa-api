@@ -40,6 +40,9 @@
                 }
             }
         },
+        "/": {
+            "$ref": "#/paths/co2"
+        },
         "/co2": {
             "summary": "Represents weekly CO2 measurements (this endpoint is the same as /v1/co2/weekly).",
             "description": "This resource represents a range of weekly average atmospheric CO2 measurements taken at Mauna Loa Observatory since 1974.",
@@ -282,16 +285,10 @@
                                 "schema": {
                                     "oneOf": [
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCo2"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCo2"
                                         },
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCo2Simple"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCo2Simple"
                                         }
                                     ]
                                 }
@@ -400,16 +397,10 @@
                                 "schema": {
                                     "oneOf": [
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCo2"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCo2"
                                         },
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCo2Simple"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCo2Simple"
                                         }
                                     ]
                                 }
@@ -478,16 +469,10 @@
                                 "schema": {
                                     "oneOf": [
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCo2"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCo2"
                                         },
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCo2Simple"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCo2Simple"
                                         }
                                     ]
                                 }
@@ -511,7 +496,7 @@
             "description": "This resource represents a range of monthly average atmospheric CH4 (methane) measurements taken at Mauna Loa Observatory since 1983.",
             "get": {
                 "tags": [
-                    "ch4"
+                    "ch4Monthly"
                 ],
                 "summary": "Requests monthly CH4 measurements.",
                 "operationId": "getCh4",
@@ -616,16 +601,10 @@
                                 "schema": {
                                     "oneOf": [
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCh4"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCh4"
                                         },
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCh4Simple"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCh4Simple"
                                         }
                                     ]
                                 }
@@ -754,16 +733,10 @@
                                 "schema": {
                                     "oneOf": [
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCh4"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCh4"
                                         },
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCh4Simple"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCh4Simple"
                                         }
                                     ]
                                 }
@@ -892,16 +865,10 @@
                                 "schema": {
                                     "oneOf": [
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCh4"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCh4"
                                         },
                                         {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ServerRespCh4Simple"
-                                            }
+                                            "$ref": "#/components/schemas/ServerRespCh4Simple"
                                         }
                                     ]
                                 }

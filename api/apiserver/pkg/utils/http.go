@@ -57,7 +57,7 @@ func ParseQuery(r *http.Request) url.Values {
 // Currently this is used mainly to allow the favicon to be requested by the client.
 func SetCSPHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'")
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; img-src '*.planetpulse.io'; object-src: 'none';")
 		next.ServeHTTP(w, r)
 	})
 }
