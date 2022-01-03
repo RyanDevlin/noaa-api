@@ -30,7 +30,7 @@
 Planet Pulse is an API service that was designed to make climate data widely available for free. Planet Pulse serves climate data obtained from the [National Oceanic and Atmospheric Administration (NOAA)](https://www.noaa.gov/) via a REST API reachable at [api.planetpulse.io](https://api.planetpulse.io).
 
 # Why NOAA Data? 🌡
-Some of NOAA's most up-to-date climate data is still served as text/csv files over an [AFTP server](https://gml.noaa.gov/aftp/). This causes headaches for developers who want to build a service with this data because a significant amount of parsing and cleaning code is needed to download and use it. To avoid this, Planet Pulse does the heavy lifting and serves the data over a simple REST API. This allows developers to request only the data they need and provides a predictable and fast endpoint to do so.
+Some of NOAA's most up-to-date climate data is still served as text/csv files over an [AFTP server](https://gml.noaa.gov/aftp/). This causes headaches for developers because a significant amount of parsing and cleaning code is needed to download and use it. To avoid this, Planet Pulse does the heavy lifting and serves the data over a simple REST API. This allows developers to request only the data they need and provides a predictable and fast endpoint to do so.
 
 # How can I use this? 👨‍💻
 Head over to [planetpulse.io](https://planetpulse.io) to see the API wrapped in a nice frontend! If you wish to use the API diretly, simply hit the [api.planetpulse.io](https://api.planetpulse.io) endpoint. If you wish to run this service yourself, read the build instructions below.
