@@ -21,6 +21,8 @@ Class | Method | HTTP request | Description
 ## Documentation for Models
 
  - [ErrorResp](./Models/ErrorResp.md)
+ - [ServerRespCo2Simple](./Models/ServerRespCo2Simple.md)
+ - [ServerRespCo2Simple_Results](./Models/ServerRespCo2Simple_Results.md)
  - [ServerRespError](./Models/ServerRespError.md)
  - [ServerRespHealth](./Models/ServerRespHealth.md)
 

@@ -939,7 +939,53 @@
                 "$ref": "./models/ServerRespCo2.json"
             },
             "ServerRespCo2Simple": {
-                "$ref": "./models/ServerRespCo2Simple.json"
+                "type": "object",
+                "description": "This object represents a simplified server response containing weekly gas measurement data.",
+                "properties": {
+                    "Results": {
+                        "type": "array",
+                        "description": "Results contains an array of all objects matching the request.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Year": {
+                                    "description": "The year this measurement was taken.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "Month": {
+                                    "description": "The month this measurement was taken.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "Day": {
+                                    "description": "The day representing the start of the week for this measurement. Measurements are taken hourly and averaged together over a week.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "Average": {
+                                    "description": "The average gas measurement recorded for the week.",
+                                    "type": "integer",
+                                    "format": "float"
+                                },
+                                "IncSincePreIndustrial": {
+                                    "description": "The CO2 mole fraction difference in dry air (in parts-per-million) between this measurement and measurements from 1800.",
+                                    "type": "number",
+                                    "format": "float",
+                                    "nullable": true
+                                }
+                            }
+                        }
+                    },
+                    "Status": {
+                        "description": "The status of the response. Currently either 'OK' or 'ERROR'.",
+                        "type": "string"
+                    },
+                    "RequestId": {
+                        "description": "The identifier associated with this request.",
+                        "type": "string"
+                    }
+                }
             },
             "ServerRespCh4": {
                 "$ref": "./models/ServerRespCh4.json"
