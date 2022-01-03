@@ -46,3 +46,23 @@ Head over to [planetpulse.io](https://planetpulse.io) to see the API wrapped in 
 This functionality is a work in progress and subject to change:
 - API Keys are not yet in place, but are under development
 - Ratelimiting requires API Keys as a prerequisite and therefore is not yet implemented
+- Realistically this service should be deployed on a Kubernetes cluster. Because of financial limitations, it's currently deployed as two containers behind an NGINX server running on a single machine in AWS.
+
+# Building 👷‍♂️
+These build instructions assume you desire to run this service in AWS. If you wish to run it locally, skip the AWS deployment steps.
+
+1.) Provsion a new AWS EC2 machine running RHEL8 (most of these steps will work on other linux distros, except things relating to SELinux).
+2.) Install git and clone this repo
+```
+[ec2-user@ip-0-0-0-0 ~]$ sudo yum install git
+[ec2-user@ip-0-0-0-0 ~]$ git clone https://github.com/RyanDevlin/planetpulse.git
+```
+3.) Move into the `planetpulse` directory and run the provisioning script. This will setup the AWS machine with everything needed to run the service.
+```
+[ec2-user@ip-0-0-0-0 ~]$ cd planetpulse/
+[ec2-user@ip-0-0-0-0 ~]$ ./api/apiserver/preflight
+```
+4.) Run the startup script to download and run the API server container
+```
+[ec2-user@ip-0-0-0-0 ~]$ ./start.sh
+```
