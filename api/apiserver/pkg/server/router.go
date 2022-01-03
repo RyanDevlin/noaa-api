@@ -30,6 +30,7 @@ import (
 	"apiserver/pkg/server/handlers/co2"
 	utils "apiserver/pkg/utils"
 	"context"
+	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -52,6 +53,9 @@ func (apiserver *ApiServer) NewRouter(ctx context.Context, routes Routes) *mux.R
 			Name(route.Name).
 			Handler(handlers.NewHandler(ctx, route.Handler, route.Name))
 	}
+
+	// Force 404 responses to go through all the middleware
+	router.NotFoundHandler = router.NewRoute().HandlerFunc(http.NotFound).GetHandler()
 
 	return router
 }

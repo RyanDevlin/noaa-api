@@ -27,12 +27,12 @@ package handlers
 import (
 	utils "apiserver/pkg/utils"
 	"context"
-	"fmt"
 	"net/http"
 )
 
-// GetIndex currently returns a welcome message to the user.
+// GetIndex currently redirects users to version 1 of the API.
+// Later this can be expanded to support multiple API versions.
 func GetIndex(ctx context.Context, handlerConfig *ApiHandlerConfig, w http.ResponseWriter, r *http.Request) *utils.ServerError {
-	fmt.Fprint(w, "Welcome to the Planetpulse API server!")
+	http.Redirect(w, r, "/v1", http.StatusMovedPermanently)
 	return nil
 }
