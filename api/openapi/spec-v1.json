@@ -923,11 +923,14 @@
         "schemas": {
             "ServerRespHealth": {
                 "type": "object",
+                "description": "This object represents a health check endpoint response.",
                 "properties": {
                     "Status": {
+                        "description": "The status of the response. Currently either 'OK' or 'ERROR'.",
                         "type": "string"
                     },
                     "RequestId": {
+                        "description": "A UUID associated with this request.",
                         "type": "string"
                     }
                 }
