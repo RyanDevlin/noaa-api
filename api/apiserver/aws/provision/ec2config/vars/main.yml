@@ -5,5 +5,5 @@ apiserver_port: "8080"
 ec2packages:
   - nginx
   - podman
-  - snapd
+  - certbot
 goversion: "1.16.7"
