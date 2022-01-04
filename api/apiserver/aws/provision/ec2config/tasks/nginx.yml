@@ -9,6 +9,10 @@
       name: httpd_can_network_connect
       state: yes
       persistent: yes
+ 
+  - name: Generate certificates with Certbot
+    shell: certbot certonly --nginx -d {{ apiserver_fqdn }},www.{{ apiserver_fqdn }},api.{{ apiserver_fqdn }},www.api.{{ apiserver_fqdn }}
+    become: yes
       
   - name: Backup boilerplate Nginx config file
     copy:
@@ -21,10 +25,6 @@
     template:
       src: nginx.conf.j2
       dest: /etc/nginx/nginx.conf
-  
-  - name: Generate certificates with Certbot
-    shell: certbot certonly --nginx -d {{ apiserver_fqdn }},www.{{ apiserver_fqdn }},api.{{ apiserver_fqdn }},www.api.{{ apiserver_fqdn }}
-    become: yes
 
   - name: Enable and start Nginx
     systemd:
