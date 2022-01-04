@@ -6,4 +6,5 @@ ec2packages:
   - nginx
   - podman
   - certbot
+  - python3-certbot-nginx
 goversion: "1.16.7"
